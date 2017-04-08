@@ -92,6 +92,18 @@ namespace automotive {
                 double m_eSum;
                 double m_eOld;
 
+			//For the PID (Proportional, derivative and Integral terms.)
+
+				// The proportional Control set the car steering harder the further we are from the desired
+				// trajectory. we use 1.30
+				double proportionalGain;
+
+				//Explain for integral 0.01
+				double integralGain;
+
+				//Explain for derivative 0.10
+				double derivativeGain;
+
                 automotive::VehicleControl m_vehicleControl;
 
 	            virtual void setUp();
