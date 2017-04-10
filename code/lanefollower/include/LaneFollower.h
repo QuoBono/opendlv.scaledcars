@@ -30,7 +30,7 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 
-namespace automotive {
+namespace automotive { //check this namespaces for future stuff
     namespace miniature {
 
         using namespace std;

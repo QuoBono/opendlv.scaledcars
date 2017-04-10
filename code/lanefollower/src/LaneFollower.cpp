@@ -65,8 +65,12 @@ namespace automotive {
             // This method will be call automatically _before_ running body().
             if (m_debug) {
                 // Create an OpenCV- Debug window.
-                cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE);
-                cvMoveWindow("Debug screen", 300, 100);
+                cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE); //Fixed size of debug screen
+
+                //Test stuff
+                //cvNamedWindow("Test screen", CV_WINDOW_AUTOSIZE);
+                //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
+
             }
 
 
@@ -80,6 +84,7 @@ namespace automotive {
 
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
+                //cvDestroyWindow("Test screen");
             }
         }
 
@@ -123,13 +128,24 @@ namespace automotive {
         }
 
         void LaneFollower::processImage() {
+
+            //boolean for the right lane marking
             static bool useRightLaneMarking = true;
+
+            //Cross Track Error
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 462; // calibrated length to right: 280px
-            const int32_t distance = 280;
+            const int32_t CONTROL_SCANLINE = 462; //462 calibrated length to right: 280px
+            const int32_t distance = 280; //280
 
             TimeStamp beforeImageProcessing;
+
+
+
+            //scanline= 222; you can use this value for the stop line detection
+
+            //complexity 0^2 not good
+            //This for loop will iterate for the scanline (each Y is the y of the line we draw
             for(int32_t y = m_image->height - 8; y > m_image->height * .6; y -= 10) {
                 // Search from middle to the left:
                 CvScalar pixelLeft;
@@ -147,8 +163,12 @@ namespace automotive {
                 // Search from middle to the right:
                 CvScalar pixelRight;
                 CvPoint right;
+
+
                 right.y = y;
                 right.x = -1;
+
+
                 for(int x = m_image->width/2; x < m_image->width; x++) {
                     pixelRight = cvGet2D(m_image, y, x);
                     if (pixelRight.val[0] >= 200) {
@@ -157,25 +177,30 @@ namespace automotive {
                     }
                 }
 
+                //draw line for the the left and right lane if debug is true
                 if (m_debug) {
+                    //draw line from the middle to left pixel
                     if (left.x > 0) {
-                        CvScalar green = CV_RGB(0, 255, 0);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), left, green, 1, 8);
+                        CvScalar orange = CV_RGB(255, 102, 0);
+                        cvLine(m_image, cvPoint(m_image->width/2, y), left, orange, 1, 8);
 
+                        //text and value of the line to the
                         stringstream sstr;
                         sstr << (m_image->width/2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, green);
+                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, orange);
                     }
+
                     if (right.x > 0) {
-                        CvScalar red = CV_RGB(255, 0, 0);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), right, red, 1, 8);
+                        CvScalar pink = CV_RGB(204, 0, 102);
+                        cvLine(m_image, cvPoint(m_image->width/2, y), right, pink, 1, 8);
 
                         stringstream sstr;
                         sstr << (right.x - m_image->width/2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, red);
+                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, pink);
                     }
                 }
 
+                //If the loop is currently checking at the height of each iteration line (each line that we see).
                 if (y == CONTROL_SCANLINE) {
                     // Calculate the deviation error.
                     if (right.x > 0) {
@@ -203,6 +228,8 @@ namespace automotive {
                         m_eSum = 0;
                         m_eOld = 0;
                     }
+
+
                 }
             }
 
@@ -212,8 +239,11 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    cvShowImage("WindowShowImage", m_image);
-                    cvWaitKey(10);
+                    cvShowImage("Debug screen", m_image);
+                    cvMoveWindow("Debug screen", 10, 100); //where in the computer screen to show this screen
+                    //cvShowImage("Test screen", m_image);
+                    //cvMoveWindow("Test screen", 10 + m_image->width + 5, 100);
+                    cvWaitKey(10); //we need a wait key
                 }
             }
 
@@ -221,6 +251,7 @@ namespace automotive {
             double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
             m_previousTime = currentTime;
 
+            //used for the Algorithm
             if (fabs(e) < 1e-2) {
                 m_eSum = 0;
             }
@@ -236,13 +267,13 @@ namespace automotive {
             const double d = derivativeGain * (e - m_eOld)/timeStep;
             m_eOld = e;
 
-            const double y = p + i + d;
+            const double y = p + i + d; //before y
 
             double desiredSteering = 0;
 
             // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
             if (fabs(e) > 1e-2) {
-                desiredSteering = y;
+                desiredSteering = y; //before y
             }
 
             if (desiredSteering > 25.0) {
