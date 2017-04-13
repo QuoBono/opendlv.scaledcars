@@ -40,6 +40,10 @@
 #include <opendavinci/odcore/wrapper/SerialPortFactory.h>
  //end for the serial communication
 
+ //for MAT
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include "LaneFollower.h"
 
  //serial test
@@ -63,8 +67,14 @@ namespace automotive {
         using namespace odcore::wrapper;
 
         //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
+        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        //const uint32_t BAUD_RATE = 9600;
+
+        const string SERIAL_PORT = "/dev/pts/2";
+        const uint32_t BAUD_RATE = 19200;
+
+        cv::Mat m_image_grey; //added grey image matrix
+
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
@@ -109,7 +119,7 @@ namespace automotive {
 
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
-                //cvDestroyWindow("Test screen");
+                cvDestroyWindow("Test screen");
 
 
             }
@@ -135,7 +145,14 @@ namespace automotive {
                     const uint32_t numberOfChannels = 3;
                     // For example, simply show the image.
                     if (m_image == NULL) {
+
                         m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
+
+
+
+
+
+
                     }
 
                     // Copying the image data is very expensive...
@@ -143,6 +160,13 @@ namespace automotive {
                         memcpy(m_image->imageData,
                                m_sharedImageMemory->getSharedMemory(),
                                si.getWidth() * si.getHeight() * numberOfChannels);
+
+                        // Make a new greyscale matrix that will hold a greyscale copy
+                        // of the original image
+                        //m_image_grey = Mat(si.getWidth(), si.getHeight(), CV_8UC1);
+                        // Copy the greyscale information to the new matrix
+                        cv::Mat m_image_temp = cv::cvarrToMat(m_image);
+                        cv::cvtColor(m_image_temp, m_image_grey, cv::COLOR_BGR2GRAY);
                     }
 
                     // Mirror the image.
@@ -268,8 +292,17 @@ namespace automotive {
                 if (m_image != NULL) {
                     cvShowImage("Debug screen", m_image);
                     cvMoveWindow("Debug screen", 10, 100); //where in the computer screen to show this screen
-                    //cvShowImage("Test screen", m_image);
+
+                    //IplImage *grayMat_tmp;
+                    //grayMat_tmp = cvCreateImage(cvSize(m_image_grey.cols, m_image_grey.rows), IPL_DEPTH_8U, 3);
+
+                    //IplImage iplTemp = m_image_grey;
+                    //cvCopy(&iplTemp, grayMat_tmp);
+
+                    //cvShowImage("Test screen", grayMat_tmp);
                     //cvMoveWindow("Test screen", 10 + m_image->width + 5, 100);
+                    imshow("Camera Original Image", m_image_grey);
+                    cv::waitKey(10);
                     cvWaitKey(10); //we need a wait key
                 }
             }
