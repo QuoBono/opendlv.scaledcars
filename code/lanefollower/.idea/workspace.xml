@@ -37,8 +37,18 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="198" column="116" lean-forward="false" selection-start-line="198" selection-start-column="116" selection-end-line="198" selection-end-column="116" />
+            <state relative-caret-position="61">
+              <caret line="314" column="46" lean-forward="true" selection-start-line="314" selection-start-column="46" selection-end-line="314" selection-end-column="46" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Serial.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/Serial.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="460">
+              <caret line="23" column="4" lean-forward="false" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -47,8 +57,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-160">
-              <caret line="196" column="54" lean-forward="false" selection-start-line="196" selection-start-column="49" selection-end-line="196" selection-end-column="54" />
+            <state relative-caret-position="-6913">
+              <caret line="0" column="14" lean-forward="false" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -72,6 +82,8 @@
       <find>WindowShowImage</find>
       <find>font</find>
       <find>int32_t</find>
+      <find>serial</find>
+      <find>main</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -79,6 +91,7 @@
       <list>
         <option value="$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp" />
         <option value="$PROJECT_DIR$/include/LaneFollower.h" />
+        <option value="$PROJECT_DIR$/../serialsendbytes/SerialSendBytes.cpp" />
         <option value="$PROJECT_DIR$/src/LaneFollower.cpp" />
       </list>
     </option>
@@ -413,11 +426,16 @@
       <workItem from="1491742143229" duration="5015000" />
       <workItem from="1491749108760" duration="76000" />
       <workItem from="1491749463308" duration="203000" />
+      <workItem from="1491997683649" duration="1462000" />
+      <workItem from="1492001728484" duration="2856000" />
+      <workItem from="1492004849824" duration="1051000" />
+      <workItem from="1492006636019" duration="2537000" />
+      <workItem from="1492073486504" duration="7386000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="28533000" />
+    <option name="totallyTimeSpent" value="43825000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -429,7 +447,8 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1366" height="741" extended-state="6" />
+    <frame x="0" y="27" width="1366" height="741" extended-state="1" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18448023" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -458,26 +477,12 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1400">
-          <caret line="70" column="12" lean-forward="false" selection-start-line="70" selection-start-column="12" selection-end-line="78" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1720">
-          <caret line="86" column="34" lean-forward="false" selection-start-line="86" selection-start-column="34" selection-end-line="86" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1420">
@@ -845,6 +850,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/include/Serial.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="460">
+          <caret line="23" column="4" lean-forward="false" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1760">
@@ -853,18 +866,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../serialsendbytes/SerialSendBytes.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="37" column="7" lean-forward="true" selection-start-line="36" selection-start-column="4" selection-end-line="45" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-160">
-          <caret line="196" column="54" lean-forward="false" selection-start-line="196" selection-start-column="49" selection-end-line="196" selection-end-column="54" />
+        <state relative-caret-position="-6913">
+          <caret line="0" column="14" lean-forward="false" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="198" column="116" lean-forward="false" selection-start-line="198" selection-start-column="116" selection-end-line="198" selection-end-column="116" />
+        <state relative-caret-position="61">
+          <caret line="314" column="46" lean-forward="true" selection-start-line="314" selection-start-column="46" selection-end-line="314" selection-end-column="46" />
           <folding />
         </state>
       </provider>
