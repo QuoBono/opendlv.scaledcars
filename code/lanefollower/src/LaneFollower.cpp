@@ -31,7 +31,22 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 
+ //this is for the serial communication
+#include <stdint.h>
+#include <iostream>
+#include <string>
+#include <memory>
+#include <opendavinci/odcore/wrapper/SerialPort.h>
+#include <opendavinci/odcore/wrapper/SerialPortFactory.h>
+ //end for the serial communication
+
 #include "LaneFollower.h"
+
+ //serial test
+#include <iostream>
+#include <fstream>
+
+
 
 namespace automotive {
     namespace miniature {
@@ -42,6 +57,14 @@ namespace automotive {
         using namespace odcore::data::image;
         using namespace automotive;
         using namespace automotive::miniature;
+
+        // We add some of OpenDaVINCI's namespaces for the sake of readability.
+        using namespace odcore;
+        using namespace odcore::wrapper;
+
+        //the serial communication
+        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        const uint32_t BAUD_RATE = 9600;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
@@ -62,6 +85,8 @@ namespace automotive {
 
         // set up before running body()
         void LaneFollower::setUp() {
+
+
             // This method will be call automatically _before_ running body().
             if (m_debug) {
                 // Create an OpenCV- Debug window.
@@ -85,6 +110,8 @@ namespace automotive {
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 //cvDestroyWindow("Test screen");
+
+
             }
         }
 
@@ -284,11 +311,30 @@ namespace automotive {
                 desiredSteering = -25.0;
             }
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
+            // We are using OpenDaVINCI's std::shared_ptr to automatically
+            // release any acquired resources.
+
+            try {
+                std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+                cerr << "SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+                serial->send("a\r\n");
+            }
+            catch(string &exception) {
+                cerr << "Serial port could not be created: " << exception << endl;
+            }
 
 
             // Go forward.
-            m_vehicleControl.setSpeed(10);
-            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+            //for SIM
+            //m_vehicleControl.setSpeed(10);
+            //m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+
+            //for serial
+            //write to it
+
+
+
+
         }
 
         // This method will do the main data processing job.
