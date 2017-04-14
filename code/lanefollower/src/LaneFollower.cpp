@@ -44,6 +44,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+ //for the serial value converter
+#include <string>
+#include <math.h>
+
 #include "LaneFollower.h"
 
  //serial test
@@ -67,11 +71,11 @@ namespace automotive {
         using namespace odcore::wrapper;
 
         //the serial communication
-        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        //const uint32_t BAUD_RATE = 9600;
+        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        const uint32_t BAUD_RATE = 9600;
 
-        const string SERIAL_PORT = "/dev/pts/2";
-        const uint32_t BAUD_RATE = 19200;
+        //const string SERIAL_PORT = "/dev/pts/6";
+        //const uint32_t BAUD_RATE = 19200;
 
         cv::Mat m_image_grey; //added grey image matrix
 
@@ -350,7 +354,13 @@ namespace automotive {
             try {
                 std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
                 cerr << "SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-                serial->send("a\r\n");
+
+                //int jesus = (int) (desiredSteering*10);
+                int jesus = (int) ((desiredSteering*180)/M_PI);
+                string steer = to_string(jesus);
+                serial->send(steer + "\r\n");
+
+
             }
             catch(string &exception) {
                 cerr << "Serial port could not be created: " << exception << endl;
@@ -359,8 +369,9 @@ namespace automotive {
 
             // Go forward.
             //for SIM
-            //m_vehicleControl.setSpeed(10);
-            //m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+            m_vehicleControl.setSpeed(10);
+            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+
 
             //for serial
             //write to it
