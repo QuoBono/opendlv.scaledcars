@@ -74,11 +74,11 @@ namespace automotive {
         using namespace odcore::wrapper;
 
         //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
+        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        //const uint32_t BAUD_RATE = 9600;
 
-        //const string SERIAL_PORT = "/dev/pts/2";
-        //const uint32_t BAUD_RATE = 19200;
+        const string SERIAL_PORT = "/dev/pts/2";
+        const uint32_t BAUD_RATE = 19200;
 
         cv::Mat m_image_black; //added grey image matrix
 
@@ -158,11 +158,14 @@ namespace automotive {
                         m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
                     }
 
-                    // Mirror the image.
-                    cvFlip(m_image, 0, -1);
+
 
                     // Copying the image data is very expensive...
                     if (m_image != NULL) {
+
+                        // Mirror the image.
+                        cvFlip(m_image, 0, -1);
+
                         memcpy(m_image->imageData,
                                m_sharedImageMemory->getSharedMemory(),
                                si.getWidth() * si.getHeight() * numberOfChannels);
@@ -193,7 +196,7 @@ namespace automotive {
             //Cross Track Error
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 462; //462 calibrated length to right: 280px
+            const int32_t CONTROL_SCANLINE = 250; //462 calibrated length to right: 280px
             const int32_t distance = 280; //280
 
             TimeStamp beforeImageProcessing;
@@ -204,7 +207,7 @@ namespace automotive {
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows - 180; y > 222; y-= 10) {
+            for(int32_t y = m_image_black.rows - 180; y > 220; y-= 10) {
                 cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
@@ -212,7 +215,7 @@ namespace automotive {
                 left.x = -1;
                 for(int x = m_image_black.cols /2; x > 0; x--){
                     pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelLeft > 120) {
+                    if (pixelLeft > 200) {
                         left.x = x;
                         break;
                     }
@@ -231,7 +234,7 @@ namespace automotive {
                 //check right
                 for(int x = m_image_black.cols/2; x < m_image_black.cols; x++) {
                     pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelRight > 120) {
+                    if (pixelRight > 200) {
                         right.x = x;
                         break;
                     }
@@ -390,10 +393,18 @@ namespace automotive {
                 std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
                 cerr << "SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
 
+                // Start receiving bytes.
+                serial->start();
+
                 //int jesus = (int) (desiredSteering*10);
                 int jesus = (int) ((desiredSteering*180)/M_PI);
                 string steer = to_string(jesus);
                 serial->send(steer + "\r\n");
+
+
+                // Stop receiving bytes and unregister our handler.
+                serial->stop();
+                serial->setStringListener(NULL);
 
 
             }

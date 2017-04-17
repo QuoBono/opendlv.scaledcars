@@ -37,8 +37,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
-              <caret line="275" column="45" lean-forward="true" selection-start-line="275" selection-start-column="45" selection-end-line="275" selection-end-column="45" />
+            <state relative-caret-position="175">
+              <caret line="198" column="48" lean-forward="false" selection-start-line="198" selection-start-column="48" selection-end-line="198" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -89,6 +89,9 @@
       <find>pink</find>
       <find>m_image_grey</find>
       <find>FONT_HERSHEY_PLAIN</find>
+      <find>CONTROL_SCANLINE</find>
+      <find>distance</find>
+      <find>scan</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -438,12 +441,12 @@
       <workItem from="1492073486504" duration="18275000" />
       <workItem from="1492164218156" duration="9374000" />
       <workItem from="1492175575483" duration="607000" />
-      <workItem from="1492422396850" duration="17081000" />
+      <workItem from="1492422396850" duration="19948000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="81776000" />
+    <option name="totallyTimeSpent" value="84643000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -455,7 +458,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1366" height="741" extended-state="0" />
+    <frame x="0" y="27" width="1366" height="741" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18448023" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -885,8 +888,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="275" column="45" lean-forward="true" selection-start-line="275" selection-start-column="45" selection-end-line="275" selection-end-column="45" />
+        <state relative-caret-position="175">
+          <caret line="198" column="48" lean-forward="false" selection-start-line="198" selection-start-column="48" selection-end-line="198" selection-end-column="48" />
           <folding />
         </state>
       </provider>
