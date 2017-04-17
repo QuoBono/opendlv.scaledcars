@@ -54,6 +54,9 @@
 #include <iostream>
 #include <fstream>
 
+ // Used for debugging
+#include <opendavinci/odtools/player/Player.h>
+
 
 
 namespace automotive {
@@ -74,10 +77,10 @@ namespace automotive {
         const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
         const uint32_t BAUD_RATE = 9600;
 
-        //const string SERIAL_PORT = "/dev/pts/6";
+        //const string SERIAL_PORT = "/dev/pts/2";
         //const uint32_t BAUD_RATE = 19200;
 
-        cv::Mat m_image_grey; //added grey image matrix
+        cv::Mat m_image_black; //added grey image matrix
 
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
@@ -130,6 +133,7 @@ namespace automotive {
         }
 
         bool LaneFollower::readSharedImage(Container &c) {
+
             bool retVal = false;
 
             if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
@@ -144,20 +148,18 @@ namespace automotive {
 
                 // Check if we could successfully attach to the shared memory.
                 if (m_sharedImageMemory->isValid()) {
+
                     // Lock the memory region to gain exclusive access using a scoped lock.
                     Lock l(m_sharedImageMemory);
                     const uint32_t numberOfChannels = 3;
+
                     // For example, simply show the image.
                     if (m_image == NULL) {
-
                         m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
-
-
-
-
-
-
                     }
+
+                    // Mirror the image.
+                    cvFlip(m_image, 0, -1);
 
                     // Copying the image data is very expensive...
                     if (m_image != NULL) {
@@ -167,14 +169,14 @@ namespace automotive {
 
                         // Make a new greyscale matrix that will hold a greyscale copy
                         // of the original image
-                        //m_image_grey = Mat(si.getWidth(), si.getHeight(), CV_8UC1);
+                        //m_image_black = Mat(si.getWidth(), si.getHeight(), CV_8UC1);
                         // Copy the greyscale information to the new matrix
                         cv::Mat m_image_temp = cv::cvarrToMat(m_image);
-                        cv::cvtColor(m_image_temp, m_image_grey, cv::COLOR_BGR2GRAY);
+                        cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
+
                     }
 
-                    // Mirror the image.
-                    cvFlip(m_image, 0, -1);
+
 
                     retVal = true;
                 }
@@ -201,59 +203,91 @@ namespace automotive {
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image->height - 8; y > m_image->height * .6; y -= 10) {
-                // Search from middle to the left:
-                CvScalar pixelLeft;
-                CvPoint left;
+            for(int32_t y = m_image_black.rows - 8; y > 0; y-= 10) {
+                cerr << "this is y: " << y << endl;
+                uchar pixelLeft;
+                cv::Point left;
                 left.y = y;
                 left.x = -1;
-                for(int x = m_image->width/2; x > 0; x--) {
-                    pixelLeft = cvGet2D(m_image, y, x);
-                    if (pixelLeft.val[0] >= 200) {
+                for(int x = m_image_black.cols /2; x > 0; x--){
+                    pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
+                    if (pixelLeft > 120) {
                         left.x = x;
                         break;
                     }
                 }
 
+
                 // Search from middle to the right:
-                CvScalar pixelRight;
-                CvPoint right;
+                //CvScalar pixelRight;
+                //CvPoint right;
 
-
+                uchar pixelRight;
+                cv::Point right;
                 right.y = y;
                 right.x = -1;
 
-
-                for(int x = m_image->width/2; x < m_image->width; x++) {
-                    pixelRight = cvGet2D(m_image, y, x);
-                    if (pixelRight.val[0] >= 200) {
+                //check right
+                for(int x = m_image_black.cols/2; x < m_image_black.cols; x++) {
+                    pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
+                    if (pixelRight > 120) {
                         right.x = x;
                         break;
                     }
                 }
 
-                //draw line for the the left and right lane if debug is true
-                if (m_debug) {
-                    //draw line from the middle to left pixel
-                    if (left.x > 0) {
-                        CvScalar orange = CV_RGB(255, 102, 0);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), left, orange, 1, 8);
 
-                        //text and value of the line to the
-                        stringstream sstr;
-                        sstr << (m_image->width/2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, orange);
-                    }
 
-                    if (right.x > 0) {
-                        CvScalar pink = CV_RGB(204, 0, 102);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), right, pink, 1, 8);
+//                //draw line for the the left and right lane if debug is true
+//                if (m_debug) {
+//                    //draw line from the middle to left pixel
+//                    if (left.x > 0) {
+//
+//                        CvScalar orange = CV_RGB(255, 102, 0);
+//                        cvLine(m_image, cvPoint(m_image->width/2, y), left, orange, 1, 8);
+//
+//                        //text and value of the line to the
+//                        stringstream sstr;
+//                        sstr << (m_image->width/2 - left.x);
+//                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, orange);
+//                    }
+//
+//                    if (right.x > 0) {
+//                        CvScalar pink = CV_RGB(204, 0, 102);
+//                        cvLine(m_image, cvPoint(m_image->width/2, y), right, pink, 1, 8);
+//
+//                        stringstream sstr;
+//                        sstr << (right.x - m_image->width/2);
+//                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, pink);
+//                    }
+//                }
 
-                        stringstream sstr;
-                        sstr << (right.x - m_image->width/2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, pink);
-                    }
+            //draw line for the the left and right lane if debug is true
+            if (m_debug) {
+                //draw line from the middle to left pixel
+                if (left.x > 0) {
+                    cv::Scalar orange = CV_RGB(255, 102, 0);
+                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, orange);
+
+                    //text and value of the line to the
+                    stringstream sstr;
+                    sstr << (m_image_black.cols / 2 - left.x);
+                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                            0.5, orange);
                 }
+
+                if (right.x > 0) {
+                    cv::Scalar pink = CV_RGB(204, 0, 102);
+                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
+
+                    stringstream sstr;
+                    sstr << (right.x - m_image_black.cols/2);
+                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                            0.5, pink);
+                }
+            }
+
+
 
                 //If the loop is currently checking at the height of each iteration line (each line that we see).
                 if (y == CONTROL_SCANLINE) {
@@ -264,7 +298,7 @@ namespace automotive {
                             m_eOld = 0;
                         }
 
-                        e = ((right.x - m_image->width/2.0) - distance)/distance;
+                        e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
 
                         useRightLaneMarking = true;
                     }
@@ -274,7 +308,7 @@ namespace automotive {
                             m_eOld = 0;
                         }
 
-                        e = (distance - (m_image->width/2.0 - left.x))/distance;
+                        e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
 
                         useRightLaneMarking = false;
                     }
@@ -286,7 +320,7 @@ namespace automotive {
 
 
                 }
-            }
+            } //commented for now
 
             TimeStamp afterImageProcessing;
             cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
@@ -294,18 +328,18 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    cvShowImage("Debug screen", m_image);
-                    cvMoveWindow("Debug screen", 10, 100); //where in the computer screen to show this screen
+                    //cvShowImage("Debug screen", m_image);
+                    //cvMoveWindow("Debug screen", 10, 100); //where in the computer screen to show this screen
 
                     //IplImage *grayMat_tmp;
-                    //grayMat_tmp = cvCreateImage(cvSize(m_image_grey.cols, m_image_grey.rows), IPL_DEPTH_8U, 3);
+                    //grayMat_tmp = cvCreateImage(cvSize(m_image_black.cols, m_image_black.rows), IPL_DEPTH_8U, 3);
 
-                    //IplImage iplTemp = m_image_grey;
+                    //IplImage iplTemp = m_image_black;
                     //cvCopy(&iplTemp, grayMat_tmp);
 
                     //cvShowImage("Test screen", grayMat_tmp);
                     //cvMoveWindow("Test screen", 10 + m_image->width + 5, 100);
-                    imshow("Camera Original Image", m_image_grey);
+                    imshow("Camera Original Image", m_image_black);
                     cv::waitKey(10);
                     cvWaitKey(10); //we need a wait key
                 }
