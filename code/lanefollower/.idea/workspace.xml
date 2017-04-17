@@ -37,8 +37,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="284" column="113" lean-forward="false" selection-start-line="284" selection-start-column="113" selection-end-line="284" selection-end-column="113" />
+            <state relative-caret-position="246">
+              <caret line="275" column="45" lean-forward="true" selection-start-line="275" selection-start-column="45" selection-end-line="275" selection-end-column="45" />
               <folding />
             </state>
           </provider>
@@ -67,8 +67,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="72">
-              <caret line="237" column="16" lean-forward="true" selection-start-line="237" selection-start-column="16" selection-end-line="256" selection-end-column="17" />
+            <state relative-caret-position="2312">
+              <caret line="154" column="77" lean-forward="true" selection-start-line="154" selection-start-column="12" selection-end-line="154" selection-end-column="77" />
               <folding />
             </state>
           </provider>
@@ -438,12 +438,12 @@
       <workItem from="1492073486504" duration="18275000" />
       <workItem from="1492164218156" duration="9374000" />
       <workItem from="1492175575483" duration="607000" />
-      <workItem from="1492422396850" duration="15234000" />
+      <workItem from="1492422396850" duration="17081000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="79929000" />
+    <option name="totallyTimeSpent" value="81776000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -867,14 +867,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="237" column="16" lean-forward="true" selection-start-line="237" selection-start-column="16" selection-end-line="256" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="175">
@@ -883,10 +875,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2312">
+          <caret line="154" column="77" lean-forward="true" selection-start-line="154" selection-start-column="12" selection-end-line="154" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="284" column="113" lean-forward="false" selection-start-line="284" selection-start-column="113" selection-end-line="284" selection-end-column="113" />
+        <state relative-caret-position="246">
+          <caret line="275" column="45" lean-forward="true" selection-start-line="275" selection-start-column="45" selection-end-line="275" selection-end-column="45" />
           <folding />
         </state>
       </provider>

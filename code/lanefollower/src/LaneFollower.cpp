@@ -173,6 +173,7 @@ namespace automotive {
                         // Copy the greyscale information to the new matrix
                         cv::Mat m_image_temp = cv::cvarrToMat(m_image);
                         cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
+                        Canny(m_image_black, m_image_black, 50, 200, 3);
 
                     }
 
@@ -203,7 +204,7 @@ namespace automotive {
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows - 8; y > 0; y-= 10) {
+            for(int32_t y = m_image_black.rows - 180; y > 222; y-= 10) {
                 cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
@@ -266,14 +267,14 @@ namespace automotive {
             if (m_debug) {
                 //draw line from the middle to left pixel
                 if (left.x > 0) {
-                    cv::Scalar orange = CV_RGB(255, 102, 0);
-                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, orange);
+                    cv::Scalar white = CV_RGB(255, 255, 255);
+                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
 
                     //text and value of the line to the
                     stringstream sstr;
                     sstr << (m_image_black.cols / 2 - left.x);
                     putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, orange);
+                            0.5, white);
                 }
 
                 if (right.x > 0) {
