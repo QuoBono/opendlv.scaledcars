@@ -189,12 +189,6 @@ namespace automotive {
                         memcpy(m_image->imageData,
                                m_sharedImageMemory->getSharedMemory(),
                                si.getWidth() * si.getHeight() * numberOfChannels);
-
-                        // Make a new greyscale matrix that will hold a greyscale copy
-                        // of the original image
-                        //m_image_black = Mat(si.getWidth(), si.getHeight(), CV_8UC1);
-                        // Copy the greyscale information to the new matrix
-
                         cv::Mat m_image_temp = cv::cvarrToMat(m_image);
                         cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
                         Canny(m_image_black, m_image_black, 100, 200, 3);
@@ -265,30 +259,6 @@ namespace automotive {
 
 
 
-//                //draw line for the the left and right lane if debug is true
-//                if (m_debug) {
-//                    //draw line from the middle to left pixel
-//                    if (left.x > 0) {
-//
-//                        CvScalar orange = CV_RGB(255, 102, 0);
-//                        cvLine(m_image, cvPoint(m_image->width/2, y), left, orange, 1, 8);
-//
-//                        //text and value of the line to the
-//                        stringstream sstr;
-//                        sstr << (m_image->width/2 - left.x);
-//                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, orange);
-//                    }
-//
-//                    if (right.x > 0) {
-//                        CvScalar pink = CV_RGB(204, 0, 102);
-//                        cvLine(m_image, cvPoint(m_image->width/2, y), right, pink, 1, 8);
-//
-//                        stringstream sstr;
-//                        sstr << (right.x - m_image->width/2);
-//                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, pink);
-//                    }
-//                }
-
             //draw line for the the left and right lane if debug is true
             if (m_debug) {
                 //draw line from the middle to left pixel
@@ -355,17 +325,7 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    //cvShowImage("Debug screen", m_image);
-                    //cvMoveWindow("Debug screen", 10, 100); //where in the computer screen to show this screen
 
-                    //IplImage *grayMat_tmp;
-                    //grayMat_tmp = cvCreateImage(cvSize(m_image_black.cols, m_image_black.rows), IPL_DEPTH_8U, 3);
-
-                    //IplImage iplTemp = m_image_black;
-                    //cvCopy(&iplTemp, grayMat_tmp);
-
-                    //cvShowImage("Test screen", grayMat_tmp);
-                    //cvMoveWindow("Test screen", 10 + m_image->width + 5, 100);
                     imshow("Camera Original Image", m_image_black);
                     cv::waitKey(10);
                     cvWaitKey(10); //we need a wait key
@@ -430,9 +390,6 @@ namespace automotive {
             m_vehicleControl.setSpeed(10);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
-
-            //for serial
-            //write to it
 
 
 
