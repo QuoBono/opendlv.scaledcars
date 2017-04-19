@@ -37,8 +37,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="204" column="62" lean-forward="false" selection-start-line="204" selection-start-column="62" selection-end-line="204" selection-end-column="62" />
+            <state relative-caret-position="-440">
+              <caret line="197" column="40" lean-forward="true" selection-start-line="197" selection-start-column="40" selection-end-line="197" selection-end-column="40" />
               <folding />
             </state>
           </provider>
@@ -443,12 +443,12 @@
       <workItem from="1492175575483" duration="607000" />
       <workItem from="1492422396850" duration="21358000" />
       <workItem from="1492596341618" duration="4244000" />
-      <workItem from="1492600783678" duration="1291000" />
+      <workItem from="1492600783678" duration="2133000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91588000" />
+    <option name="totallyTimeSpent" value="92430000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -890,8 +890,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="204" column="62" lean-forward="false" selection-start-line="204" selection-start-column="62" selection-end-line="204" selection-end-column="62" />
+        <state relative-caret-position="-440">
+          <caret line="197" column="40" lean-forward="true" selection-start-line="197" selection-start-column="40" selection-end-line="197" selection-end-column="40" />
           <folding />
         </state>
       </provider>
