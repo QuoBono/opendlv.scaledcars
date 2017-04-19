@@ -36,6 +36,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <opendavinci/odcore/base/Thread.h>
 #include <opendavinci/odcore/wrapper/SerialPort.h>
 #include <opendavinci/odcore/wrapper/SerialPortFactory.h>
  //end for the serial communication
@@ -74,11 +75,13 @@ namespace automotive {
         using namespace odcore::wrapper;
 
         //the serial communication
-        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        //const uint32_t BAUD_RATE = 9600;
+        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        const uint32_t BAUD_RATE = 9600;
+        bool serialBool = false;
+        std::shared_ptr<SerialPort> serial;
 
-        const string SERIAL_PORT = "/dev/pts/2";
-        const uint32_t BAUD_RATE = 19200;
+        //const string SERIAL_PORT = "/dev/pts/2";
+        //const uint32_t BAUD_RATE = 19200;
 
         cv::Mat m_image_black; //added grey image matrix
 
@@ -115,6 +118,24 @@ namespace automotive {
 
             }
 
+            try {
+                if(!serialBool){
+
+                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+                    const uint32_t ONE_SECOND = 1000 * 1000;
+                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+                    // Start receiving bytes.
+                    serial->start();
+                    serialBool = true;
+                }
+
+                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+            }
+            catch(string &exception) {
+                cerr << "Set up error Serial port could not be created: " << exception << endl;
+            }
+
 
         }
 
@@ -122,6 +143,7 @@ namespace automotive {
             // This method will be call automatically _after_ return from body().
             if (m_image != NULL) {
                 cvReleaseImage(&m_image);
+                m_image_black.deallocate();
             }
 
             if (m_debug) {
@@ -130,6 +152,10 @@ namespace automotive {
 
 
             }
+            if(serialBool){
+                serial -> stop();
+            }
+
         }
 
         bool LaneFollower::readSharedImage(Container &c) {
@@ -158,14 +184,8 @@ namespace automotive {
                         m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
                     }
 
-
-
                     // Copying the image data is very expensive...
                     if (m_image != NULL) {
-
-                        // Mirror the image.
-                        cvFlip(m_image, 0, -1);
-
                         memcpy(m_image->imageData,
                                m_sharedImageMemory->getSharedMemory(),
                                si.getWidth() * si.getHeight() * numberOfChannels);
@@ -174,12 +194,15 @@ namespace automotive {
                         // of the original image
                         //m_image_black = Mat(si.getWidth(), si.getHeight(), CV_8UC1);
                         // Copy the greyscale information to the new matrix
+
                         cv::Mat m_image_temp = cv::cvarrToMat(m_image);
                         cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
-                        Canny(m_image_black, m_image_black, 50, 200, 3);
+                        Canny(m_image_black, m_image_black, 100, 200, 3);
 
                     }
 
+                    // Mirror the image.
+                    cv::flip(m_image_black, m_image_black, 1);
 
 
                     retVal = true;
@@ -390,22 +413,11 @@ namespace automotive {
             // release any acquired resources.
 
             try {
-                std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                cerr << "SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
 
-                // Start receiving bytes.
-                serial->start();
-
-                //int jesus = (int) (desiredSteering*10);
                 int jesus = (int) ((desiredSteering*180)/M_PI);
                 string steer = to_string(jesus);
                 serial->send(steer + "\r\n");
-
-
-                // Stop receiving bytes and unregister our handler.
-                serial->stop();
-                serial->setStringListener(NULL);
-
 
             }
             catch(string &exception) {
