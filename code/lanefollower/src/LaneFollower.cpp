@@ -1,4 +1,4 @@
-﻿ /**
+﻿/**
  * lanefollower - Sample application for following lane markings.
  * Copyright (C) 2012 - 2015 Christian Berger
  *
@@ -31,31 +31,19 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 
- //this is for the serial communication
-#include <stdint.h>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <opendavinci/odcore/base/Thread.h>
-#include <opendavinci/odcore/wrapper/SerialPort.h>
-#include <opendavinci/odcore/wrapper/SerialPortFactory.h>
- //end for the serial communication
 
- //for MAT
+//for MAT
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
- //for the serial value converter
-#include <string>
-#include <math.h>
 
 #include "LaneFollower.h"
 
- //serial test
+//serial test
 #include <iostream>
 #include <fstream>
 
- // Used for debugging
+// Used for debugging
 #include <opendavinci/odtools/player/Player.h>
 
 
@@ -74,16 +62,8 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
-        //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
-        bool serialBool = false;
-        std::shared_ptr<SerialPort> serial;
-
-        //const string SERIAL_PORT = "/dev/pts/2";
-        //const uint32_t BAUD_RATE = 19200;
-
         cv::Mat m_image_black; //added grey image matrix
+        cv::Mat m_image_black_new;
 
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
@@ -118,24 +98,6 @@ namespace automotive {
 
             }
 
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
-            }
-
 
         }
 
@@ -144,6 +106,7 @@ namespace automotive {
             if (m_image != NULL) {
                 cvReleaseImage(&m_image);
                 m_image_black.deallocate();
+                m_image_black_new.deallocate();
             }
 
             if (m_debug) {
@@ -151,9 +114,6 @@ namespace automotive {
                 cvDestroyWindow("Test screen");
 
 
-            }
-            if(serialBool){
-                serial -> stop();
             }
 
         }
@@ -193,10 +153,11 @@ namespace automotive {
                         cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
                         Canny(m_image_black, m_image_black, 100, 200, 3);
 
+                        // Mirror the image.
+                        cv::flip(m_image_black, m_image_black_new, -1);
+                        m_image_black = m_image_black_new.clone();
                     }
 
-                    // Mirror the image.
-                    cv::flip(m_image_black, m_image_black, 1);
 
 
                     retVal = true;
@@ -213,7 +174,8 @@ namespace automotive {
             //Cross Track Error
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 250; //462 calibrated length to right: 280px
+            const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
+            //const int32_t SECOND_CONTROL_SCANLINE = 450;
             const int32_t distance = 280; //280
 
             TimeStamp beforeImageProcessing;
@@ -224,7 +186,7 @@ namespace automotive {
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows - 180; y > 220; y-= 10) {
+            for(int32_t y = m_image_black.rows; y > 220; y-= 10) {
                 cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
@@ -237,6 +199,16 @@ namespace automotive {
                         break;
                     }
                 }
+
+//                cv::Point secondLeft;
+//                secondLeft.y = y;
+//                secondLeft.x = -1;
+//
+//                if (y == SECOND_CONTROL_SCANLINE){
+//                    if(left.x > 0){
+//                        secondLeft.x = left.x;
+//                    }
+//                }
 
 
                 // Search from middle to the right:
@@ -256,33 +228,88 @@ namespace automotive {
                         break;
                     }
                 }
+//
+//                cv::Point secondright;
+//                secondright.y = y;
+//                secondright.x = -1;
+//
+//                if (y == SECOND_CONTROL_SCANLINE){
+//                    if(right.x > 0){
+//                        secondright.x = right.x;
+//                    }
+//                }
 
 
 
-            //draw line for the the left and right lane if debug is true
-            if (m_debug) {
-                //draw line from the middle to left pixel
-                if (left.x > 0) {
-                    cv::Scalar white = CV_RGB(255, 255, 255);
-                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
+                //draw line for the the left and right lane if debug is true
+                if (m_debug) {
+//                //draw line from the middle to left pixel
+//                if (left.x > 0) {
+//                    cv::Scalar white = CV_RGB(255, 255, 255);
+//                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
+//
+//                    //text and value of the line to the
+//                    stringstream sstr;
+//                    sstr << (m_image_black.cols / 2 - left.x);
+//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+//                            0.5, white);
+//                }
+//
+//                if (right.x > 0) {
+//                    cv::Scalar pink = CV_RGB(204, 0, 102);
+//                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
+//
+//                    stringstream sstr;
+//                    sstr << (right.x - m_image_black.cols/2);
+//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+//                            0.5, pink);
+//                }
 
-                    //text and value of the line to the
-                    stringstream sstr;
-                    sstr << (m_image_black.cols / 2 - left.x);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, white);
+                    if(y == CONTROL_SCANLINE){
+                        if (left.x > 0) {
+                            cv::Scalar white = CV_RGB(255, 255, 255);
+                            line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
+
+                            //text and value of the line to the
+                            stringstream sstr;
+                            sstr << (m_image_black.cols / 2 - left.x);
+                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                    0.5, white);
+                        }
+
+                        if (right.x > 0) {
+                            cv::Scalar pink = CV_RGB(204, 0, 102);
+                            line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
+
+                            stringstream sstr;
+                            sstr << (right.x - m_image_black.cols/2);
+                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                    0.5, pink);
+                        }
+
+                    }
+//
+//                    if (secondLeft.x > 0) {
+//                        cv::Scalar white = CV_RGB(255, 255, 255);
+//                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
+//
+//                        //text and value of the line to the
+//                        stringstream sstr;
+//                        sstr << (m_image_black.cols / 2 - secondLeft.x);
+//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+//                                0.5, white);
+//                    }
+//
+//                    if (secondright.x > 0) {
+//                        cv::Scalar pink = CV_RGB(204, 0, 102);
+//                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
+//
+//                        stringstream sstr;
+//                        sstr << (secondright.x - m_image_black.cols/2);
+//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+//                                0.5, pink);
+//                    }
                 }
-
-                if (right.x > 0) {
-                    cv::Scalar pink = CV_RGB(204, 0, 102);
-                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
-
-                    stringstream sstr;
-                    sstr << (right.x - m_image_black.cols/2);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, pink);
-                }
-            }
 
 
 
@@ -308,15 +335,43 @@ namespace automotive {
                         e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
 
                         useRightLaneMarking = false;
-                    }
-                    else {
-                        // If no measurements are available, reset PID controller.
-                        m_eSum = 0;
-                        m_eOld = 0;
+                    } else {
+//                    {
+//                        // If no measurements are available, reset PID controller.
+//                        if(secondright.x){
+//                            if (!useRightLaneMarking) {
+//                                m_eSum = 0;
+//                                m_eOld = 0;
+//                            }
+//
+//                            e = ((secondright.x - m_image_black.cols/2.0) - distance)/distance;
+//
+//                            useRightLaneMarking = true;
+//                        } else if (secondLeft.x > 0) {
+//                            if (useRightLaneMarking) {
+//                                m_eSum = 0;
+//                                m_eOld = 0;
+//                            }
+//
+//                            e = (distance - (m_image_black.cols/2.0 - secondLeft.x))/distance;
+//
+//                            useRightLaneMarking = false;
+//                        } else
+//                        {
+                            m_eSum = 0;
+                            m_eOld = 0;
+//                        }
                     }
 
 
                 }
+
+
+
+
+
+
+
             } //commented for now
 
             TimeStamp afterImageProcessing;
@@ -371,18 +426,6 @@ namespace automotive {
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
             // We are using OpenDaVINCI's std::shared_ptr to automatically
             // release any acquired resources.
-
-            try {
-                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-                int jesus = (int) ((desiredSteering*180)/M_PI);
-                string steer = to_string(jesus);
-                serial->send(steer + "\r\n");
-
-            }
-            catch(string &exception) {
-                cerr << "Serial port could not be created: " << exception << endl;
-            }
 
 
             // Go forward.
