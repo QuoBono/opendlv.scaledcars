@@ -81,7 +81,7 @@ namespace automotive {
 //                    // Go forward.
 //                    vc.setSpeed(1);
 //                    vc.setSteeringWheelAngle(0);
-                }
+                //}
                 if ((stageMoving > 0) && (stageMoving < 20)) {
                     // Move slightly forward.
                     vc.setSpeed(1);
