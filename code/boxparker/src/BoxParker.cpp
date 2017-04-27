@@ -77,11 +77,11 @@ namespace automotive {
 
                 // commnting out the moving part of the code
                 // Moving state machine.
-//                if (stageMoving == 0) {
-//                    // Go forward.
-//                    vc.setSpeed(1);
-//                    vc.setSteeringWheelAngle(0);
-                //}
+                if (stageMoving == 0) {
+                    // Go forward.
+                    vc.setSpeed(1);
+                    vc.setSteeringWheelAngle(0);
+                }
                 if ((stageMoving > 0) && (stageMoving < 20)) {
                     // Move slightly forward.
                     vc.setSpeed(1);
