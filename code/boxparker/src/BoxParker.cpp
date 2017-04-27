@@ -74,11 +74,13 @@ namespace automotive {
                 // Create vehicle control data.
                 VehicleControl vc;
 
+
+                // commnting out the moving part of the code
                 // Moving state machine.
-                if (stageMoving == 0) {
-                    // Go forward.
-                    vc.setSpeed(1);
-                    vc.setSteeringWheelAngle(0);
+//                if (stageMoving == 0) {
+//                    // Go forward.
+//                    vc.setSpeed(1);
+//                    vc.setSteeringWheelAngle(0);
                 }
                 if ((stageMoving > 0) && (stageMoving < 20)) {
                     // Move slightly forward.
@@ -92,13 +94,13 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 25) && (stageMoving < 80)) {
+                if ((stageMoving >= 25) && (stageMoving < 70)) {
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-2);
                     vc.setSteeringWheelAngle(25);
                     stageMoving++;
                 }
-                if (stageMoving >= 80) {
+                if (stageMoving >= 70) {
                     // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
