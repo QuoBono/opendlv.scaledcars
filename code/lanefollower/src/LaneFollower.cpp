@@ -330,6 +330,7 @@ namespace automotive {
                         if (useRightLaneMarking) {
                             m_eSum = 0;
                             m_eOld = 0;
+                            e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
                         }
 
                         e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
@@ -392,7 +393,7 @@ namespace automotive {
             m_previousTime = currentTime;
 
             //used for the Algorithm
-            if (fabs(e) < 1e-2) {
+            if (fabs(e) < 1e-100) {
                 m_eSum = 0;
             }
             else {
@@ -412,7 +413,7 @@ namespace automotive {
             double desiredSteering = 0;
 
             // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
-            if (fabs(e) > 1e-2) {
+            if (fabs(e) > 1e-100) {
                 desiredSteering = y; //before y
             }
 
@@ -646,4 +647,3 @@ namespace automotive {
 
     }
 } // automotive::miniature
-
