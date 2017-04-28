@@ -41,6 +41,13 @@ namespace automotive {
 
         BoxParker::~BoxParker() {}
 
+        int stageMoving = 0;
+
+
+        // Create vehicle control data.
+        VehicleControl vc;
+
+
         void BoxParker::setUp() {
             // This method will be call automatically _before_ running body().
         }
@@ -59,7 +66,7 @@ namespace automotive {
             double absPathStart = 0;
             double absPathEnd = 0;
 
-            int stageMoving = 0;
+
             int stageMeasuring = 0;
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -67,50 +74,21 @@ namespace automotive {
                 Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
                 VehicleData vd = containerVehicleData.getData<VehicleData> ();
 
+
                 // 2. Get most recent sensor board data describing virtual sensor data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
 
-                // Create vehicle control data.
-                VehicleControl vc;
 
 
-                // commnting out the moving part of the code
-                // Moving state machine.
-                if (stageMoving == 0) {
-                    // Go forward.
-                    vc.setSpeed(1);
-                    vc.setSteeringWheelAngle(0);
-                }
-                if ((stageMoving > 0) && (stageMoving < 20)) {
-                    // Move slightly forward.
-                    vc.setSpeed(1);
-                    vc.setSteeringWheelAngle(0);
-                    stageMoving++;
-                }
-                if ((stageMoving >= 20) && (stageMoving < 25)) {
-                    // Stop.
-                    vc.setSpeed(0);
-                    vc.setSteeringWheelAngle(0);
-                    stageMoving++;
-                }
-                if ((stageMoving >= 25) && (stageMoving < 70)) {
-                    // Backwards, steering wheel to the right.
-                    vc.setSpeed(-2);
-                    vc.setSteeringWheelAngle(25);
-                    stageMoving++;
-                }
-                if (stageMoving >= 70) {
-                    // Stop.
-                    vc.setSpeed(0);
-                    vc.setSteeringWheelAngle(0);
 
-                    stageMoving++;
-                }
-                if (stageMoving >= 150) {
-                    // End component.
+                // Our code for parking!!
+                if( parallelPark()==1){
                     break;
                 }
+
+
+
 
                 // Measuring state machine.
                 switch (stageMeasuring) {
@@ -144,7 +122,7 @@ namespace automotive {
                                 cerr << "Size = " << GAP_SIZE << endl;
                                 m_foundGaps.push_back(GAP_SIZE);
 
-                                if ((stageMoving < 1) && (GAP_SIZE > 3.5)) {
+                                if ((stageMoving < 1) && (GAP_SIZE > 3.0)) {
                                     stageMoving = 1;
                                 }
                             }
@@ -160,6 +138,98 @@ namespace automotive {
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+        }
+
+
+        void BoxParker::stop(){
+
+            vc.setSpeed(0);
+            vc.setSteeringWheelAngle(0);
+
+        }
+
+        void BoxParker::reverse(){
+            vc.setSpeed(-1);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void BoxParker::accelerate(){
+            vc.setSpeed(1);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void BoxParker::reverseTurnRight(){
+            vc.setSpeed(-1);
+            vc.setSteeringWheelAngle(25);
+        }
+
+        bool BoxParker::carOnRight(){
+            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+            SensorBoardData data = containerSensorBoardData.getData<SensorBoardData> ();
+            double rearRightInfrared = data.getValueForKey_MapOfDistances(2);
+            double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
+
+            if((rearRightInfrared<0.6) && (frontRightInfrared < 0.6)){
+                return true;
+            } else{
+                return false;
+            }
+
+        }
+
+
+        int BoxParker::parallelPark() {
+
+            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+            SensorBoardData data = containerSensorBoardData.getData<SensorBoardData> ();
+
+
+            int result = 0;
+            //double rearRightInfrared = data.getValueForKey_MapOfDistances(2);
+           // double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
+            double frontRightUltrasonic = data.getValueForKey_MapOfDistances(4);
+            //double rearRightUltrasonic = data.getValueForKey_MapOfDistances(5);
+            //double rearInfrared = data.getValueForKey_MapOfDistances(1);
+
+
+
+
+            // commnt out the first if to remove moving part of the code
+            // Moving state machine.
+            if (stageMoving == 0) {
+                // Go forward.
+                accelerate();
+
+            }
+                if(stageMoving >= 1 && stageMoving < 25){
+                    cerr<< "Moving extra: " << stageMoving << endl;
+                    accelerate();
+                    stageMoving++;
+                }
+
+
+            if (stageMoving >= 25 && stageMoving < 110) {
+                    cerr<< "backin up: "<< endl;
+                    reverseTurnRight();
+                    stageMoving++;
+
+            }
+            if(stageMoving >=110 && stageMoving<120){
+                stop();
+                stageMoving++;
+            }
+            if (stageMoving >= 120) {
+
+                if (frontRightUltrasonic < 0) {
+                    cerr<< "reversing " << endl;
+                    reverse();
+                }else{
+                    stop();
+                    cerr<< "stopping " << endl;
+                    result = 1;
+                }
+            }
+            return result;
         }
 
     } // miniature

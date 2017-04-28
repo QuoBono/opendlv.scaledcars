@@ -29,6 +29,7 @@ namespace automotive {
 
         using namespace std;
 
+
         /**
          * This class is an example demonstrating how to park a simulated vehicle
          * using OpenDaVINCI's driving dynamics simulation.
@@ -78,6 +79,18 @@ namespace automotive {
                 virtual void setUp();
 
                 virtual void tearDown();
+
+                virtual int parallelPark();
+
+                virtual void stop();
+
+                virtual void accelerate();
+
+                virtual void reverseTurnRight();
+
+                virtual void reverse();
+
+                virtual bool carOnRight();
 
             private:
                 vector<double> m_foundGaps;
