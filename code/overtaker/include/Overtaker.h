@@ -68,6 +68,8 @@ namespace automotive {
                 virtual void setUp();
 
                 virtual void tearDown();
+
+                //virtual int ls(const char *dir);
         };
 
     }

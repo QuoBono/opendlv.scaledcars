@@ -27,6 +27,13 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 #include "Overtaker.h"
+#include <iostream>
+
+#include <unistd.h>
+#include <sys/wait.h>
+
+    //Function to execute a command without the shell.
+    // for example, let's "ls"
 
 namespace automotive {
     namespace miniature {
@@ -50,6 +57,31 @@ namespace automotive {
         void Overtaker::tearDown() {
             // This method will be call automatically _after_ return from body().
         }
+
+        // int ls(const char *dir) {
+        //     int pid = 0, status = 0;
+        //     // first we fork the process
+        //     if (pid == fork()) {
+        //     // pid != 0: this is the parent process (i.e. our process)
+        //         waitpid(pid, &status, 0); // wait for the child to exit
+        //     } else {
+        //         /* pid == 0: this is the child process. now let's load the
+        //         "ls" program into this process and run it */
+
+        //         const char executable[] = "/batseeyon@batseeyon-Lenovo-U31-70 ~/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin";
+
+        //         // load it. there are more exec__ functions, try 'man 3 exec'
+        //         // execl takes the arguments as parameters. execv takes them as an array
+        //         // this is execl though, so:
+        //         //      exec         argv[0]  argv[1] end
+        //         execl(executable, executable, dir,    NULL);
+
+        //         /* exec does not return unless the program couldn't be started. 
+        //             when the child process stops, the waitpid() above will return.
+        //         */
+        //     }
+        //     return status; // this is the parent process again.
+        // }
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body() {
@@ -92,11 +124,13 @@ namespace automotive {
                 // The car moves forward until the object, where it stops.
                 if (stageMoving == FORWARD) {
                     // Go forward.
-                    vc.setSpeed(3);
-                    vc.setSteeringWheelAngle(0);
+                    //vc.setSpeed(3);
+                    //std::cout << "returned: " << ls("sudo ./lanefollower --cid=111 --freq=10") << std::endl;
+                    std::system("$HOME/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin/lanefollower --cid=111 --freq=10");
+                    //vc.setSteeringWheelAngle(0);
 
-                    stageToRightLaneLeftTurn = 0;
-                    stageToRightLaneRightTurn = 0;
+                    //stageToRightLaneLeftTurn = 0;
+                    //stageToRightLaneRightTurn = 0;
                 }
                 
                 else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
@@ -109,7 +143,6 @@ namespace automotive {
                     stageToRightLaneRightTurn++;
                 }
 
-                /*
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
@@ -118,24 +151,24 @@ namespace automotive {
                     stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
                 }
                 
-                */
-                else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
+                
+                /*else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                     // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(0);
                     // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                     stageMeasuring = HAVE_BOTH_IR;
                     stageToRightLaneLeftTurn++;
-                }
+                }*/
 
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
-                    vc.setSteeringWheelAngle(20);
+                    vc.setSteeringWheelAngle(25);
                     // Find end of object.
                     stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
                 }
-                /*
+                
                 else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                     // Move to the right lane: Turn right part.
                     vc.setSpeed(1.5);
@@ -145,7 +178,7 @@ namespace automotive {
                         stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                     }
                 }
-                                
+                /*                
                 else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part.
                     vc.setSpeed(.9);
@@ -230,4 +263,5 @@ namespace automotive {
         }
 
     }
+
 } // automotive::miniature
