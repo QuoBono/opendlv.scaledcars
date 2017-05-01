@@ -77,9 +77,9 @@ namespace automotive {
             double distanceToObstacleOld = 0;
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-	            // 1. Get most recent vehicle data:
-	            Container containerVehicleData = getKeyValueDataStore().get(VehicleData::ID());
-	            VehicleData vd = containerVehicleData.getData<VehicleData> ();
+                // 1. Get most recent vehicle data:
+                Container containerVehicleData = getKeyValueDataStore().get(VehicleData::ID());
+                VehicleData vd = containerVehicleData.getData<VehicleData> ();
 
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
@@ -99,60 +99,62 @@ namespace automotive {
                     stageToRightLaneRightTurn = 0;
                 }
                 
-                /*else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
+                else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part until both IRs see something.
+                    // The car moves left, overtaking the object, until it reaches the left lane, then stops.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(-25);
-
                     // State machine measuring: Both IRs need to see something before leaving this moving state.
                     stageMeasuring = HAVE_BOTH_IR;
-
                     stageToRightLaneRightTurn++;
-                }*/
-                
-                /*else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
-                    // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                    vc.setSpeed(1);
-                    vc.setSteeringWheelAngle(25);
-
-                    // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
-                    stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
-
-                    stageToRightLaneLeftTurn++;
                 }
-                
-                
+
+                /*
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
                     vc.setSteeringWheelAngle(0);
-
                     // Find end of object.
-                    stageMeasuring = END_OF_OBJECT;
+                    stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
                 }
+                
+                */
+                else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
+                    // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
+                    vc.setSpeed(1);
+                    vc.setSteeringWheelAngle(0);
+                    // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
+                    stageMeasuring = HAVE_BOTH_IR;
+                    stageToRightLaneLeftTurn++;
+                }
+
+                else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
+                    // Move to the left lane: Passing stage.
+                    vc.setSpeed(2);
+                    vc.setSteeringWheelAngle(20);
+                    // Find end of object.
+                    stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
+                }
+                /*
                 else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                     // Move to the right lane: Turn right part.
                     vc.setSpeed(1.5);
                     vc.setSteeringWheelAngle(25);
-
                     stageToRightLaneRightTurn--;
                     if (stageToRightLaneRightTurn == 0) {
                         stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                     }
                 }
-                                /*
-
+                                
                 else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part.
                     vc.setSpeed(.9);
                     vc.setSteeringWheelAngle(-25);
-
                     stageToRightLaneLeftTurn--;
                     if (stageToRightLaneLeftTurn == 0) {
                         // Start over.
                         stageMoving = FORWARD;
                         stageMeasuring = FIND_OBJECT_INIT;
-
                         distanceToObstacle = 0;
                         distanceToObstacleOld = 0;
                     }
@@ -229,4 +231,3 @@ namespace automotive {
 
     }
 } // automotive::miniature
-
