@@ -175,14 +175,11 @@ namespace automotive {
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
-            //const int32_t SECOND_CONTROL_SCANLINE = 450;
+            const int32_t SECOND_CONTROL_SCANLINE = 470;
             const int32_t distance = 280; //280
 
             TimeStamp beforeImageProcessing;
 
-
-
-            //scanline= 222; you can use this value for the stop line detection
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
@@ -200,15 +197,15 @@ namespace automotive {
                     }
                 }
 
-//                cv::Point secondLeft;
-//                secondLeft.y = y;
-//                secondLeft.x = -1;
-//
-//                if (y == SECOND_CONTROL_SCANLINE){
-//                    if(left.x > 0){
-//                        secondLeft.x = left.x;
-//                    }
-//                }
+                cv::Point secondLeft;
+                secondLeft.y = y;
+                secondLeft.x = -1;
+
+                if (y == SECOND_CONTROL_SCANLINE){
+                    if(left.x > 0){
+                        secondLeft.x = left.x;
+                    }
+                }
 
 
                 // Search from middle to the right:
@@ -228,42 +225,21 @@ namespace automotive {
                         break;
                     }
                 }
-//
-//                cv::Point secondright;
-//                secondright.y = y;
-//                secondright.x = -1;
-//
-//                if (y == SECOND_CONTROL_SCANLINE){
-//                    if(right.x > 0){
-//                        secondright.x = right.x;
-//                    }
-//                }
+
+                cv::Point secondright;
+                secondright.y = y;
+                secondright.x = -1;
+
+                if (y == SECOND_CONTROL_SCANLINE){
+                    if(right.x > 0){
+                        secondright.x = right.x;
+                    }
+                }
 
 
 
                 //draw line for the the left and right lane if debug is true
                 if (m_debug) {
-//                //draw line from the middle to left pixel
-//                if (left.x > 0) {
-//                    cv::Scalar white = CV_RGB(255, 255, 255);
-//                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
-//
-//                    //text and value of the line to the
-//                    stringstream sstr;
-//                    sstr << (m_image_black.cols / 2 - left.x);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, white);
-//                }
-//
-//                if (right.x > 0) {
-//                    cv::Scalar pink = CV_RGB(204, 0, 102);
-//                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
-//
-//                    stringstream sstr;
-//                    sstr << (right.x - m_image_black.cols/2);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, pink);
-//                }
 
                     if(y == CONTROL_SCANLINE){
                         if (left.x > 0) {
@@ -288,27 +264,27 @@ namespace automotive {
                         }
 
                     }
-//
-//                    if (secondLeft.x > 0) {
-//                        cv::Scalar white = CV_RGB(255, 255, 255);
-//                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
-//
-//                        //text and value of the line to the
-//                        stringstream sstr;
-//                        sstr << (m_image_black.cols / 2 - secondLeft.x);
-//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                                0.5, white);
-//                    }
-//
-//                    if (secondright.x > 0) {
-//                        cv::Scalar pink = CV_RGB(204, 0, 102);
-//                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
-//
-//                        stringstream sstr;
-//                        sstr << (secondright.x - m_image_black.cols/2);
-//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                                0.5, pink);
-//                    }
+
+                    if (secondLeft.x > 0) {
+                        cv::Scalar white = CV_RGB(255, 255, 255);
+                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
+
+                        //text and value of the line to the
+                        stringstream sstr;
+                        sstr << (m_image_black.cols / 2 - secondLeft.x);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                0.5, white);
+                    }
+
+                    if (secondright.x > 0) {
+                        cv::Scalar pink = CV_RGB(204, 0, 102);
+                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
+
+                        stringstream sstr;
+                        sstr << (secondright.x - m_image_black.cols/2);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                0.5, pink);
+                    }
                 }
 
 
@@ -321,7 +297,7 @@ namespace automotive {
                             m_eSum = 0;
                             m_eOld = 0;
                         }
-
+                        //double pixSum = (secondright.x + right.x) / 2.0;
                         e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
 
                         useRightLaneMarking = true;
@@ -330,10 +306,10 @@ namespace automotive {
                         if (useRightLaneMarking) {
                             m_eSum = 0;
                             m_eOld = 0;
-                            e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
+                            //e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
                         }
-
-                        e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
+                        //double pixLeftSum = (left.x + secondLeft.x)/2.0;
+                        e = (distance - (m_image_black.cols/2.0 - left.x ))/distance;
 
                         useRightLaneMarking = false;
                     } else {
@@ -456,29 +432,6 @@ namespace automotive {
 
             cvInitFont(&m_font, CV_FONT_HERSHEY_DUPLEX, hscale, vscale, shear, thickness, lineType);
 
-            // Parameters for overtaking.
-            const int32_t ULTRASONIC_FRONT_CENTER = 3;
-            const int32_t ULTRASONIC_FRONT_RIGHT = 4;
-            const int32_t INFRARED_FRONT_RIGHT = 0;
-            const int32_t INFRARED_REAR_RIGHT = 2;
-
-            const double OVERTAKING_DISTANCE = 5.5;
-            const double HEADING_PARALLEL = 0.04;
-
-            // Overall state machines for moving and measuring.
-            enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
-            enum StateMachineMeasuring { DISABLE, FIND_OBJECT_INIT, FIND_OBJECT, FIND_OBJECT_PLAUSIBLE, HAVE_BOTH_IR, HAVE_BOTH_IR_SAME_DISTANCE, END_OF_OBJECT };
-
-            StateMachineMoving stageMoving = FORWARD;
-            StateMachineMeasuring stageMeasuring = FIND_OBJECT_INIT;
-
-            // State counter for dynamically moving back to right lane.
-            int32_t stageToRightLaneRightTurn = 0;
-            int32_t stageToRightLaneLeftTurn = 0;
-
-            // Distance variables to ensure we are overtaking only stationary or slowly driving obstacles.
-            double distanceToObstacle = 0;
-            double distanceToObstacleOld = 0;
 
             // Overall state machine handler.
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -497,144 +450,6 @@ namespace automotive {
                     processImage();
                 }
 
-
-                // Overtaking part.
-                {
-                    // 1. Get most recent vehicle data:
-                    Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-                    VehicleData vd = containerVehicleData.getData<VehicleData> ();
-
-                    // 2. Get most recent sensor board data:
-                    Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-                    SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-
-                    // Moving state machine.
-                    if (stageMoving == FORWARD) {
-                        // Use m_vehicleControl data from image processing.
-
-                        stageToRightLaneLeftTurn = 0;
-                        stageToRightLaneRightTurn = 0;
-                    }
-                    else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
-                        // Move to the left lane: Turn left part until both IRs see something.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
-
-                        // State machine measuring: Both IRs need to see something before leaving this moving state.
-                        stageMeasuring = HAVE_BOTH_IR;
-
-                        stageToRightLaneRightTurn++;
-                    }
-                    else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
-                        // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(25);
-
-                        // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
-                        stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
-
-                        stageToRightLaneLeftTurn++;
-                    }
-                    else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
-                        // Move to the left lane: Passing stage.
-
-                        // Use m_vehicleControl data from image processing.
-
-                        // Find end of object.
-                        stageMeasuring = END_OF_OBJECT;
-                    }
-                    else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
-                        // Move to the right lane: Turn right part.
-                        m_vehicleControl.setSpeed(1.5);
-                        m_vehicleControl.setSteeringWheelAngle(25);
-
-                        stageToRightLaneRightTurn--;
-                        if (stageToRightLaneRightTurn == 0) {
-                            stageMoving = TO_RIGHT_LANE_LEFT_TURN;
-                        }
-                    }
-                    else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
-                        // Move to the left lane: Turn left part.
-                        m_vehicleControl.setSpeed(.9);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
-
-                        stageToRightLaneLeftTurn--;
-                        if (stageToRightLaneLeftTurn == 0) {
-                            // Start over.
-                            stageMoving = FORWARD;
-                            stageMeasuring = FIND_OBJECT_INIT;
-
-                            distanceToObstacle = 0;
-                            distanceToObstacleOld = 0;
-
-                            // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                    }
-
-                    // Measuring state machine.
-                    if (stageMeasuring == FIND_OBJECT_INIT) {
-                        distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
-                        stageMeasuring = FIND_OBJECT;
-                    }
-                    else if (stageMeasuring == FIND_OBJECT) {
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
-
-                        // Approaching an obstacle (stationary or driving slower than us).
-                        if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
-                            // Check if overtaking shall be started.                        
-                            stageMeasuring = FIND_OBJECT_PLAUSIBLE;
-                        }
-
-                        distanceToObstacleOld = distanceToObstacle;
-                    }
-                    else if (stageMeasuring == FIND_OBJECT_PLAUSIBLE) {
-                        if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE) {
-                            stageMoving = TO_LEFT_LANE_LEFT_TURN;
-
-                            // Disable measuring until requested from moving state machine again.
-                            stageMeasuring = DISABLE;
-                        }
-                        else {
-                            stageMeasuring = FIND_OBJECT;
-                        }
-                    }
-                    else if (stageMeasuring == HAVE_BOTH_IR) {
-                        // Remain in this stage until both IRs see something.
-                        if ( (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0) ) {
-                            // Turn to right.
-                            stageMoving = TO_LEFT_LANE_RIGHT_TURN;
-                        }
-                    }
-                    else if (stageMeasuring == HAVE_BOTH_IR_SAME_DISTANCE) {
-                        // Remain in this stage until both IRs have the similar distance to obstacle (i.e. turn car)
-                        // and the driven parts of the turn are plausible.
-                        const double IR_FR = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-                        const double IR_RR = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
-
-                        if ((fabs(IR_FR - IR_RR) < HEADING_PARALLEL) && ((stageToRightLaneLeftTurn - stageToRightLaneRightTurn) > 0)) {
-                            // Straight forward again.
-                            stageMoving = CONTINUE_ON_LEFT_LANE;
-
-                            // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                    }
-                    else if (stageMeasuring == END_OF_OBJECT) {
-                        // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-
-                        if (distanceToObstacle < 0) {
-                            // Move to right lane again.
-                            stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
-
-                            // Disable measuring until requested from moving state machine again.
-                            stageMeasuring = DISABLE;
-                        }
-                    }
-                }
 
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);

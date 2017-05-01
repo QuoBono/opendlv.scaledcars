@@ -124,13 +124,13 @@ namespace automotive {
                 // The car moves forward until the object, where it stops.
                 if (stageMoving == FORWARD) {
                     // Go forward.
-                    //vc.setSpeed(3);
+                    vc.setSpeed(3);
                     //std::cout << "returned: " << ls("sudo ./lanefollower --cid=111 --freq=10") << std::endl;
-                    std::system("$HOME/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin/lanefollower --cid=111 --freq=10");
-                    //vc.setSteeringWheelAngle(0);
+                   
+                    vc.setSteeringWheelAngle(0);
 
-                    //stageToRightLaneLeftTurn = 0;
-                    //stageToRightLaneRightTurn = 0;
+                    stagezToRightLaneLeftTurn = 0;
+                    stageToRightLaneRightTurn = 0;
                 }
                 
                 else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
@@ -250,6 +250,7 @@ namespace automotive {
 
                         // Disable measuring until requested from moving state machine again.
                         stageMeasuring = DISABLE;
+                        std::system("$HOME/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin/lanefollower --cid=111 --freq=10");
                     }
                 }
 
