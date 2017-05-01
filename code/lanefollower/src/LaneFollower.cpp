@@ -175,14 +175,11 @@ namespace automotive {
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
-            //const int32_t SECOND_CONTROL_SCANLINE = 450;
+            const int32_t SECOND_CONTROL_SCANLINE = 470;
             const int32_t distance = 280; //280
 
             TimeStamp beforeImageProcessing;
 
-
-
-            //scanline= 222; you can use this value for the stop line detection
 
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
@@ -200,15 +197,15 @@ namespace automotive {
                     }
                 }
 
-//                cv::Point secondLeft;
-//                secondLeft.y = y;
-//                secondLeft.x = -1;
-//
-//                if (y == SECOND_CONTROL_SCANLINE){
-//                    if(left.x > 0){
-//                        secondLeft.x = left.x;
-//                    }
-//                }
+                cv::Point secondLeft;
+                secondLeft.y = y;
+                secondLeft.x = -1;
+
+                if (y == SECOND_CONTROL_SCANLINE){
+                    if(left.x > 0){
+                        secondLeft.x = left.x;
+                    }
+                }
 
 
                 // Search from middle to the right:
@@ -228,42 +225,21 @@ namespace automotive {
                         break;
                     }
                 }
-//
-//                cv::Point secondright;
-//                secondright.y = y;
-//                secondright.x = -1;
-//
-//                if (y == SECOND_CONTROL_SCANLINE){
-//                    if(right.x > 0){
-//                        secondright.x = right.x;
-//                    }
-//                }
+
+                cv::Point secondright;
+                secondright.y = y;
+                secondright.x = -1;
+
+                if (y == SECOND_CONTROL_SCANLINE){
+                    if(right.x > 0){
+                        secondright.x = right.x;
+                    }
+                }
 
 
 
                 //draw line for the the left and right lane if debug is true
                 if (m_debug) {
-//                //draw line from the middle to left pixel
-//                if (left.x > 0) {
-//                    cv::Scalar white = CV_RGB(255, 255, 255);
-//                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
-//
-//                    //text and value of the line to the
-//                    stringstream sstr;
-//                    sstr << (m_image_black.cols / 2 - left.x);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, white);
-//                }
-//
-//                if (right.x > 0) {
-//                    cv::Scalar pink = CV_RGB(204, 0, 102);
-//                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
-//
-//                    stringstream sstr;
-//                    sstr << (right.x - m_image_black.cols/2);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, pink);
-//                }
 
                     if(y == CONTROL_SCANLINE){
                         if (left.x > 0) {
@@ -288,27 +264,27 @@ namespace automotive {
                         }
 
                     }
-//
-//                    if (secondLeft.x > 0) {
-//                        cv::Scalar white = CV_RGB(255, 255, 255);
-//                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
-//
-//                        //text and value of the line to the
-//                        stringstream sstr;
-//                        sstr << (m_image_black.cols / 2 - secondLeft.x);
-//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                                0.5, white);
-//                    }
-//
-//                    if (secondright.x > 0) {
-//                        cv::Scalar pink = CV_RGB(204, 0, 102);
-//                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
-//
-//                        stringstream sstr;
-//                        sstr << (secondright.x - m_image_black.cols/2);
-//                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                                0.5, pink);
-//                    }
+
+                    if (secondLeft.x > 0) {
+                        cv::Scalar white = CV_RGB(255, 255, 255);
+                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
+
+                        //text and value of the line to the
+                        stringstream sstr;
+                        sstr << (m_image_black.cols / 2 - secondLeft.x);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                0.5, white);
+                    }
+
+                    if (secondright.x > 0) {
+                        cv::Scalar pink = CV_RGB(204, 0, 102);
+                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
+
+                        stringstream sstr;
+                        sstr << (secondright.x - m_image_black.cols/2);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                                0.5, pink);
+                    }
                 }
 
 
@@ -321,7 +297,7 @@ namespace automotive {
                             m_eSum = 0;
                             m_eOld = 0;
                         }
-
+                        //double pixSum = (secondright.x + right.x) / 2.0;
                         e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
 
                         useRightLaneMarking = true;
@@ -330,10 +306,10 @@ namespace automotive {
                         if (useRightLaneMarking) {
                             m_eSum = 0;
                             m_eOld = 0;
-                            e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
+                            //e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
                         }
-
-                        e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
+                        //double pixLeftSum = (left.x + secondLeft.x)/2.0;
+                        e = (distance - (m_image_black.cols/2.0 - left.x ))/distance;
 
                         useRightLaneMarking = false;
                     } else {
