@@ -89,6 +89,7 @@ namespace automotive {
                 VehicleControl vc;
 
                 // Moving state machine.
+                // The car moves forward until the object, where it stops.
                 if (stageMoving == FORWARD) {
                     // Go forward.
                     vc.setSpeed(3);
@@ -97,7 +98,8 @@ namespace automotive {
                     stageToRightLaneLeftTurn = 0;
                     stageToRightLaneRightTurn = 0;
                 }
-                else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
+                
+                /*else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part until both IRs see something.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(-25);
@@ -106,8 +108,9 @@ namespace automotive {
                     stageMeasuring = HAVE_BOTH_IR;
 
                     stageToRightLaneRightTurn++;
-                }
-                /*else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
+                }*/
+                
+                else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                     // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(25);
@@ -117,6 +120,8 @@ namespace automotive {
 
                     stageToRightLaneLeftTurn++;
                 }
+                
+                /*
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
@@ -135,6 +140,8 @@ namespace automotive {
                         stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                     }
                 }
+                                /*
+
                 else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part.
                     vc.setSpeed(.9);
@@ -149,8 +156,9 @@ namespace automotive {
                         distanceToObstacle = 0;
                         distanceToObstacleOld = 0;
                     }
-                    */
+                
                 }
+                */
 
                 // Measuring state machine.
                 if (stageMeasuring == FIND_OBJECT_INIT) {
