@@ -91,7 +91,7 @@ namespace automotive {
                 // Moving state machine.
                 if (stageMoving == FORWARD) {
                     // Go forward.
-                    vc.setSpeed(2);
+                    vc.setSpeed(3);
                     vc.setSteeringWheelAngle(0);
 
                     stageToRightLaneLeftTurn = 0;
@@ -107,7 +107,7 @@ namespace automotive {
 
                     stageToRightLaneRightTurn++;
                 }
-                else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
+                /*else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                     // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(25);
@@ -149,6 +149,7 @@ namespace automotive {
                         distanceToObstacle = 0;
                         distanceToObstacleOld = 0;
                     }
+                    */
                 }
 
                 // Measuring state machine.
