@@ -110,7 +110,7 @@ namespace automotive {
                     stageToRightLaneRightTurn++;
                 }*/
                 
-                else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
+                /*else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                     // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(25);
@@ -121,7 +121,7 @@ namespace automotive {
                     stageToRightLaneLeftTurn++;
                 }
                 
-                /*
+                
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
