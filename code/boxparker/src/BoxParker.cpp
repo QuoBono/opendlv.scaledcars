@@ -216,7 +216,7 @@ namespace automotive {
             }
             if(stageMoving >=110 && stageMoving<120){
                 stop();
-                
+
                 stageMoving++;
             }
             if (stageMoving >= 120) {
