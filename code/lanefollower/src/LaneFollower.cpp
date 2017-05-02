@@ -496,7 +496,7 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part until both IRs see something.
                         m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
+                        m_vehicleControl.setSteeringWheelAngle(-20);
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR;
@@ -505,8 +505,8 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(25);
+                        m_vehicleControl.setSpeed(10);
+                        m_vehicleControl.setSteeringWheelAngle(8);
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -523,29 +523,36 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
-                        if(!lastEnum) {
-                            m_vehicleControl.setSpeed(0.2);
-                            m_vehicleControl.setSteeringWheelAngle(10);
+                        //if(!lastEnum) {
+                            m_vehicleControl.setSpeed(10);
+                            m_vehicleControl.setSteeringWheelAngle(0);
 
-                            stageToRightLaneRightTurn-=4;
+                            stageToRightLaneRightTurn-=3;
 
-                            if (stageToRightLaneRightTurn == 0) {
+                            if (stageToRightLaneRightTurn <= 0) {
+                            	m_vehicleControl.setSteeringWheelAngle(desiredSteering);
                                 stageMoving = TO_RIGHT_LANE_LEFT_TURN;
+                                
                             }
 
-                        }
+                        //}
 
-                        m_vehicleControl.setSpeed(10);
-                        m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                        //m_vehicleControl.setSpeed(10);
+                        //m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
                     }
                     else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part.
-                        m_vehicleControl.setSpeed(.9);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
+                        //m_vehicleControl.setSpeed(1.5);
+                        //m_vehicleControl.setSteeringWheelAngle(0);
 
-                        stageToRightLaneLeftTurn-= 4;
-                        if (stageToRightLaneLeftTurn == 0) {
+                        m_vehicleControl.setSpeed(10);
+                        m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+
+                        cerr << "LEFT STATE" << endl;
+
+                        //stageToRightLaneLeftTurn-=1;
+                        //if (stageToRightLaneLeftTurn <= 0) {
                             // Start over.
                             stageMoving = FORWARD;
                             stageMeasuring = FIND_OBJECT_INIT;
@@ -556,7 +563,7 @@ namespace automotive {
                             // Reset PID controller.
                             m_eSum = 0;
                             m_eOld = 0;
-                        }
+                        //}
                     }
 
                     // Measuring state machine.
