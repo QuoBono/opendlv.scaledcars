@@ -31,6 +31,7 @@
 
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h> 
 
     //Function to execute a command without the shell.
     // for example, let's "ls"
@@ -125,7 +126,9 @@ namespace automotive {
                 if (stageMoving == FORWARD) {
                     // Go forward.
                     vc.setSpeed(3);
-                    //std::cout << "returned: " << ls("sudo ./lanefollower --cid=111 --freq=10") << std::endl;
+ 					cout << "The \"lanefollower\" script will be executed"; 
+  					system("./lanefollower_script.sh"); 
+  					//std::cout << "returned: " << ls("sudo ./lanefollower --cid=111 --freq=10") << std::endl;
                    
                     vc.setSteeringWheelAngle(0);
 
