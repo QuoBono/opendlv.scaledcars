@@ -175,17 +175,50 @@ namespace automotive {
             //Cross Track Error
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
-            const int32_t SECOND_CONTROL_SCANLINE = 470;
+            //const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
+            //const int32_t SECOND_CONTROL_SCANLINE = 470;
             const int32_t distance = 280; //280
+
+            double rightPixelAverage = 0;
+            double leftPixelAverage = 0;
+            double leftPixelResult = 0;
+            double rightPixelResult = 0;
+            int counterAverageLeft = 0;
+            int counterAverageRight = 0;
 
             TimeStamp beforeImageProcessing;
 
 
+            //Check the pixels fromm the top of the car
+
+            uchar pixelTopLeft;
+            cv::Point leftTop;
+            leftTop.y = 445;
+            leftTop.x = m_image_black.cols / 2;
+
+            for(int y = 445; y > 0; y--){
+                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2, y));
+                if (pixelTopLeft > 200) {
+                    leftTop.y = y;
+                    break;
+                }
+            }
+
+            if (leftTop.y > 0) {
+                cv::Scalar white = CV_RGB(255, 255, 255);
+                line(m_image_black, cv::Point(leftTop.x, m_image_black.rows - 40), leftTop, white);
+
+                stringstream sstr;
+                sstr << (leftTop.y - 445);
+                putText(m_image_black, sstr.str().c_str(), cv::Point(leftTop.x, leftTop.y), cv::FONT_HERSHEY_PLAIN,
+                        0.5, white);
+            }
+
+
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows; y > 220; y-= 10) {
-                cerr << "this is y: " << y << endl;
+            for(int32_t y = m_image_black.rows - 10; y > 445; y-= 2) {
+                //cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
                 left.y = y;
@@ -197,21 +230,14 @@ namespace automotive {
                         break;
                     }
                 }
+                cerr << "THIS IS LEFT.X" << left.x << endl;
+                //Increment the counter for the average
+                counterAverageLeft ++;
+                //Add the value of the left pixel to the average variable
+                leftPixelAverage = leftPixelAverage + left.x;
+                //Create the average result
+                leftPixelResult = leftPixelAverage / counterAverageLeft;
 
-                cv::Point secondLeft;
-                secondLeft.y = y;
-                secondLeft.x = -1;
-
-                if (y == SECOND_CONTROL_SCANLINE){
-                    if(left.x > 0){
-                        secondLeft.x = left.x;
-                    }
-                }
-
-
-                // Search from middle to the right:
-                //CvScalar pixelRight;
-                //CvPoint right;
 
                 uchar pixelRight;
                 cv::Point right;
@@ -225,24 +251,23 @@ namespace automotive {
                         right.x = x;
                         break;
                     }
+
                 }
 
-                cv::Point secondright;
-                secondright.y = y;
-                secondright.x = -1;
+                cerr << "THIS IS RIGHT.X" << right.x << endl;
 
-                if (y == SECOND_CONTROL_SCANLINE){
-                    if(right.x > 0){
-                        secondright.x = right.x;
-                    }
-                }
+                //Increment the counter for the average
+                counterAverageRight ++;
+                //Add the value of the left pixel to the average variable
+                rightPixelAverage = rightPixelAverage + right.x;
+                //Create the average result
+                rightPixelResult = rightPixelAverage / counterAverageRight;
 
 
 
                 //draw line for the the left and right lane if debug is true
                 if (m_debug) {
 
-                    if(y == CONTROL_SCANLINE){
                         if (left.x > 0) {
                             cv::Scalar white = CV_RGB(255, 255, 255);
                             line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
@@ -263,97 +288,43 @@ namespace automotive {
                             putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
                                     0.5, pink);
                         }
-
-                    }
-
-                    if (secondLeft.x > 0) {
-                        cv::Scalar white = CV_RGB(255, 255, 255);
-                        line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
-
-                        //text and value of the line to the
-                        stringstream sstr;
-                        sstr << (m_image_black.cols / 2 - secondLeft.x);
-                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                                0.5, white);
-                    }
-
-                    if (secondright.x > 0) {
-                        cv::Scalar pink = CV_RGB(204, 0, 102);
-                        line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
-
-                        stringstream sstr;
-                        sstr << (secondright.x - m_image_black.cols/2);
-                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                                0.5, pink);
-                    }
                 }
-
-
-
-                //If the loop is currently checking at the height of each iteration line (each line that we see).
-                if (y == CONTROL_SCANLINE) {
-                    // Calculate the deviation error.
-                    if (right.x > 0) {
-                        if (!useRightLaneMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                        //double pixSum = (secondright.x + right.x) / 2.0;
-                        e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
-
-                        useRightLaneMarking = true;
-                    }
-                    else if (left.x > 0) {
-                        if (useRightLaneMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
-                            //e = ((left.x - m_image_black.cols/2.0) - distance)/distance;
-                        }
-                        //double pixLeftSum = (left.x + secondLeft.x)/2.0;
-                        e = (distance - (m_image_black.cols/2.0 - left.x ))/distance;
-
-                        useRightLaneMarking = false;
-                    } else {
-//                    {
-//                        // If no measurements are available, reset PID controller.
-//                        if(secondright.x){
-//                            if (!useRightLaneMarking) {
-//                                m_eSum = 0;
-//                                m_eOld = 0;
-//                            }
-//
-//                            e = ((secondright.x - m_image_black.cols/2.0) - distance)/distance;
-//
-//                            useRightLaneMarking = true;
-//                        } else if (secondLeft.x > 0) {
-//                            if (useRightLaneMarking) {
-//                                m_eSum = 0;
-//                                m_eOld = 0;
-//                            }
-//
-//                            e = (distance - (m_image_black.cols/2.0 - secondLeft.x))/distance;
-//
-//                            useRightLaneMarking = false;
-//                        } else
-//                        {
-                            m_eSum = 0;
-                            m_eOld = 0;
-//                        }
-                    }
 
 
                 }
 
+            cerr << "This is the average right pixel" << rightPixelResult << endl;
+            cerr << "This is the average left pixel" << leftPixelResult << endl;
 
+                // Calculate the deviation error.
+                if (rightPixelResult > 0) {
+                    if (!useRightLaneMarking) {
+                        m_eSum = 0;
+                        m_eOld = 0;
+                    }
+                    //double pixSum = (secondright.x + right.x) / 2.0;
+                    e = ((rightPixelResult - m_image_black.cols/2.0) - distance)/distance;
 
+                    useRightLaneMarking = true;
+                }
+                else if (leftPixelResult > 0) {
+                    if (useRightLaneMarking) {
+                        m_eSum = 0;
+                        m_eOld = 0;
+                        //e = ((leftPixelResult - m_image_black.cols/2.0) - distance)/distance;
+                    }
+                    //double pixLeftSum = (left.x + secondLeft.x)/2.0;
+                    e = (distance - (m_image_black.cols/2.0 - leftPixelResult))/distance;
 
+                    useRightLaneMarking = false;
+                } else {
+                    m_eSum = 0;
+                    m_eOld = 0;
 
-
-
-            } //commented for now
+                }
 
             TimeStamp afterImageProcessing;
-            cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
+            //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
 
             // Show resulting features.
             if (m_debug) {
