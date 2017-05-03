@@ -81,6 +81,8 @@ namespace automotive {
 
             virtual void reverse();
 
+            virtual void slowReverse();
+
             virtual void reverseTurnLeftSlow();
         };
 

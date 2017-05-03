@@ -54,6 +54,7 @@ namespace automotive {
 
         int stageMoving = 0;
         int stageMeasuring = 0;
+        int parkAfterCar = 0;
 
         // Create vehicle control data.
         VehicleControl vc;
@@ -64,7 +65,10 @@ namespace automotive {
             double distanceOld = 0;
             double absPathStart = 0;
             double absPathEnd = 0;
-            double absPathPark = 0;
+            double absPathParkStart = 0;
+            double absPathParkEnd = 0;
+
+
 
 
 
@@ -94,39 +98,63 @@ namespace automotive {
                             // Initialize measurement.
                             distanceOld = frontRightInfrared;
                             stageMeasuring++;
+
                         }
                     break;
                     case 1:
                         {
-                            absPathPark = vd.getAbsTraveledPath();
+                            absPathParkStart = vd.getAbsTraveledPath();
+
+                            if(absPathParkStart - absPathParkEnd > 6){
+                                if(parkAfterCar != 1){
+                                    stageMoving = 1;
+                                }
+                                parkAfterCar = 1;
+
+                            }
+
+
                             // Checking for sequence +, -.
                             if ((distanceOld > 0) && (frontRightInfrared < 0)) {
                                 // Found sequence +, -.
                                 stageMeasuring = 2;
                                 absPathStart = vd.getAbsTraveledPath();
-                            }
 
-                            if(absPathPark > 7){
-                                stageMoving = 1;
+
+
                             }
+                            cerr << "absParkStart: " << absPathParkStart << endl;
+                            cerr << "absParkEnd: " << absPathParkEnd << endl;
+
 
                             distanceOld = frontRightInfrared;
                         }
                     break;
                     case 2:
                         {
+
+                            if(vd.getAbsTraveledPath() - absPathStart > 5){
+                                if(parkAfterCar != 3){
+                                    stageMoving = 1;
+                                }
+                                parkAfterCar = 3;
+                            }
+
                             // Checking for sequence -, +.
                             if ((distanceOld < 0) && (frontRightInfrared > 0)) {
                                 // Found sequence -, +.
                                 stageMeasuring = 1;
                                 absPathEnd = vd.getAbsTraveledPath();
+                                absPathParkEnd = vd.getAbsTraveledPath();
+
 
                                 const double GAP_SIZE = (absPathEnd - absPathStart);
 
                                 cerr << "Size = " << GAP_SIZE << endl;
 
-                                if ((stageMoving < 1) && (GAP_SIZE > 7)) {
+                                if ((stageMoving < 1) && (GAP_SIZE > 5)) {
                                     stageMoving = 1;
+                                    parkAfterCar = 2;
                                 }
                             }
                             distanceOld = frontRightInfrared;
@@ -151,7 +179,12 @@ namespace automotive {
         }
 
         void SidewaysParker::reverse(){
-            vc.setSpeed(-1);
+            vc.setSpeed(2);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void SidewaysParker::slowReverse(){
+            vc.setSpeed(-0.5);
             vc.setSteeringWheelAngle(0);
         }
 
@@ -167,57 +200,141 @@ namespace automotive {
 
         void SidewaysParker::reverseTurnRight(){
             vc.setSpeed(-2);
-            vc.setSteeringWheelAngle(25);
+            vc.setSteeringWheelAngle(45);
         }
 
         void SidewaysParker::reverseTurnLeftSlow(){
-            vc.setSpeed(-.4);
-            vc.setSteeringWheelAngle(-25);
+            vc.setSpeed(-.5);
+            vc.setSteeringWheelAngle(-45);
         }
 
         void SidewaysParker::parallelPark() {
 
-            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+            cerr << "StageMoving: " << stageMoving << endl;
+
+            Container containerSensorBoardData = getKeyValueDataStore().get(
+                    automotive::miniature::SensorBoardData::ID());
             SensorBoardData data = containerSensorBoardData.getData<SensorBoardData>();
 
+            cerr << "parkaeftercar: " << parkAfterCar << endl;
 
             //double rearRightInfrared = data.getValueForKey_MapOfDistances(2);
-            // double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
+            //double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
             //double frontRightUltrasonic = data.getValueForKey_MapOfDistances(4);
             //double rearRightUltrasonic = data.getValueForKey_MapOfDistances(5);
-            //double rearInfrared = data.getValueForKey_MapOfDistances(1);
+            double rearInfrared = data.getValueForKey_MapOfDistances(1);
+            double frontUltrasonic = data.getValueForKey_MapOfDistances(3);
 
             // Moving state machine.
             if (stageMoving == 0) {
                 // Go forward.
-               forward();
-            }
-            if ((stageMoving > 0) && (stageMoving < 40)) {
-                // Move slightly forward.
-               slowForward();
-                stageMoving++;
-            }
-            if ((stageMoving >= 40) && (stageMoving < 45)) {
-                // Stop.
-                stop();
-                stageMoving++;
-            }
-            if ((stageMoving >= 45) && (stageMoving < 85)) {
-                // Backwards, steering wheel to the right.
-                reverseTurnRight();
-                stageMoving++;
-            }
-            if ((stageMoving >= 85) && (stageMoving < 220)) {
-                // Backwards, steering wheel to the left.
-                reverseTurnLeftSlow();
-                stageMoving++;
-            }
-            if (stageMoving >= 220) {
-                // Stop.
-                stop();
+                forward();
             }
 
+            if (parkAfterCar == 1) {
 
+                if ((stageMoving > 0) && (stageMoving < 15)) {
+                    // forward
+                    forward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 15) && (stageMoving < 30)) {
+                    // slowforward
+                    slowForward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 30) && (stageMoving < 35)) {
+                    // Stop.
+                    stop();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 35) && (stageMoving < 71)) {
+                    // Backwards, steering wheel to the right.
+                    reverseTurnRight();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 71) && (stageMoving < 108)) {
+                    // Backwards, steering wheel to the left.
+                    reverseTurnLeftSlow();
+                    stageMoving++;
+                }
+                if (stageMoving >= 108) {
+                    // Stop.
+                    stop();
+                }
+            }
+
+            if (parkAfterCar == 2) {
+
+                if ((stageMoving > 0) && (stageMoving < 25)) {
+                    // Move slightly forward.
+                    slowForward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 25) && (stageMoving < 30)) {
+                    // Stop.
+                    stop();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 30) && (stageMoving < 66)) {
+                    // Backwards, steering wheel to the right.
+                    reverseTurnRight();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 66) && (stageMoving < 107)) {
+                    // Backwards, steering wheel to the left.
+                    reverseTurnLeftSlow();
+                    stageMoving++;
+                }
+                if (stageMoving >= 107) {
+                    if (frontUltrasonic > 3) {
+                        slowForward();
+                    } else {
+                        stop();
+                    }
+
+                }
+
+
+            }
+            if (parkAfterCar == 3) {
+
+
+                if ((stageMoving > 0) && (stageMoving < 20)) {
+                    // Move forward.
+                    forward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 20) && (stageMoving < 45)) {
+                    // Move slightly forward.
+                    slowForward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 45) && (stageMoving < 50)) {
+                    // Stop.
+                    stop();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 50) && (stageMoving < 86)) {
+                    // Backwards, steering wheel to the right.
+                    reverseTurnRight();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 86) && (stageMoving < 127)) {
+                    // Backwards, steering wheel to the left.
+                    reverseTurnLeftSlow();
+                    stageMoving++;
+                }
+                if (stageMoving >= 127) {
+                    if (rearInfrared > 2.5) {
+                        slowReverse();
+                    } else {
+                        stop();
+                    }
+
+
+                }
+            }
         }
         }
 } // automotive::miniature
