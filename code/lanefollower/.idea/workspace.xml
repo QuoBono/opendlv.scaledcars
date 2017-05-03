@@ -37,8 +37,8 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="406">
-              <caret line="215" column="0" lean-forward="true" selection-start-line="215" selection-start-column="0" selection-end-line="215" selection-end-column="0" />
+            <state relative-caret-position="320">
+              <caret line="250" column="55" lean-forward="false" selection-start-line="250" selection-start-column="55" selection-end-line="250" selection-end-column="55" />
               <folding />
             </state>
           </provider>
@@ -57,7 +57,7 @@
       <file leaf-file-name="LaneFollower.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="715">
+            <state relative-caret-position="2120">
               <caret line="106" column="60" lean-forward="false" selection-start-line="106" selection-start-column="15" selection-end-line="106" selection-end-column="60" />
               <folding />
             </state>
@@ -67,7 +67,7 @@
       <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="595">
+            <state relative-caret-position="1760">
               <caret line="294" column="82" lean-forward="false" selection-start-line="294" selection-start-column="73" selection-end-line="294" selection-end-column="82" />
               <folding />
             </state>
@@ -457,12 +457,13 @@
       <workItem from="1493724103875" duration="4590000" />
       <workItem from="1493805481653" duration="381000" />
       <workItem from="1493805884682" duration="648000" />
-      <workItem from="1493806789403" duration="9226000" />
+      <workItem from="1493806789403" duration="12639000" />
+      <workItem from="1493821649914" duration="3810000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="135130000" />
+    <option name="totallyTimeSpent" value="142353000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -888,7 +889,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="715">
+        <state relative-caret-position="2120">
           <caret line="106" column="60" lean-forward="false" selection-start-line="106" selection-start-column="15" selection-end-line="106" selection-end-column="60" />
           <folding />
         </state>
@@ -896,7 +897,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="595">
+        <state relative-caret-position="1760">
           <caret line="294" column="82" lean-forward="false" selection-start-line="294" selection-start-column="73" selection-end-line="294" selection-end-column="82" />
           <folding />
         </state>
@@ -904,8 +905,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="406">
-          <caret line="215" column="0" lean-forward="true" selection-start-line="215" selection-start-column="0" selection-end-line="215" selection-end-column="0" />
+        <state relative-caret-position="320">
+          <caret line="250" column="55" lean-forward="false" selection-start-line="250" selection-start-column="55" selection-end-line="250" selection-end-column="55" />
           <folding />
         </state>
       </provider>

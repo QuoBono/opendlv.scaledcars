@@ -37,6 +37,11 @@
 #include <opencv2/highgui/highgui.hpp>
 
 
+#include <unistd.h>
+
+
+
+
 #include "LaneFollower.h"
 
 //serial test
@@ -194,12 +199,25 @@ namespace automotive {
             uchar pixelTopLeft;
             cv::Point leftTop;
             leftTop.y = 445;
-            leftTop.x = m_image_black.cols / 2;
+            leftTop.x = m_image_black.cols / 2 + 55;
 
-            for(int y = 445; y > 0; y--){
-                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2, y));
+            uchar pixelTopRight;
+            cv::Point rightTop;
+            rightTop.y = 445;
+            rightTop.x = m_image_black.cols / 2 - 55;
+
+            for (int y = 445; y > 0; y--) {
+                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 + 55, y));
                 if (pixelTopLeft > 200) {
                     leftTop.y = y;
+                    break;
+                }
+            }
+
+            for (int y = 445; y > 0; y--) {
+                pixelTopRight = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 - 55, y));
+                if (pixelTopRight > 200) {
+                    rightTop.y = y;
                     break;
                 }
             }
@@ -214,87 +232,119 @@ namespace automotive {
                         0.5, white);
             }
 
+            if (rightTop.y > 0) {
+                cv::Scalar white = CV_RGB(255, 255, 255);
+                line(m_image_black, cv::Point(rightTop.x, m_image_black.rows - 40), rightTop, white);
 
-            //complexity 0^2 not good
-            //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows - 10; y > 445; y-= 2) {
-                //cerr << "this is y: " << y << endl;
-                uchar pixelLeft;
-                cv::Point left;
-                left.y = y;
-                left.x = -1;
-                for(int x = m_image_black.cols /2; x > 0; x--){
-                    pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelLeft > 200) {
-                        left.x = x;
-                        break;
-                    }
-                }
-                cerr << "THIS IS LEFT.X" << left.x << endl;
-                //Increment the counter for the average
-                counterAverageLeft ++;
-                //Add the value of the left pixel to the average variable
-                leftPixelAverage = leftPixelAverage + left.x;
-                //Create the average result
-                leftPixelResult = leftPixelAverage / counterAverageLeft;
+                stringstream sstr;
+                sstr << (rightTop.y - 445);
+                putText(m_image_black, sstr.str().c_str(), cv::Point(rightTop.x, rightTop.y), cv::FONT_HERSHEY_PLAIN,
+                        0.5, white);
+            }
 
+            if (fabs(leftTop.y - rightTop.y) < 10 && rightTop.y > 350 && leftTop.y > 350) {
 
-                uchar pixelRight;
-                cv::Point right;
-                right.y = y;
-                right.x = -1;
+                m_eSum = 0;
+                m_eOld = 0;
+                m_vehicleControl.setSpeed(0);
+                m_vehicleControl.setSteeringWheelAngle(0);
+                unsigned int microseconds = 1000 * 1000;
 
-                //check right
-                for(int x = m_image_black.cols/2; x < m_image_black.cols; x++) {
-                    pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelRight > 200) {
-                        right.x = x;
-                        break;
-                    }
+                usleep(microseconds);
 
-                }
-
-                cerr << "THIS IS RIGHT.X" << right.x << endl;
-
-                //Increment the counter for the average
-                counterAverageRight ++;
-                //Add the value of the left pixel to the average variable
-                rightPixelAverage = rightPixelAverage + right.x;
-                //Create the average result
-                rightPixelResult = rightPixelAverage / counterAverageRight;
-
-
-
-                //draw line for the the left and right lane if debug is true
+                // Show resulting features.
                 if (m_debug) {
+                    if (m_image != NULL) {
+
+                        imshow("Camera Original Image", m_image_black);
+                        cv::waitKey(10);
+                        cvWaitKey(10); //we need a wait key
+                    }
+                }
+
+            } else {
+
+                //This for loop will iterate for the scanline (each Y is the y of the line we draw
+                for (int32_t y = m_image_black.rows - 10; y > 445; y -= 2) {
+                    //cerr << "this is y: " << y << endl;
+                    uchar pixelLeft;
+                    cv::Point left;
+                    left.y = y;
+                    left.x = -1;
+                    for (int x = m_image_black.cols / 2; x > 0; x--) {
+                        pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
+                        if (pixelLeft > 200) {
+                            left.x = x;
+                            break;
+                        }
+                    }
+                    cerr << "THIS IS LEFT.X" << left.x << endl;
+                    //Increment the counter for the average
+                    counterAverageLeft++;
+                    //Add the value of the left pixel to the average variable
+                    leftPixelAverage = leftPixelAverage + left.x;
+                    //Create the average result
+                    leftPixelResult = leftPixelAverage / counterAverageLeft;
+
+
+                    uchar pixelRight;
+                    cv::Point right;
+                    right.y = y;
+                    right.x = -1;
+
+                    //check right
+                    for (int x = m_image_black.cols / 2; x < m_image_black.cols; x++) {
+                        pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
+                        if (pixelRight > 200) {
+                            right.x = x;
+                            break;
+                        }
+
+                    }
+
+                    cerr << "THIS IS RIGHT.X" << right.x << endl;
+
+                    //Increment the counter for the average
+                    counterAverageRight++;
+                    //Add the value of the left pixel to the average variable
+                    rightPixelAverage = rightPixelAverage + right.x;
+                    //Create the average result
+                    rightPixelResult = rightPixelAverage / counterAverageRight;
+
+
+
+                    //draw line for the the left and right lane if debug is true
+                    if (m_debug) {
 
                         if (left.x > 0) {
                             cv::Scalar white = CV_RGB(255, 255, 255);
-                            line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
+                            line(m_image_black, cv::Point(m_image_black.cols / 2, y), left, white);
 
                             //text and value of the line to the
                             stringstream sstr;
                             sstr << (m_image_black.cols / 2 - left.x);
-                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 - 100, y - 2),
+                                    cv::FONT_HERSHEY_PLAIN,
                                     0.5, white);
                         }
 
                         if (right.x > 0) {
                             cv::Scalar pink = CV_RGB(204, 0, 102);
-                            line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
+                            line(m_image_black, cv::Point(m_image_black.cols / 2, y), right, pink);
 
                             stringstream sstr;
-                            sstr << (right.x - m_image_black.cols/2);
-                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
+                            sstr << (right.x - m_image_black.cols / 2);
+                            putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 + 100, y - 2),
+                                    cv::FONT_HERSHEY_PLAIN,
                                     0.5, pink);
                         }
-                }
+                    }
 
 
                 }
 
-            cerr << "This is the average right pixel" << rightPixelResult << endl;
-            cerr << "This is the average left pixel" << leftPixelResult << endl;
+                cerr << "This is the average right pixel" << rightPixelResult << endl;
+                cerr << "This is the average left pixel" << leftPixelResult << endl;
 
                 // Calculate the deviation error.
                 if (rightPixelResult > 0) {
@@ -303,18 +353,17 @@ namespace automotive {
                         m_eOld = 0;
                     }
                     //double pixSum = (secondright.x + right.x) / 2.0;
-                    e = ((rightPixelResult - m_image_black.cols/2.0) - distance)/distance;
+                    e = ((rightPixelResult - m_image_black.cols / 2.0) - distance) / distance;
 
                     useRightLaneMarking = true;
-                }
-                else if (leftPixelResult > 0) {
+                } else if (leftPixelResult > 0) {
                     if (useRightLaneMarking) {
                         m_eSum = 0;
                         m_eOld = 0;
                         //e = ((leftPixelResult - m_image_black.cols/2.0) - distance)/distance;
                     }
                     //double pixLeftSum = (left.x + secondLeft.x)/2.0;
-                    e = (distance - (m_image_black.cols/2.0 - leftPixelResult))/distance;
+                    e = (distance - (m_image_black.cols / 2.0 - leftPixelResult)) / distance;
 
                     useRightLaneMarking = false;
                 } else {
@@ -323,69 +372,67 @@ namespace automotive {
 
                 }
 
-            TimeStamp afterImageProcessing;
-            //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
+                TimeStamp afterImageProcessing;
+                //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
 
-            // Show resulting features.
-            if (m_debug) {
-                if (m_image != NULL) {
+                // Show resulting features.
+                if (m_debug) {
+                    if (m_image != NULL) {
 
-                    imshow("Camera Original Image", m_image_black);
-                    cv::waitKey(10);
-                    cvWaitKey(10); //we need a wait key
+                        imshow("Camera Original Image", m_image_black);
+                        cv::waitKey(10);
+                        cvWaitKey(10); //we need a wait key
+                    }
                 }
+
+                TimeStamp currentTime;
+                double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
+                m_previousTime = currentTime;
+
+                //used for the Algorithm
+                if (fabs(e) < 1e-100) {
+                    m_eSum = 0;
+                } else {
+                    m_eSum += e;
+                }
+
+
+                // The following values have been determined by Twiddle algorithm
+
+                const double p = proportionalGain * e;
+                const double i = integralGain * timeStep * m_eSum;
+                const double d = derivativeGain * (e - m_eOld) / timeStep;
+                m_eOld = e;
+
+                const double y = p + i + d; //before y
+
+                //double desiredSteering = 0;
+
+                // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
+                if (fabs(e) > 1e-100) {
+                    desiredSteering = y; //before y
+                }
+
+                if (desiredSteering > 25.0) {
+                    desiredSteering = 25.0;
+                }
+
+                if (desiredSteering < -25.0) {
+                    desiredSteering = -25.0;
+                }
+                cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
+                     << ", y = " << y << endl;
+                // We are using OpenDaVINCI's std::shared_ptr to automatically
+                // release any acquired resources.
+
+
+                // Go forward.
+                //for SIM
+                m_vehicleControl.setSpeed(10);
+                m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+
+
             }
-
-            TimeStamp currentTime;
-            double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
-            m_previousTime = currentTime;
-
-            //used for the Algorithm
-            if (fabs(e) < 1e-100) {
-                m_eSum = 0;
-            }
-            else {
-                m_eSum += e;
-            }
-
-
-            // The following values have been determined by Twiddle algorithm
-
-            const double p = proportionalGain * e;
-            const double i = integralGain * timeStep * m_eSum;
-            const double d = derivativeGain * (e - m_eOld)/timeStep;
-            m_eOld = e;
-
-            const double y = p + i + d; //before y
-
-            //double desiredSteering = 0;
-
-            // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
-            if (fabs(e) > 1e-100) {
-                desiredSteering = y; //before y
-            }
-
-            if (desiredSteering > 25.0) {
-                desiredSteering = 25.0;
-            }
-
-            if (desiredSteering < -25.0) {
-                desiredSteering = -25.0;
-            }
-            cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
-            // We are using OpenDaVINCI's std::shared_ptr to automatically
-            // release any acquired resources.
-
-
-            // Go forward.
-            //for SIM
-            m_vehicleControl.setSpeed(10);
-            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
-
-
-
-
-
         }
 
         // This method will do the main data processing job.
