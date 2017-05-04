@@ -185,7 +185,7 @@ namespace automotive {
             //complexity 0^2 not good
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
             for(int32_t y = m_image_black.rows; y > 220; y-= 10) {
-                cerr << "this is y: " << y << endl;
+                //cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
                 left.y = y;
@@ -353,7 +353,7 @@ namespace automotive {
             } //commented for now
 
             TimeStamp afterImageProcessing;
-            cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
+            //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
 
             // Show resulting features.
             if (m_debug) {
@@ -401,14 +401,14 @@ namespace automotive {
             if (desiredSteering < -25.0) {
                 desiredSteering = -25.0;
             }
-            cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
+            //cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
             // We are using OpenDaVINCI's std::shared_ptr to automatically
             // release any acquired resources.
 
 
             // Go forward.
             //for SIM
-            m_vehicleControl.setSpeed(10);
+            m_vehicleControl.setSpeed(1);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
 
@@ -439,7 +439,7 @@ namespace automotive {
             const int32_t INFRARED_FRONT_RIGHT = 0;
             const int32_t INFRARED_REAR_RIGHT = 2;
 
-            const double OVERTAKING_DISTANCE = 5.5;
+            const double OVERTAKING_DISTANCE = 6.5; //5.5 default
             const double HEADING_PARALLEL = 0.04;
 
             // Overall state machines for moving and measuring.
@@ -489,14 +489,30 @@ namespace automotive {
                     // Moving state machine.
                     if (stageMoving == FORWARD) {
                         // Use m_vehicleControl data from image processing.
+                        cerr << "FORWARD" << endl;
 
                         stageToRightLaneLeftTurn = 0;
                         stageToRightLaneRightTurn = 0;
                     }
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part until both IRs see something.
-                        m_vehicleControl.setSpeed(1);
+                    	cerr << "TO_LEFT_LANE_LEFT_TURN" << endl;
+
+                        m_vehicleControl.setSpeed(0.4);
                         m_vehicleControl.setSteeringWheelAngle(-20);
+
+                        int i = 0;
+
+                        if(i == 0){
+                        	i = stageToRightLaneRightTurn;
+                        }
+
+                        if(i < stageToRightLaneRightTurn-5){
+                        	m_vehicleControl.setSpeed(1);
+                        	m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                        	stageMoving = TO_LEFT_LANE_RIGHT_TURN;
+                        }
+
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR;
@@ -505,8 +521,11 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(10);
-                        m_vehicleControl.setSteeringWheelAngle(8);
+                    	cerr << "TO_LEFT_LANE_RIGHT_TURN" << endl;
+                        m_vehicleControl.setSpeed(0.4);
+                        //m_vehicleControl.setSteeringWheelAngle(8);
+                        m_vehicleControl.setSteeringWheelAngle(desiredSteering + 6);
+
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -514,6 +533,13 @@ namespace automotive {
                         stageToRightLaneLeftTurn++;
                     }
                     else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
+                    	cerr << "CONTINUE_ON_LEFT_LANE" << endl;
+
+                    	//added
+                    	m_vehicleControl.setSpeed(0.4);
+						m_vehicleControl.setSteeringWheelAngle(desiredSteering + 6);
+
+
                         // Move to the left lane: Passing stage.
 
                         // Use m_vehicleControl data from image processing.
@@ -523,14 +549,16 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
-                        //if(!lastEnum) {
-                            m_vehicleControl.setSpeed(10);
-                            m_vehicleControl.setSteeringWheelAngle(0);
+                        cerr << "TO_RIGHT_LANE_RIGHT_TURN, stageToRightLaneRightTurn = " << stageToRightLaneRightTurn << endl;
 
-                            stageToRightLaneRightTurn-=3;
+                        //if(!lastEnum) {
+							m_vehicleControl.setSpeed(0.4);
+							m_vehicleControl.setSteeringWheelAngle(0);
+
+                            stageToRightLaneRightTurn-=1;
 
                             if (stageToRightLaneRightTurn <= 0) {
-                            	m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                            	m_vehicleControl.setSteeringWheelAngle(desiredSteering - 10);
                                 stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                                 
                             }
@@ -546,12 +574,12 @@ namespace automotive {
                         //m_vehicleControl.setSpeed(1.5);
                         //m_vehicleControl.setSteeringWheelAngle(0);
 
-                        m_vehicleControl.setSpeed(10);
-                        m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                    	cerr << "TO_RIGHT_LANE_LEFT_TURN, stageToRightLaneLeftTurn = " << stageToRightLaneLeftTurn << endl;
 
-                        cerr << "LEFT STATE" << endl;
+                        m_vehicleControl.setSpeed(0.4);
+                        m_vehicleControl.setSteeringWheelAngle(desiredSteering - 20);
 
-                        //stageToRightLaneLeftTurn-=1;
+                        stageToRightLaneLeftTurn-=1;
                         //if (stageToRightLaneLeftTurn <= 0) {
                             // Start over.
                             stageMoving = FORWARD;
@@ -568,14 +596,17 @@ namespace automotive {
 
                     // Measuring state machine.
                     if (stageMeasuring == FIND_OBJECT_INIT) {
+                    	cerr << "FIND_OBJECT_INIT" << endl;
                         distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
                         stageMeasuring = FIND_OBJECT;
                     }
                     else if (stageMeasuring == FIND_OBJECT) {
+                    	cerr << "FIND_OBJECT" << endl;
                         distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
 
                         // Approaching an obstacle (stationary or driving slower than us).
-                        if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
+                        //if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
+                        if (  (distanceToObstacle > 0) && ((distanceToObstacleOld - distanceToObstacle) > 0)) {
                             // Check if overtaking shall be started.
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
                         }
@@ -583,6 +614,8 @@ namespace automotive {
                         distanceToObstacleOld = distanceToObstacle;
                     }
                     else if (stageMeasuring == FIND_OBJECT_PLAUSIBLE) {
+                    	cerr << "FIND_OBJECT_PLAUSIBLE" << endl;
+
                         if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE) {
                             stageMoving = TO_LEFT_LANE_LEFT_TURN;
 
@@ -594,6 +627,8 @@ namespace automotive {
                         }
                     }
                     else if (stageMeasuring == HAVE_BOTH_IR) {
+                    	cerr << "HAVE_BOTH_IR" << endl;
+
                         // Remain in this stage until both IRs see something.
                         if ( (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0) ) {
                             // Turn to right.
@@ -601,6 +636,8 @@ namespace automotive {
                         }
                     }
                     else if (stageMeasuring == HAVE_BOTH_IR_SAME_DISTANCE) {
+                    	cerr << "HAVE_BOTH_IR_SAME_DISTANCE" << endl;
+
                         // Remain in this stage until both IRs have the similar distance to obstacle (i.e. turn car)
                         // and the driven parts of the turn are plausible.
                         const double IR_FR = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
@@ -616,6 +653,8 @@ namespace automotive {
                         }
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
+                    	cerr << "END_OF_OBJECT" << endl;
+
                         // Find end of object.
                         distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
 
@@ -646,4 +685,3 @@ namespace automotive {
 
     }
 } // automotive::miniature
-
