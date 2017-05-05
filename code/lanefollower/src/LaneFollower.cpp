@@ -70,6 +70,7 @@ namespace automotive {
         cv::Mat m_image_black; //added grey image matrix
         cv::Mat m_image_black_new;
         double desiredSteering = 0;
+        bool stopLineBool = false;
 
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
@@ -186,12 +187,20 @@ namespace automotive {
 
             double rightPixelAverage = 0;
             double leftPixelAverage = 0;
+
             double leftPixelResult = 0;
             double rightPixelResult = 0;
+
             int counterAverageLeft = 0;
             int counterAverageRight = 0;
 
+            int lineCounter = 0;
+
             TimeStamp beforeImageProcessing;
+
+            TimeStamp currentTime;
+            double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
+            m_previousTime = currentTime;
 
 
             //Check the pixels fromm the top of the car
@@ -242,30 +251,12 @@ namespace automotive {
                         0.5, white);
             }
 
-            if (fabs(leftTop.y - rightTop.y) < 10 && rightTop.y > 350 && leftTop.y > 350) {
-
-                m_eSum = 0;
-                m_eOld = 0;
-                m_vehicleControl.setSpeed(0);
-                m_vehicleControl.setSteeringWheelAngle(0);
-                unsigned int microseconds = 1000 * 1000;
-
-                usleep(microseconds);
-
-                // Show resulting features.
-                if (m_debug) {
-                    if (m_image != NULL) {
-
-                        imshow("Camera Original Image", m_image_black);
-                        cv::waitKey(10);
-                        cvWaitKey(10); //we need a wait key
-                    }
-                }
-
-            } else {
+//            if (fabs(leftTop.y - rightTop.y) < 10 && rightTop.y > 300 && leftTop.y > 300) {
+//
+//            }
 
                 //This for loop will iterate for the scanline (each Y is the y of the line we draw
-                for (int32_t y = m_image_black.rows - 10; y > 445; y -= 2) {
+                for (int32_t y = m_image_black.rows - 10; y > 445; y -= 4) {
                     //cerr << "this is y: " << y << endl;
                     uchar pixelLeft;
                     cv::Point left;
@@ -275,12 +266,13 @@ namespace automotive {
                         pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
                         if (pixelLeft > 200) {
                             left.x = x;
+                            counterAverageLeft++;
                             break;
                         }
                     }
-                    cerr << "THIS IS LEFT.X" << left.x << endl;
+
                     //Increment the counter for the average
-                    counterAverageLeft++;
+
                     //Add the value of the left pixel to the average variable
                     leftPixelAverage = leftPixelAverage + left.x;
                     //Create the average result
@@ -297,15 +289,15 @@ namespace automotive {
                         pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
                         if (pixelRight > 200) {
                             right.x = x;
+                            counterAverageRight++;
                             break;
                         }
-
                     }
 
-                    cerr << "THIS IS RIGHT.X" << right.x << endl;
+                    lineCounter++;
 
                     //Increment the counter for the average
-                    counterAverageRight++;
+
                     //Add the value of the left pixel to the average variable
                     rightPixelAverage = rightPixelAverage + right.x;
                     //Create the average result
@@ -346,31 +338,39 @@ namespace automotive {
                 cerr << "This is the average right pixel" << rightPixelResult << endl;
                 cerr << "This is the average left pixel" << leftPixelResult << endl;
 
-                // Calculate the deviation error.
-                if (rightPixelResult > 0) {
-                    if (!useRightLaneMarking) {
+
+
+
+            // Shift the whole perception of the image 30px to the right,
+            // this helps with keeping the right lane marking in picture.
+            if (rightPixelResult > 0) rightPixelResult += 30;
+
+                    // Calculate the deviation error.
+                    if (rightPixelResult > 30) {
+                        if (!useRightLaneMarking) {
+                            m_eSum = 0;
+                            m_eOld = 0;
+                        }
+                        //double pixSum = (secondright.x + right.x) / 2.0;
+                        e = ((rightPixelResult - m_image_black.cols / 2.0) - distance) / distance;
+
+                        useRightLaneMarking = true;
+
+                    } else if (leftPixelResult > 30) {
+                        if (useRightLaneMarking) {
+                            m_eSum = 0;
+                            m_eOld = 0;
+                        }
+
+                        e = (distance - (m_image_black.cols / 2.0 - leftPixelResult)) / distance;
+
+                        useRightLaneMarking = false;
+                    } else {
                         m_eSum = 0;
                         m_eOld = 0;
+                        e = 0;
+
                     }
-                    //double pixSum = (secondright.x + right.x) / 2.0;
-                    e = ((rightPixelResult - m_image_black.cols / 2.0) - distance) / distance;
-
-                    useRightLaneMarking = true;
-                } else if (leftPixelResult > 0) {
-                    if (useRightLaneMarking) {
-                        m_eSum = 0;
-                        m_eOld = 0;
-                        //e = ((leftPixelResult - m_image_black.cols/2.0) - distance)/distance;
-                    }
-                    //double pixLeftSum = (left.x + secondLeft.x)/2.0;
-                    e = (distance - (m_image_black.cols / 2.0 - leftPixelResult)) / distance;
-
-                    useRightLaneMarking = false;
-                } else {
-                    m_eSum = 0;
-                    m_eOld = 0;
-
-                }
 
                 TimeStamp afterImageProcessing;
                 //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
@@ -384,10 +384,6 @@ namespace automotive {
                         cvWaitKey(10); //we need a wait key
                     }
                 }
-
-                TimeStamp currentTime;
-                double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
-                m_previousTime = currentTime;
 
                 //used for the Algorithm
                 if (fabs(e) < 1e-100) {
@@ -404,9 +400,13 @@ namespace automotive {
                 const double d = derivativeGain * (e - m_eOld) / timeStep;
                 m_eOld = e;
 
-                const double y = p + i + d; //before y
+                double y = p + i + d; //before y
 
                 //double desiredSteering = 0;
+
+//                if(rightPixelResult < 0 && leftPixelResult < 0){
+//                    y = 0;
+//                }
 
                 // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
                 if (fabs(e) > 1e-100) {
@@ -425,14 +425,24 @@ namespace automotive {
                 // We are using OpenDaVINCI's std::shared_ptr to automatically
                 // release any acquired resources.
 
+                cerr << lineCounter << endl;
 
                 // Go forward.
                 //for SIM
-                m_vehicleControl.setSpeed(10);
-                m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+
+                if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+
+                    m_vehicleControl.setSpeed(5);
+                    m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                } else {
+
+                    m_vehicleControl.setSpeed(5);
+                    m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                }
 
 
-            }
+
+
         }
 
         // This method will do the main data processing job.
