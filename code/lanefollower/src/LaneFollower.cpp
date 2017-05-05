@@ -266,17 +266,15 @@ namespace automotive {
                         pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
                         if (pixelLeft > 200) {
                             left.x = x;
+                            //Increment the counter for the average
                             counterAverageLeft++;
+                            //Add the value of the left pixel to the average variable
+                            leftPixelAverage = leftPixelAverage + left.x;
+                            //Create the average result
+                            leftPixelResult = leftPixelAverage / counterAverageLeft;
                             break;
                         }
                     }
-
-                    //Increment the counter for the average
-
-                    //Add the value of the left pixel to the average variable
-                    leftPixelAverage = leftPixelAverage + left.x;
-                    //Create the average result
-                    leftPixelResult = leftPixelAverage / counterAverageLeft;
 
 
                     uchar pixelRight;
@@ -289,19 +287,19 @@ namespace automotive {
                         pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
                         if (pixelRight > 200) {
                             right.x = x;
+                            //Increment the counter for the average
                             counterAverageRight++;
+                            //Add the value of the left pixel to the average variable
+                            rightPixelAverage = rightPixelAverage + right.x;
+                            //Create the average result
+                            rightPixelResult = rightPixelAverage / counterAverageRight;
+
                             break;
                         }
                     }
 
                     lineCounter++;
 
-                    //Increment the counter for the average
-
-                    //Add the value of the left pixel to the average variable
-                    rightPixelAverage = rightPixelAverage + right.x;
-                    //Create the average result
-                    rightPixelResult = rightPixelAverage / counterAverageRight;
 
 
 
@@ -356,7 +354,7 @@ namespace automotive {
 
                         useRightLaneMarking = true;
 
-                    } else if (leftPixelResult > 30) {
+                    } else if (leftPixelResult > 0) {
                         if (useRightLaneMarking) {
                             m_eSum = 0;
                             m_eOld = 0;
@@ -368,7 +366,6 @@ namespace automotive {
                     } else {
                         m_eSum = 0;
                         m_eOld = 0;
-                        e = 0;
 
                     }
 
@@ -404,9 +401,9 @@ namespace automotive {
 
                 //double desiredSteering = 0;
 
-//                if(rightPixelResult < 0 && leftPixelResult < 0){
-//                    y = 0;
-//                }
+                if(rightPixelResult < 0 && leftPixelResult < 0){
+                    y = 0;
+                }
 
                 // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
                 if (fabs(e) > 1e-100) {
@@ -432,8 +429,21 @@ namespace automotive {
 
                 if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
 
-                    m_vehicleControl.setSpeed(5);
-                    m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                    if(sleep(3)){
+
+                        if (m_debug) {
+                            if (m_image != NULL) {
+
+                                imshow("Camera Original Image", m_image_black);
+                                cv::waitKey(10);
+                                cvWaitKey(10); //we need a wait key
+                            }
+                        }
+                        m_vehicleControl.setSpeed(0);
+                        m_vehicleControl.setSteeringWheelAngle(0);
+
+                    }
+
                 } else {
 
                     m_vehicleControl.setSpeed(5);
