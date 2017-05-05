@@ -38,183 +38,161 @@ namespace automotive {
         using namespace automotive;
         using namespace automotive::miniature;
 
-        SidewaysParker::SidewaysParker(const int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "SidewaysParker") {
+        SidewaysParker::SidewaysParker() {
         }
 
         SidewaysParker::~SidewaysParker() {}
 
-        void SidewaysParker::setUp() {
-            // This method will be call automatically _before_ running body().
-        }
-
-        void SidewaysParker::tearDown() {
-            // This method will be call automatically _after_ return from body().
-        }
 
         int stageMoving = 0;
         int stageMeasuring = 0;
         int parkAfterCar = 0;
+        bool parked = false;
+
 
         // Create vehicle control data.
         VehicleControl vc;
 
-        // This method will do the main data processing job.
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
+        bool SidewaysParker::findParkingSpot(automotive::VehicleData vd, automotive::miniature::SensorBoardData sbd) {
 
             double distanceOld = 0;
             double absPathStart = 0;
             double absPathEnd = 0;
             double absPathParkStart = 0;
             double absPathParkEnd = 0;
+            bool result = false;
+
+
+            // 1. Get most recent vehicle data:
+
+            double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
 
 
 
+            // Measuring state machine.
+            switch (stageMeasuring) {
+                case 0: {
+                    // Initialize measurement.
+                    distanceOld = frontRightInfrared;
+                    stageMeasuring++;
 
-
-            while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-                // 1. Get most recent vehicle data:
-                Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-                VehicleData vd = containerVehicleData.getData<VehicleData> ();
-
-                // 2. Get most recent sensor board data:
-                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-                double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
-
-
-                // Our code for parking!!
-                parallelPark();
-
-
-
-
-
-
-                // Measuring state machine.
-                switch (stageMeasuring) {
-                    case 0:
-                        {
-                            // Initialize measurement.
-                            distanceOld = frontRightInfrared;
-                            stageMeasuring++;
-
-                        }
-                    break;
-                    case 1:
-                        {
-                            absPathParkStart = vd.getAbsTraveledPath();
-
-                            if(absPathParkStart - absPathParkEnd > 6){
-                                if(parkAfterCar != 1){
-                                    stageMoving = 1;
-                                }
-                                parkAfterCar = 1;
-
-                            }
-
-
-                            // Checking for sequence +, -.
-                            if ((distanceOld > 0) && (frontRightInfrared < 0)) {
-                                // Found sequence +, -.
-                                stageMeasuring = 2;
-                                absPathStart = vd.getAbsTraveledPath();
-
-
-
-                            }
-                            cerr << "absParkStart: " << absPathParkStart << endl;
-                            cerr << "absParkEnd: " << absPathParkEnd << endl;
-
-
-                            distanceOld = frontRightInfrared;
-                        }
-                    break;
-                    case 2:
-                        {
-
-                            if(vd.getAbsTraveledPath() - absPathStart > 5){
-                                if(parkAfterCar != 3){
-                                    stageMoving = 1;
-                                }
-                                parkAfterCar = 3;
-                            }
-
-                            // Checking for sequence -, +.
-                            if ((distanceOld < 0) && (frontRightInfrared > 0)) {
-                                // Found sequence -, +.
-                                stageMeasuring = 1;
-                                absPathEnd = vd.getAbsTraveledPath();
-                                absPathParkEnd = vd.getAbsTraveledPath();
-
-
-                                const double GAP_SIZE = (absPathEnd - absPathStart);
-
-                                cerr << "Size = " << GAP_SIZE << endl;
-
-                                if ((stageMoving < 1) && (GAP_SIZE > 5)) {
-                                    stageMoving = 1;
-                                    parkAfterCar = 2;
-                                }
-                            }
-                            distanceOld = frontRightInfrared;
-                        }
-                    break;
                 }
+                    break;
+                case 1: {
+                    absPathParkStart = vd.getAbsTraveledPath();
 
-                // Create container for finally sending the data.
-                Container c(vc);
-                // Send container.
-                getConference().send(c);
+                    if (absPathParkStart - absPathParkEnd > 6) {
+                        if (parkAfterCar != 1) {
+                            parkAfterCar = 1;
+                            return true;
+                        }
+
+
+                    }
+
+
+                    // Checking for sequence +, -.
+                    if ((distanceOld > 0) && (frontRightInfrared < 0)) {
+                        // Found sequence +, -.
+                        stageMeasuring = 2;
+                        absPathStart = vd.getAbsTraveledPath();
+
+
+                    }
+                    cerr << "absParkStart: " << absPathParkStart << endl;
+                    cerr << "absParkEnd: " << absPathParkEnd << endl;
+
+
+                    distanceOld = frontRightInfrared;
+                }
+                    break;
+                case 2: {
+
+                    if (vd.getAbsTraveledPath() - absPathStart > 5) {
+                        if (parkAfterCar != 3) {
+                            parkAfterCar = 3;
+                            return true;
+                        }
+
+                    }
+
+                    // Checking for sequence -, +.
+                    if ((distanceOld < 0) && (frontRightInfrared > 0)) {
+                        // Found sequence -, +.
+                        stageMeasuring = 1;
+                        absPathEnd = vd.getAbsTraveledPath();
+                        absPathParkEnd = vd.getAbsTraveledPath();
+
+
+                        const double GAP_SIZE = (absPathEnd - absPathStart);
+
+                        cerr << "Size = " << GAP_SIZE << endl;
+
+                        if ((stageMoving < 1) && (GAP_SIZE > 5)) {
+                            parkAfterCar = 2;
+                            return true;
+                        }
+
+                    }
+                    distanceOld = frontRightInfrared;
+                }
+                    break;
             }
 
-            return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+            // Create container for finally sending the data.
+            Container c(vc);
+            // Send container.
+            getConference().send(c);
+            return false;
         }
 
-        void SidewaysParker::stop(){
+
+        void SidewaysParker::stop() {
 
             vc.setSpeed(0);
             vc.setSteeringWheelAngle(0);
 
         }
 
-        void SidewaysParker::reverse(){
+        void SidewaysParker::reverse() {
             vc.setSpeed(2);
             vc.setSteeringWheelAngle(0);
         }
 
-        void SidewaysParker::slowReverse(){
+        void SidewaysParker::slowReverse() {
             vc.setSpeed(-0.5);
             vc.setSteeringWheelAngle(0);
         }
 
-        void SidewaysParker::forward(){
+        void SidewaysParker::forward() {
             vc.setSpeed(2);
             vc.setSteeringWheelAngle(0);
         }
 
-        void SidewaysParker::slowForward(){
+        void SidewaysParker::slowForward() {
             vc.setSpeed(.4);
             vc.setSteeringWheelAngle(0);
         }
 
-        void SidewaysParker::reverseTurnRight(){
+        void SidewaysParker::reverseTurnRight() {
             vc.setSpeed(-2);
             vc.setSteeringWheelAngle(45);
         }
 
-        void SidewaysParker::reverseTurnLeftSlow(){
+        void SidewaysParker::reverseTurnLeftSlow() {
             vc.setSpeed(-.5);
             vc.setSteeringWheelAngle(-45);
         }
 
-        void SidewaysParker::parallelPark() {
+        bool isParked() {
+            return parked;
+        }
 
+        void SidewaysParker::parallelPark(automotive::miniature::SensorBoardData data) {
+
+            stageMoving = 1;
             cerr << "StageMoving: " << stageMoving << endl;
 
-            Container containerSensorBoardData = getKeyValueDataStore().get(
-                    automotive::miniature::SensorBoardData::ID());
-            SensorBoardData data = containerSensorBoardData.getData<SensorBoardData>();
 
             cerr << "parkaeftercar: " << parkAfterCar << endl;
 
@@ -224,12 +202,6 @@ namespace automotive {
             //double rearRightUltrasonic = data.getValueForKey_MapOfDistances(5);
             double rearInfrared = data.getValueForKey_MapOfDistances(1);
             double frontUltrasonic = data.getValueForKey_MapOfDistances(3);
-
-            // Moving state machine.
-            if (stageMoving == 0) {
-                // Go forward.
-                forward();
-            }
 
             if (parkAfterCar == 1) {
 
@@ -261,6 +233,7 @@ namespace automotive {
                 if (stageMoving >= 108) {
                     // Stop.
                     stop();
+                    parked = true;
                 }
             }
 
@@ -291,6 +264,7 @@ namespace automotive {
                         slowForward();
                     } else {
                         stop();
+                        parked = true;
                     }
 
                 }
@@ -330,12 +304,14 @@ namespace automotive {
                         slowReverse();
                     } else {
                         stop();
+                        parked = true;
                     }
 
 
                 }
             }
         }
-        }
-} // automotive::miniature
+    }
 
+
+}
