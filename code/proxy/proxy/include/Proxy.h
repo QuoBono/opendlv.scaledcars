@@ -1,5 +1,5 @@
 /**
- * Example - Example code.
+ * Proxy - Proxy code.
  * Copyright (C) 2016 Christian Berger
  *
  * This program is free software; you can redistribute it and/or
@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CONTROL_EXAMPLE_H
-#define CONTROL_EXAMPLE_H
+#ifndef CONTROL_PROXY_H
+#define CONTROL_PROXY_H
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include <opendavinci/odcore/data/Container.h>
@@ -29,12 +29,12 @@ namespace control {
 using namespace std;
 
 /**
- * Time-triggered example.
+ * Time-triggered proxy.
  */
-class Example : public odcore::base::module::TimeTriggeredConferenceClientModule {
+class Proxy : public odcore::base::module::TimeTriggeredConferenceClientModule {
    private:
-    Example(const Example & /*obj*/) = delete;
-    Example &operator=(const Example & /*obj*/) = delete;
+    Proxy(const Proxy & /*obj*/) = delete;
+    Proxy &operator=(const Proxy & /*obj*/) = delete;
 
    public:
     /**
@@ -43,9 +43,9 @@ class Example : public odcore::base::module::TimeTriggeredConferenceClientModule
      * @param argc Number of command line arguments.
      * @param argv Command line arguments.
      */
-    Example(const int &argc, char **argv);
+    Proxy(const int &argc, char **argv);
 
-    virtual ~Example();
+    virtual ~Proxy();
 
     virtual void nextContainer(odcore::data::Container &c);
 
@@ -57,4 +57,4 @@ class Example : public odcore::base::module::TimeTriggeredConferenceClientModule
 }
 } // scaledcars::control
 
-#endif /*CONTROL_EXAMPLE_H*/
+#endif /*CONTROL_PROXY_H*/
