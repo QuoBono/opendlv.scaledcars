@@ -48,6 +48,7 @@
 
 #include "Proxy.h"
 
+
 namespace automotive {
     namespace miniature {
 
@@ -55,6 +56,10 @@ namespace automotive {
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace odtools::recorder;
+
+        // We add some of OpenDaVINCI's namespaces for the sake of readability.
+        using namespace odcore;
+        using namespace odcore::wrapper;
 
         //the serial communication
         const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino

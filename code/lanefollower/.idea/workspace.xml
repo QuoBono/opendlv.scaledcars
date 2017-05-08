@@ -34,21 +34,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="false">
+      <file leaf-file-name="LaneFollower.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="326">
-              <caret line="135" column="13" lean-forward="false" selection-start-line="135" selection-start-column="13" selection-end-line="135" selection-end-column="13" />
+            <state relative-caret-position="-6994">
+              <caret line="72" column="8" lean-forward="false" selection-start-line="72" selection-start-column="8" selection-end-line="74" selection-end-column="40" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Proxy.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Proxy.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../proxy/src/Proxy.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="150" column="40" lean-forward="false" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
+            <state relative-caret-position="275">
+              <caret line="58" column="0" lean-forward="false" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -57,7 +57,7 @@
       <file leaf-file-name="Serial.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/Serial.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="460">
+            <state relative-caret-position="400">
               <caret line="23" column="4" lean-forward="false" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="23" />
               <folding />
             </state>
@@ -67,7 +67,7 @@
       <file leaf-file-name="LaneFollower.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2120">
+            <state relative-caret-position="335">
               <caret line="106" column="60" lean-forward="false" selection-start-line="106" selection-start-column="15" selection-end-line="106" selection-end-column="60" />
               <folding />
             </state>
@@ -459,12 +459,12 @@
       <workItem from="1492782987985" duration="2165000" />
       <workItem from="1494242108174" duration="745000" />
       <workItem from="1494245842383" duration="1707000" />
-      <workItem from="1494248047344" duration="169000" />
+      <workItem from="1494248047344" duration="1503000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="97216000" />
+    <option name="totallyTimeSpent" value="98550000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -872,22 +872,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../serialsendbytes/SerialSendBytes.cpp" />
-    <entry file="file://$PROJECT_DIR$/include/Serial.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="460">
-          <caret line="23" column="4" lean-forward="false" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2120">
-          <caret line="106" column="60" lean-forward="false" selection-start-line="106" selection-start-column="15" selection-end-line="106" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../../AutoTux/Odroid/LaneFollower/src/LaneFollower.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1680">
@@ -896,18 +880,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
+    <entry file="file://$PROJECT_DIR$/include/LaneFollower.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="326">
-          <caret line="135" column="13" lean-forward="false" selection-start-line="135" selection-start-column="13" selection-end-line="135" selection-end-column="13" />
+        <state relative-caret-position="335">
+          <caret line="106" column="60" lean-forward="false" selection-start-line="106" selection-start-column="15" selection-end-line="106" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/Serial.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="23" column="4" lean-forward="false" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="23" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../proxy/src/Proxy.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="150" column="40" lean-forward="false" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
+        <state relative-caret-position="275">
+          <caret line="58" column="0" lean-forward="false" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/LaneFollower.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-6994">
+          <caret line="72" column="8" lean-forward="false" selection-start-line="72" selection-start-column="8" selection-end-line="74" selection-end-column="40" />
           <folding />
         </state>
       </provider>

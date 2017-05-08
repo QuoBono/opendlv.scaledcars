@@ -27,6 +27,9 @@
 #include "opendavinci/odcore/data/Container.h"
 #include "opendavinci/odtools/recorder/Recorder.h"
 
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+
 #include "Camera.h"
 
 namespace automotive {
