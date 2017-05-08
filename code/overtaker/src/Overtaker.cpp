@@ -33,8 +33,6 @@
 #include <sys/wait.h>
 #include <stdlib.h> 
 
-    //Function to execute a command without the shell.
-    // for example, let's "ls"
 
 namespace automotive {
     namespace miniature {
@@ -58,31 +56,6 @@ namespace automotive {
         void Overtaker::tearDown() {
             // This method will be call automatically _after_ return from body().
         }
-
-        // int ls(const char *dir) {
-        //     int pid = 0, status = 0;
-        //     // first we fork the process
-        //     if (pid == fork()) {
-        //     // pid != 0: this is the parent process (i.e. our process)
-        //         waitpid(pid, &status, 0); // wait for the child to exit
-        //     } else {
-        //         /* pid == 0: this is the child process. now let's load the
-        //         "ls" program into this process and run it */
-
-        //         const char executable[] = "/batseeyon@batseeyon-Lenovo-U31-70 ~/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin";
-
-        //         // load it. there are more exec__ functions, try 'man 3 exec'
-        //         // execl takes the arguments as parameters. execv takes them as an array
-        //         // this is execl though, so:
-        //         //      exec         argv[0]  argv[1] end
-        //         execl(executable, executable, dir,    NULL);
-
-        //         /* exec does not return unless the program couldn't be started. 
-        //             when the child process stops, the waitpid() above will return.
-        //         */
-        //     }
-        //     return status; // this is the parent process again.
-        // }
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body() {

@@ -698,7 +698,7 @@ void LaneFollower::processImage() {
                         if (distanceToObstacle < 0) {
                         	if(chooseBox == 0)
                             {
-                            	stageToRightLaneRightTurn -= 55;
+                            	stageToRightLaneRightTurn -= 70;
                             	chooseBox++;
                             } else if (chooseBox == 1)
                             { 
