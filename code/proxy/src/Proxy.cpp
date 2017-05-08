@@ -26,6 +26,20 @@
 #include "opendavinci/odcore/data/Container.h"
 #include "opendavinci/odcore/data/TimeStamp.h"
 
+//this is for the serial communication
+#include <stdint.h>
+#include <iostream>
+#include <string>
+#include <memory>
+#include <opendavinci/odcore/base/Thread.h>
+#include <opendavinci/odcore/wrapper/SerialPort.h>
+#include <opendavinci/odcore/wrapper/SerialPortFactory.h>
+//end for the serial communication
+
+//serial test
+#include <iostream>
+#include <fstream>
+
 #include "OpenCVCamera.h"
 
 #ifdef HAVE_UEYE
@@ -41,6 +55,18 @@ namespace automotive {
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace odtools::recorder;
+
+        //the serial communication
+        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        const uint32_t BAUD_RATE = 9600;
+        bool serialBool = false;
+        std::shared_ptr<SerialPort> serial;
+
+        //FOR TESTING WITH A FAKE SERIAL PORT
+
+        //const string SERIAL_PORT = "/dev/pts/2";
+        //const uint32_t BAUD_RATE = 19200;
+
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
