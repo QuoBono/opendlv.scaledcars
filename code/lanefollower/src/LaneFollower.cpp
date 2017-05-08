@@ -78,7 +78,7 @@ namespace automotive {
         const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
         const uint32_t BAUD_RATE = 9600;
         bool serialBool = false;
-        //std::shared_ptr<SerialPort> serial;
+        std::shared_ptr<SerialPort> serial;
 //        bool serialBool = false;
 
 
@@ -92,7 +92,6 @@ namespace automotive {
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
                                                                        m_sharedImageMemory(),
-                                                                       serial(),
                                                                        m_image(NULL),
                                                                        m_debug(false),
                                                                        m_font(),
@@ -122,6 +121,23 @@ namespace automotive {
 
             }
 
+            try {
+                if(!serialBool){
+
+                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+                    const uint32_t ONE_SECOND = 1000 * 1000;
+                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+                    // Start receiving bytes.
+                    serial->start();
+                    serialBool = true;
+                }
+
+                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+            }
+            catch(string &exception) {
+                cerr << "Set up error Serial port could not be created: " << exception << endl;
+            }
 
         }
 
@@ -135,6 +151,10 @@ namespace automotive {
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 cvDestroyWindow("Test screen");
+            }
+
+            if(serialBool){
+                serial -> stop();
             }
 
         }
@@ -191,45 +211,103 @@ namespace automotive {
             //Cross Track Error
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 250; //462 calibrated length to right: 280px
+            //const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
+            //const int32_t SECOND_CONTROL_SCANLINE = 470;
             const int32_t distance = 280; //280
+
+            double rightPixelAverage = 0;
+            double leftPixelAverage = 0;
+
+            double leftPixelResult = 0;
+            double rightPixelResult = 0;
+
+            int counterAverageLeft = 0;
+            int counterAverageRight = 0;
+
+            int lineCounter = 0;
+
+            double desiredSteering = 0;
 
             TimeStamp beforeImageProcessing;
 
+            TimeStamp currentTime;
+            double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
+            m_previousTime = currentTime;
 
 
-            //scanline= 222; you can use this value for the stop line detection
+            //Check the pixels fromm the top of the car
 
-            //complexity 0^2 not good
+            uchar pixelTopLeft;
+            cv::Point leftTop;
+            leftTop.y = 445;
+            leftTop.x = m_image_black.cols / 2 + 55;
+
+            uchar pixelTopRight;
+            cv::Point rightTop;
+            rightTop.y = 445;
+            rightTop.x = m_image_black.cols / 2 - 55;
+
+            for (int y = 445; y > 0; y--) {
+                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 + 55, y));
+                if (pixelTopLeft > 200) {
+                    leftTop.y = y;
+                    break;
+                }
+            }
+
+            for (int y = 445; y > 0; y--) {
+                pixelTopRight = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 - 55, y));
+                if (pixelTopRight > 200) {
+                    rightTop.y = y;
+                    break;
+                }
+            }
+
+            if (leftTop.y > 0) {
+                cv::Scalar white = CV_RGB(255, 255, 255);
+                line(m_image_black, cv::Point(leftTop.x, m_image_black.rows - 40), leftTop, white);
+
+                stringstream sstr;
+                sstr << (leftTop.y - 445);
+                putText(m_image_black, sstr.str().c_str(), cv::Point(leftTop.x, leftTop.y), cv::FONT_HERSHEY_PLAIN,
+                        0.5, white);
+            }
+
+            if (rightTop.y > 0) {
+                cv::Scalar white = CV_RGB(255, 255, 255);
+                line(m_image_black, cv::Point(rightTop.x, m_image_black.rows - 40), rightTop, white);
+
+                stringstream sstr;
+                sstr << (rightTop.y - 445);
+                putText(m_image_black, sstr.str().c_str(), cv::Point(rightTop.x, rightTop.y), cv::FONT_HERSHEY_PLAIN,
+                        0.5, white);
+            }
+
+//            if (fabs(leftTop.y - rightTop.y) < 10 && rightTop.y > 300 && leftTop.y > 300) {
+//
+//            }
+
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
-            for(int32_t y = m_image_black.rows - 180; y > 220; y-= 10) {
-                cerr << "this is y: " << y << endl;
+            for (int32_t y = m_image_black.rows - 10; y > 445; y -= 4) {
+                //cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
                 left.y = y;
                 left.x = -1;
-                for(int x = m_image_black.cols /2; x > 0; x--){
+                for (int x = m_image_black.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
                     if (pixelLeft > 200) {
                         left.x = x;
+                        //Increment the counter for the average
+                        counterAverageLeft++;
+                        //Add the value of the left pixel to the average variable
+                        leftPixelAverage = leftPixelAverage + left.x;
+                        //Create the average result
+                        leftPixelResult = leftPixelAverage / counterAverageLeft;
                         break;
                     }
                 }
 
-                cv::Point secondLeft;
-                secondLeft.y = y;
-                secondLeft.x = -1;
-
-                if (y == 260){
-                    if(left.x > 0){
-                        secondLeft.x = left.x;
-                    }
-                }
-
-
-                // Search from middle to the right:
-                //CvScalar pixelRight;
-                //CvPoint right;
 
                 uchar pixelRight;
                 cv::Point right;
@@ -237,160 +315,94 @@ namespace automotive {
                 right.x = -1;
 
                 //check right
-                for(int x = m_image_black.cols/2; x < m_image_black.cols; x++) {
+                for (int x = m_image_black.cols / 2; x < m_image_black.cols; x++) {
                     pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
                     if (pixelRight > 200) {
                         right.x = x;
+                        //Increment the counter for the average
+                        counterAverageRight++;
+                        //Add the value of the left pixel to the average variable
+                        rightPixelAverage = rightPixelAverage + right.x;
+                        //Create the average result
+                        rightPixelResult = rightPixelAverage / counterAverageRight;
+
                         break;
                     }
                 }
 
-                cv::Point secondright;
-                secondright.y = y;
-                secondright.x = -1;
+                lineCounter++;
 
-                if (y == 260){
-                    if(right.x > 0){
-                        secondright.x = right.x;
+
+
+
+                //draw line for the the left and right lane if debug is true
+                if (m_debug) {
+
+                    if (left.x > 0) {
+                        cv::Scalar white = CV_RGB(255, 255, 255);
+                        line(m_image_black, cv::Point(m_image_black.cols / 2, y), left, white);
+
+                        //text and value of the line to the
+                        stringstream sstr;
+                        sstr << (m_image_black.cols / 2 - left.x);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 - 100, y - 2),
+                                cv::FONT_HERSHEY_PLAIN,
+                                0.5, white);
+                    }
+
+                    if (right.x > 0) {
+                        cv::Scalar pink = CV_RGB(204, 0, 102);
+                        line(m_image_black, cv::Point(m_image_black.cols / 2, y), right, pink);
+
+                        stringstream sstr;
+                        sstr << (right.x - m_image_black.cols / 2);
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 + 100, y - 2),
+                                cv::FONT_HERSHEY_PLAIN,
+                                0.5, pink);
                     }
                 }
 
 
-
-            //draw line for the the left and right lane if debug is true
-            if (m_debug) {
-//                //draw line from the middle to left pixel
-//                if (left.x > 0) {
-//                    cv::Scalar white = CV_RGB(255, 255, 255);
-//                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
-//
-//                    //text and value of the line to the
-//                    stringstream sstr;
-//                    sstr << (m_image_black.cols / 2 - left.x);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, white);
-//                }
-//
-//                if (right.x > 0) {
-//                    cv::Scalar pink = CV_RGB(204, 0, 102);
-//                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
-//
-//                    stringstream sstr;
-//                    sstr << (right.x - m_image_black.cols/2);
-//                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-//                            0.5, pink);
-//                }
-
-                if(y == CONTROL_SCANLINE){
-                    if (left.x > 0) {
-                    cv::Scalar white = CV_RGB(255, 255, 255);
-                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), left, white);
-
-                    //text and value of the line to the
-                    stringstream sstr;
-                    sstr << (m_image_black.cols / 2 - left.x);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, white);
-                }
-
-                    if (right.x > 0) {
-                    cv::Scalar pink = CV_RGB(204, 0, 102);
-                    line(m_image_black, cv::Point(m_image_black.cols/2, y), right, pink);
-
-                    stringstream sstr;
-                    sstr << (right.x - m_image_black.cols/2);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, pink);
-                }
-
-                }
-
-                if (secondLeft.x > 0) {
-                    cv::Scalar white = CV_RGB(255, 255, 255);
-                    line(m_image_black, cv::Point(m_image_black.cols/ 2, y), secondLeft, white);
-
-                    //text and value of the line to the
-                    stringstream sstr;
-                    sstr << (m_image_black.cols / 2 - secondLeft.x);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 - 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, white);
-                }
-
-                if (secondright.x > 0) {
-                    cv::Scalar pink = CV_RGB(204, 0, 102);
-                    line(m_image_black, cv::Point(m_image_black.cols/2, y), secondright, pink);
-
-                    stringstream sstr;
-                    sstr << (secondright.x - m_image_black.cols/2);
-                    putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols/2 + 100, y - 2), cv::FONT_HERSHEY_PLAIN,
-                            0.5, pink);
-                }
             }
 
+            cerr << "This is the average right pixel" << rightPixelResult << endl;
+            cerr << "This is the average left pixel" << leftPixelResult << endl;
 
 
-                //If the loop is currently checking at the height of each iteration line (each line that we see).
-                if (y == CONTROL_SCANLINE) {
-                    // Calculate the deviation error.
-                    if (right.x > 0) {
-                        if (!useRightLaneMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-
-                        e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
-
-                        useRightLaneMarking = true;
-                    }
-                    else if (left.x > 0) {
-                        if (useRightLaneMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-
-                        e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
-
-                        useRightLaneMarking = false;
-                    }
-                    else {
-                        // If no measurements are available, reset PID controller.
-                        if(secondright.x){
-                            if (!useRightLaneMarking) {
-                                m_eSum = 0;
-                                m_eOld = 0;
-                            }
-
-                            e = ((right.x - m_image_black.cols/2.0) - distance)/distance;
-
-                            useRightLaneMarking = true;
-                        } else if (secondLeft.x > 0) {
-                            if (useRightLaneMarking) {
-                                m_eSum = 0;
-                                m_eOld = 0;
-                            }
-
-                            e = (distance - (m_image_black.cols/2.0 - left.x))/distance;
-
-                            useRightLaneMarking = false;
-                        } else {
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                    }
 
 
+            // Shift the whole perception of the image 30px to the right,
+            // this helps with keeping the right lane marking in picture.
+            if (rightPixelResult > 0) rightPixelResult += 30;
+
+            // Calculate the deviation error.
+            if (rightPixelResult > 30) {
+                if (!useRightLaneMarking) {
+                    m_eSum = 0;
+                    m_eOld = 0;
+                }
+                //double pixSum = (secondright.x + right.x) / 2.0;
+                e = ((rightPixelResult - m_image_black.cols / 2.0) - distance) / distance;
+
+                useRightLaneMarking = true;
+
+            } else if (leftPixelResult > 0) {
+                if (useRightLaneMarking) {
+                    m_eSum = 0;
+                    m_eOld = 0;
                 }
 
+                e = (distance - (m_image_black.cols / 2.0 - leftPixelResult)) / distance;
 
+                useRightLaneMarking = false;
+            } else {
+                m_eSum = 0;
+                m_eOld = 0;
 
-
-
-
-
-            } //commented for now
+            }
 
             TimeStamp afterImageProcessing;
-            cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
+            //cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
 
             // Show resulting features.
             if (m_debug) {
@@ -402,15 +414,10 @@ namespace automotive {
                 }
             }
 
-            TimeStamp currentTime;
-            double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
-            m_previousTime = currentTime;
-
             //used for the Algorithm
-            if (fabs(e) < 1e-2) {
+            if (fabs(e) < 1e-100) {
                 m_eSum = 0;
-            }
-            else {
+            } else {
                 m_eSum += e;
             }
 
@@ -419,15 +426,19 @@ namespace automotive {
 
             const double p = proportionalGain * e;
             const double i = integralGain * timeStep * m_eSum;
-            const double d = derivativeGain * (e - m_eOld)/timeStep;
+            const double d = derivativeGain * (e - m_eOld) / timeStep;
             m_eOld = e;
 
-            const double y = p + i + d; //before y
+            double y = p + i + d; //before y
 
-            double desiredSteering = 0;
+            //double desiredSteering = 0;
+
+            if(rightPixelResult < 0 && leftPixelResult < 0){
+                y = 0;
+            }
 
             // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
-            if (fabs(e) > 1e-2) {
+            if (fabs(e) > 1e-100) {
                 desiredSteering = y; //before y
             }
 
@@ -438,29 +449,44 @@ namespace automotive {
             if (desiredSteering < -25.0) {
                 desiredSteering = -25.0;
             }
-            cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
+            cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
+                 << ", y = " << y << endl;
             // We are using OpenDaVINCI's std::shared_ptr to automatically
             // release any acquired resources.
 
-//            try {
-//                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-//
-//                int jesus = (int) ((desiredSteering*180)/M_PI);
-//                string steer = to_string(jesus);
-//
-//                sendSerial(steer + "\r\n");
-//
-//            }
-//            catch(string &exception) {
-//                cerr << "Serial port could not be created: " << exception << endl;
-//            }
-
+            cerr << lineCounter << endl;
 
             // Go forward.
             //for SIM
-            m_vehicleControl.setSpeed(10);
-            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
+            if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+
+                try {
+                    cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+                    int jesus = (int) ((desiredSteering*180)/M_PI);
+                    string steer = to_string(jesus);
+                    serial->send(steer + "\r\n");
+
+                } catch(string &exception) {
+                    cerr << "Serial port could not be created: " << exception << endl;
+                }
+
+            } else {
+
+                try {
+                    cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+                    int jesus = (int) ((desiredSteering*180)/M_PI);
+                    string steer = to_string(jesus);
+                    serial->send(steer + "\r\n");
+
+                   } catch(string &exception) {
+                    cerr << "Serial port could not be created: " << exception << endl;
+                }
+
+
+            }
 
 
 
