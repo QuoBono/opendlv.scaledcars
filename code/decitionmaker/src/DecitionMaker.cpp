@@ -5,7 +5,6 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
 #include "opendavinci/odcore/data/Container.h"
 
@@ -13,12 +12,10 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 #include "DecitionMaker.h"
-#include "LaneFollower.h"
-#include "SidewaysParking.h"
 
-#define LANEFOLLOWER 1
-#define PARKING 2
-#define OVERTAKING 3
+
+
+
 
 namespace automotive {
     namespace miniature {
@@ -44,13 +41,13 @@ namespace automotive {
         }
 
 
-        bool laneFollowing = false;
-        bool parking = false;
-        bool overtaking = false;
+
 
 
         // Create vehicle control data.
         VehicleControl vc;
+
+
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecitionMaker::body() {
@@ -68,23 +65,23 @@ namespace automotive {
 
 
                 //Todo somehow get the state to set what to do
-                currentState = PARKING;
+                currentState = park;
 
 
                 // Measuring state machine.
                 switch (currentState) {
-                    case LANEFOLLOWER:
+                    case 1:
                         {
                             //Todo Lanefollowing
                             forward();
                             if(!laneFollowing){
-                                LaneFollowing::laneFollow();
+                                //LaneFollowing::laneFollow();
                                 laneFollowing = true;
                             }
 
                         }
                     break;
-                    case PARKING:
+                    case 2:
                         {
                             //Todo Parking
                             if(!laneFollowing){
@@ -92,32 +89,35 @@ namespace automotive {
                                 forward();
                                 laneFollowing = true;
                             }
-                            if(SidewaysParker::findParkingSpot(vd,sbd)){
-                                stop();
+
+
                                 if(!parking){
-                                    SidewaysParker::paralellPark(sbd);
+                                    stop();
+                                    int num = 6;
+                                    Test test(num);
+                                    Container c(test);
+                                    getConference().send(c);
                                     parking = true;
                                     cerr << "Parking!" << endl;
                                 }
 
-                                if(SidewaysParker.isParked()){
-                                     cerr << "Parked!" << endl;
-                                }
+//                                if(automotive::miniature::SidewaysParker::isParked()){
+//                                     cerr << "Parked!" << endl;
+//                                }
 
-                            }
                         }
                     break;
-                    case OVERTAKING:
+                    case 3:
                         {
                             //Todo LanefollowingWithOvertaking
-                            if(!laneFollwing){
-                                LaneFollowing::laneFollow();
+                            if(!laneFollowing){
+                                //LaneFollowing::laneFollow();
                                 forward();
                             }
                             if(!overtakingActive){
                                 stop();
                                 if(!overtaking){
-                                    Overtaking::overtake();
+                                    //Overtaking::overtake();
                                 }
 
                             }

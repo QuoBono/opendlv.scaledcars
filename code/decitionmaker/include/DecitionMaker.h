@@ -6,6 +6,8 @@
 #define DECITIONMAKER_H_
 
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
+#include "opendavinci/odcore/io/conference/ContainerConference.h"
+
 
 namespace automotive {
     namespace miniature {
@@ -50,9 +52,20 @@ namespace automotive {
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
             private:
-                virtual void setUp();
 
-                virtual void tearDown();
+            bool laneFollowing = false;
+            bool parking = false;
+            bool overtaking = false;
+
+            int laneFollow = 1;
+            int park = 2;
+            int overtake = 3;
+            int currentState = 0;
+
+
+            virtual void setUp();
+
+            virtual void tearDown();
 
             virtual void stop();
 
@@ -63,6 +76,8 @@ namespace automotive {
             virtual void reverse();
 
             virtual void slowReverse();
+
+
 
         };
 

@@ -53,6 +53,7 @@ add_subdirectory(lanedetector)
 add_subdirectory(lanefollower)
 add_subdirectory(boxparker)
 add_subdirectory(sidewaysparker)
+add_subdirectory(decitionmaker)
 
 
 

@@ -20,7 +20,7 @@ message chalmersrevere.scaledcars.ExampleMessage [id = 801] {
     uint32 field1   [id = 1];
 }
 
-message chalmersrevere.scaledcars.testContainer [id = 802] {
-    String test   [id = 2];
+message chalmersrevere.scaledcars.Test [id = 802] {
+    uint32 test   [id = 2];
 }
 

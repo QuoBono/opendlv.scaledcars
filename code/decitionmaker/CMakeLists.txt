@@ -113,6 +113,6 @@ ENDIF(CXXTEST_FOUND)
 # Install this project.
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT software)
 # This project does not have a manual page so far.
-#INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT software)
+#INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION bin COMPONENT software)
 
 
