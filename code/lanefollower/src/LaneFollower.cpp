@@ -74,11 +74,11 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
-        //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
-        bool serialBool = false;
-        std::shared_ptr<SerialPort> serial;
+//        //the serial communication
+//        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+//        const uint32_t BAUD_RATE = 9600;
+//        bool serialBool = false;
+//        std::shared_ptr<SerialPort> serial;
 
         //const string SERIAL_PORT = "/dev/pts/2";
         //const uint32_t BAUD_RATE = 19200;
@@ -117,24 +117,24 @@ namespace automotive {
                 //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
 
             }
-
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
-            }
+//
+//            try {
+//                if(!serialBool){
+//
+//                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+//                    const uint32_t ONE_SECOND = 1000 * 1000;
+//                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+//                    // Start receiving bytes.
+//                    serial->start();
+//                    serialBool = true;
+//                }
+//
+//                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Set up error Serial port could not be created: " << exception << endl;
+//            }
 
 
         }
@@ -152,9 +152,9 @@ namespace automotive {
 
 
             }
-            if(serialBool){
-                serial -> stop();
-            }
+//            if(serialBool){
+//                serial -> stop();
+//            }
 
         }
 
@@ -462,17 +462,17 @@ namespace automotive {
             // We are using OpenDaVINCI's std::shared_ptr to automatically
             // release any acquired resources.
 
-            try {
-                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-                int jesus = (int) ((desiredSteering*180)/M_PI);
-                string steer = to_string(jesus);
-                serial->send(steer + "\r\n");
-
-            }
-            catch(string &exception) {
-                cerr << "Serial port could not be created: " << exception << endl;
-            }
+//            try {
+//                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+//
+//                int jesus = (int) ((desiredSteering*180)/M_PI);
+//                string steer = to_string(jesus);
+//                serial->send(steer + "\r\n");
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Serial port could not be created: " << exception << endl;
+//            }
 
 
             // Go forward.
