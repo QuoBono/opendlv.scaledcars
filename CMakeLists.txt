@@ -19,8 +19,8 @@ cmake_minimum_required(VERSION 2.8)
 
 # To create a proper build environment, you are supposed to call CMake as follows:
 #
-# PATH=/opt/od4/bin:$PATH cmake -D CMAKE_INSTALL_PREFIX=<Where shall Chalmers.Revere.scaledcars be installed?> 
-#                               -D OPENDAVINCI_DIR=<Where is OpenDaVINCI installed?> 
+ #PATH(/opt/opendlv.scaledcars/bin:$PATH cmake -D CMAKE_INSTALL_PREFIX=usr
+#                               -D OPENDAVINCI_DIR=/home/johan)
 #                               -D CXXTEST_INCLUDE_DIR=<Where is CxxTest installed?> ..
 #
 # The adjusted PATH variable is required to find odDataStructureGenerator-latest.jar.

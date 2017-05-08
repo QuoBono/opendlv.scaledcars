@@ -16,11 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-message chalmersrevere.scaledcars.ExampleMessage [id = 801] {
+message scaledcars.ExampleMessage [id = 801] {
     uint32 field1   [id = 1];
 }
 
-message chalmersrevere.scaledcars.Test [id = 802] {
+message automotive.Test [id = 802] {
     uint32 test   [id = 2];
 }
 

@@ -5,14 +5,16 @@
 #ifndef DECITIONMAKER_H_
 #define DECITIONMAKER_H_
 
-#include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
+#include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+#include "opendavinci/odcore/data/Container.h"
 
 
 
-namespace automotive {
-    namespace miniature {
+
+
+namespace scaledcars {
 
         using namespace std;
 
@@ -83,7 +85,7 @@ namespace automotive {
 
         };
 
-    }
+
 } // automotive::miniature
 
 #endif /*DECITIONMAKER_H_*/

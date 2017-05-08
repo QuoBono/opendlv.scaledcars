@@ -20,21 +20,21 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-#include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include "opendavinci/odcore/data/Container.h"
 
-#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-//#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 
 
 #include "SidewaysParker.h"
 
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
 
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
+#include <../../decitionmaker/include/DecitionMaker.h>
 
-namespace automotive {
-    namespace miniature {
+namespace scaledcars {
+
 
         using namespace std;
         using namespace odcore::base;
@@ -44,7 +44,7 @@ namespace automotive {
 
 
         SidewaysParker::SidewaysParker(const int32_t &argc, char **argv) :
-                DataTriggeredConferenceClientModule(argc, argv, "SidewaysParker") {
+                TimeTriggeredConferenceClientModule(argc, argv, "SidewaysParker") {
         }
 
         SidewaysParker::~SidewaysParker() {}
@@ -213,6 +213,8 @@ namespace automotive {
 
         void SidewaysParker::nextContainer(Container &c) {
 
+
+
             if (c.getDataType() == SensorBoardData::ID()) {
                 data = c.getData<SensorBoardData>();
                 cout << "Received a message!:  " << data.toString() << endl;
@@ -223,8 +225,8 @@ namespace automotive {
                 cout << "Received a message!:  " << vd.toString() << endl;
             }
 
-            if (c.getDataType() == Test::ID()) {
-                Test stuff = c.getData<Test>();
+            if (c.getDataType() == ExampleMessage::ID()) {
+                ExampleMessage stuff = c.getData<ExampleMessage>();
                 cout << "Received a message!:  " << stuff.toString() << endl;
             }
         }
@@ -354,6 +356,6 @@ namespace automotive {
 
                 }
             }
-        }
+
     }
 } // automotive::miniature

@@ -5,21 +5,20 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-#include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include "opendavinci/odcore/data/Container.h"
 
-#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-//#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 #include "DecitionMaker.h"
 
 
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include <../../sidewaysparker/include/SidewaysParker.h>
 
 
+namespace scaledcars {
 
-
-namespace automotive {
-    namespace miniature {
 
         using namespace std;
         using namespace odcore::base;
@@ -53,7 +52,8 @@ namespace automotive {
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecitionMaker::body() {
 
-            Test test;
+
+
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 // 1. Get most recent vehicle data:
@@ -97,9 +97,10 @@ namespace automotive {
                                 if(!parking){
                                     stop();
                                     string send = "hello";
-
-                                    test(send);
-                                    Container c(test);
+                                    ExampleMessage em;
+                                    cout << em.toString() << endl;
+                                    em.setField1(1234);
+                                    Container c(em);
                                     getConference().send(c);
                                     parking = true;
                                     cerr << "Parking!" << endl;
@@ -164,6 +165,6 @@ namespace automotive {
         }
 
 
-        }
+
 } // automotive::miniature
 

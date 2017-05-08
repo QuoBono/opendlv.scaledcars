@@ -1,4 +1,4 @@
-# sidewaysparker - Sample application for following lane markings
+# lanefollower - Sample application for following lane markings
 # Copyright (C) 2012 - 2015  Christian Berger
 #
 # This program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ INCLUDE (CompileFlags)
 
 ###########################################################################
 # Find and configure CxxTest.
-#SET (CXXTEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../cxxtest") 
+#SET (CXXTEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../cxxtest")
 #INCLUDE (CheckCxxTestEnvironment)
 
 ###########################################################################
@@ -50,6 +50,11 @@ FIND_PACKAGE (OpenDaVINCI REQUIRED)
 # Find AutomotiveData.
 SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (AutomotiveData REQUIRED)
+
+
+###########################################################################
+# Find ODVDScaledCarsDataModel.
+find_package(ODVDScaledCarsDataModel REQUIRED)
 
 ###########################################################################
 # Find OpenCV.
@@ -65,23 +70,31 @@ SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIB
 INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
 # Set header files from AutomotiveData.
 INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS})
+# Set header files from ODVDScaledCarsDataModel.
+INCLUDE_DIRECTORIES (SYSTEM ${ODVDSCALEDCARSDATAMODEL_INCLUDE_DIRS})
 # Set header files from OpenCV.
 INCLUDE_DIRECTORIES (${OPENCV_INCLUDE_DIRS})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
+
+# Set libraries to link against.
+set(LIBRARIES ${OPENDAVINCI_LIBRARIES}
+        ${AUTOMOTIVEDATA_LIBRARIES}
+        ${ODVDSCALEDCARSDATAMODEL_LIBRARIES}
+        ${OpenCV_LIBS})
 
 ###########################################################################
 # Build this project.
 FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 ADD_LIBRARY (${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
 ADD_EXECUTABLE (${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/apps/${PROJECT_NAME}.cpp")
-TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES}) 
+TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES})
 
 ###########################################################################
 # Enable CxxTest for all available testsuites.
 IF(CXXTEST_FOUND)
     FILE(GLOB thisproject-testsuites "${CMAKE_CURRENT_SOURCE_DIR}/testsuites/*.h")
-    
+
     FOREACH(testsuite ${thisproject-testsuites})
         STRING(REPLACE "/" ";" testsuite-list ${testsuite})
 
@@ -93,9 +106,9 @@ IF(CXXTEST_FOUND)
         CXXTEST_ADD_TEST(${testsuite-short}-TestSuite ${testsuite-short}-TestSuite.cpp ${testsuite})
         IF(UNIX)
             IF( (   ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-                 OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-                 OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "DragonFly") )
-                AND (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") )
+                    OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
+                    OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "DragonFly") )
+                    AND (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") )
                 SET_SOURCE_FILES_PROPERTIES(${testsuite-short}-TestSuite.cpp PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-float-equal -Wno-error=suggest-attribute=noreturn")
             ELSE()
                 SET_SOURCE_FILES_PROPERTIES(${testsuite-short}-TestSuite.cpp PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-float-equal")
@@ -114,5 +127,3 @@ ENDIF(CXXTEST_FOUND)
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT software)
 # This project does not have a manual page so far.
 #INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT software)
-
-

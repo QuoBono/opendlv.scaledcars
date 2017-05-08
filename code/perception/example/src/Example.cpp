@@ -30,7 +30,7 @@
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
 #include <automotivedata/GeneratedHeaders_AutomotiveData.h>
 
-#include "odvdscaledcarsdatamodel/generated/chalmersrevere/scaledcars/ExampleMessage.h"
+#include "odvdscaledcarsdatamodel/generated/scaledcars/ExampleMessage.h"
 
 #include "Example.h"
 

@@ -23,7 +23,7 @@
 
 #include <automotivedata/GeneratedHeaders_AutomotiveData.h>
 
-#include "odvdscaledcarsdatamodel/generated/chalmersrevere/scaledcars/ExampleMessage.h"
+#include "odvdscaledcarsdatamodel/generated/scaledcars/ExampleMessage.h"
 
 #include "Example.h"
 
@@ -50,7 +50,7 @@ void Example::nextContainer(odcore::data::Container &c) {
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Example::body() {
     // Example on how to use self-defined data structures.
-    chalmersrevere::scaledcars::ExampleMessage em;
+    scaledcars::ExampleMessage em;
     cout << em.toString() << endl;
     em.setField1(1234);
     cout << em.toString() << endl;

@@ -1,0 +1,1 @@
+cmd='/home/johan/Downloads/clion-2017.1.1/bin/cmake/bin/cmake;-DCMAKE_INSTALL_PREFIX=/usr/local;-DOPENDAVINCI_DIR=;-DAUTOMOTIVEDATA_DIR=;-DCXXTEST_INCLUDE_DIR=/home/johan/CLionProjects/opendlv.scaledcars/thirdparty/cxxtest;-GCodeBlocks - Unix Makefiles;/home/johan/CLionProjects/opendlv.scaledcars/code'
