@@ -117,24 +117,6 @@ namespace automotive {
                 //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
 
             }
-//
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
-            }
 
 
         }
@@ -151,9 +133,6 @@ namespace automotive {
                 cvDestroyWindow("Test screen");
 
 
-            }
-            if(serialBool){
-                serial -> stop();
             }
 
         }
