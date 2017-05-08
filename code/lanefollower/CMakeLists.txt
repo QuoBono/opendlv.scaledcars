@@ -1,6 +1,4 @@
-# proxy - proxy is an example application to demonstrate how to 
-#         abstract from embedded software realized on Arudino or
-#         STM32F4 Discovery Board with OpenDaVINCI
+# lanefollower - Sample application for following lane markings
 # Copyright (C) 2012 - 2015  Christian Berger
 #
 # This program is free software; you can redistribute it and/or
@@ -19,7 +17,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (proxy)
+PROJECT (lanefollower)
 
 ###########################################################################
 # Set the search path for .cmake files.
@@ -59,17 +57,8 @@ SET(OPENCV_ROOT_DIR "/usr")
 FIND_PACKAGE (OpenCV REQUIRED)
 
 ###########################################################################
-# Find uEye drivers.
-SET(UEYE_PATH "/usr/local")
-FIND_PACKAGE(UEYE)
-
-###########################################################################
 # Set linking libraries to successfully link test suites and binaries.
-IF(UEYE_FOUND)
-    SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES} ${UEYE_LIBRARIES})
-ELSE()
-    SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
-ENDIF()
+SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
 
 ###########################################################################
 # Set header files from OpenDaVINCI.
@@ -78,11 +67,6 @@ INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS})
 # Set header files from OpenCV.
 INCLUDE_DIRECTORIES (${OPENCV_INCLUDE_DIRS})
-IF(UEYE_FOUND)
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_UEYE")
-    # Set header files from uEye.
-    INCLUDE_DIRECTORIES (${UEYE_INCLUDE_DIR})
-ENDIF()
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 
