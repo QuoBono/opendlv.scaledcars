@@ -62,8 +62,8 @@ namespace automotive {
         using namespace odcore::wrapper;
 
         //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
+//        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+//        const uint32_t BAUD_RATE = 9600;
         bool serialBool = false;
         std::shared_ptr<SerialPort> serial;
 
@@ -86,25 +86,6 @@ namespace automotive {
             // This method will be call automatically _before_ running body().
             if (getFrequency() < 20) {
                 cerr << endl << endl << "Proxy: WARNING! Running proxy with a LOW frequency (consequence: data updates are too seldom and will influence your algorithms in a negative manner!) --> suggestions: --freq=20 or higher! Current frequency: " << getFrequency() << " Hz." << endl << endl << endl;
-            }
-
-            //make the serial connection. wait a second to make it work and start the serial
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
             }
 
             // Get configuration data.
@@ -149,6 +130,32 @@ namespace automotive {
             if (m_camera.get() == NULL) {
                 cerr << "No valid camera type defined." << endl;
             }
+
+            //get the serial PortNumber and serial BaudRate
+            const string Port = getKeyValueConfiguration().getValue<string>("proxy.Sensor.SerialPort");
+            const uint32_t SerialSpeed = getKeyValueConfiguration().getValue<uint32_t>("proxy.Sensor.SerialSpeed");
+
+            //make the serial connection. wait a second to make it work and start the serial
+            try {
+                if(!serialBool){
+
+                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(Port, SerialSpeed));
+                    const uint32_t ONE_SECOND = 1000 * 1000;
+                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+                    // Start receiving bytes.
+                    serial->start();
+                    serialBool = true;
+                }
+
+                cerr << "Setup with SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
+
+            }
+            catch(string &exception) {
+                cerr << "Set up error Serial port could not be created: " << exception << endl;
+            }
+
+
+
         }
 
         void Proxy::tearDown() {
@@ -159,10 +166,10 @@ namespace automotive {
             }
         }
 
-        void Proxy::sendSerial(int &number){
+        void Proxy::sendSerial(string &number){
 
             try {
-                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+                //cerr << "Sending to SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
 
                 serial->send(number + "\r\n");
 

@@ -81,8 +81,6 @@ namespace automotive {
         std::shared_ptr<SerialPort> serial;
 //        bool serialBool = false;
 
-        //Proxy proxy;
-
 
 
         //const string SERIAL_PORT = "/dev/pts/2";
@@ -136,8 +134,6 @@ namespace automotive {
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 cvDestroyWindow("Test screen");
-
-
             }
 
         }
@@ -446,18 +442,18 @@ namespace automotive {
             // We are using OpenDaVINCI's std::shared_ptr to automatically
             // release any acquired resources.
 
-            try {
-                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-                int jesus = (int) ((desiredSteering*180)/M_PI);
-                string steer = to_string(jesus);
-
-                serial->send(steer + "\r\n");
-
-            }
-            catch(string &exception) {
-                cerr << "Serial port could not be created: " << exception << endl;
-            }
+//            try {
+//                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+//
+//                int jesus = (int) ((desiredSteering*180)/M_PI);
+//                string steer = to_string(jesus);
+//
+//                sendSerial(steer + "\r\n");
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Serial port could not be created: " << exception << endl;
+//            }
 
 
             // Go forward.

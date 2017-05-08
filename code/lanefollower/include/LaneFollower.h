@@ -27,6 +27,8 @@
 #include "opendavinci/odcore/data/TimeStamp.h"
 #include "opendavinci/odcore/wrapper/SharedMemory.h"
 
+//#include <code/proxy/include/Proxy.h>
+
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 

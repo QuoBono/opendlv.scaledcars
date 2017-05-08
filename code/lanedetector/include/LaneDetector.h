@@ -26,6 +26,7 @@
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 #include "opendavinci/odcore/wrapper/SharedMemory.h"
 
+
 namespace automotive {
     namespace miniature {
 

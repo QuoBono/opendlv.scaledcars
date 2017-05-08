@@ -71,7 +71,7 @@ namespace automotive {
                 Proxy(const int32_t &argc, char **argv);
 
                 virtual ~Proxy();
-		virtual void sendSerial(int &number);
+		        virtual void sendSerial(string &number);
 
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
