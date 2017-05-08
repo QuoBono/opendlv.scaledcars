@@ -79,6 +79,11 @@ namespace automotive {
         const uint32_t BAUD_RATE = 9600;
         bool serialBool = false;
         std::shared_ptr<SerialPort> serial;
+//        bool serialBool = false;
+
+        //Proxy proxy;
+
+
 
         //const string SERIAL_PORT = "/dev/pts/2";
         //const uint32_t BAUD_RATE = 19200;
@@ -446,6 +451,7 @@ namespace automotive {
 
                 int jesus = (int) ((desiredSteering*180)/M_PI);
                 string steer = to_string(jesus);
+
                 serial->send(steer + "\r\n");
 
             }

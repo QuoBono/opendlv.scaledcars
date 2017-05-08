@@ -159,6 +159,20 @@ namespace automotive {
             }
         }
 
+        void Proxy::sendSerial(int &number){
+
+            try {
+                cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+                serial->send(number + "\r\n");
+
+            }
+            catch(string &exception) {
+                cerr << "Serial port could not be created: " << exception << endl;
+            }
+
+        }
+
         void Proxy::distribute(Container c) {
             // Store data to recorder.
             if (m_recorder.get() != NULL) {
