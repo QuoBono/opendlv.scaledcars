@@ -24,9 +24,14 @@
 #include "opendavinci/odcore/data/Container.h"
 
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+//#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+
+
 
 #include "SidewaysParker.h"
+
+
+
 
 namespace automotive {
     namespace miniature {
@@ -36,6 +41,7 @@ namespace automotive {
         using namespace odcore::data;
         using namespace automotive;
         using namespace automotive::miniature;
+
 
         SidewaysParker::SidewaysParker(const int32_t &argc, char **argv) :
                 DataTriggeredConferenceClientModule(argc, argv, "SidewaysParker") {
@@ -54,7 +60,7 @@ namespace automotive {
         int stageMoving = 0;
         int stageMeasuring = 0;
         int parkAfterCar = 0;
-        SensorBoardData sbd;
+        SensorBoardData data;
         VehicleData vd;
 
         // Create vehicle control data.
@@ -78,7 +84,7 @@ namespace automotive {
 
 
 
-                double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
+                double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
 
                 // Our code for parking!!
                 parallelPark();
@@ -208,8 +214,8 @@ namespace automotive {
         void SidewaysParker::nextContainer(Container &c) {
 
             if (c.getDataType() == SensorBoardData::ID()) {
-                sbd = c.getData<SensorBoardData>();
-                cout << "Received a message!:  " << sbd.toString() << endl;
+                data = c.getData<SensorBoardData>();
+                cout << "Received a message!:  " << data.toString() << endl;
             }
 
             if (c.getDataType() == VehicleData::ID()) {
@@ -218,8 +224,8 @@ namespace automotive {
             }
 
             if (c.getDataType() == Test::ID()) {
-                Test ts = c.getData<Test>();
-                cout << "Received a message!:  " << ts.toString() << endl;
+                Test stuff = c.getData<Test>();
+                cout << "Received a message!:  " << stuff.toString() << endl;
             }
         }
 

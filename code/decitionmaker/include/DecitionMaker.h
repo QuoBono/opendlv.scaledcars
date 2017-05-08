@@ -7,6 +7,8 @@
 
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+
 
 
 namespace automotive {

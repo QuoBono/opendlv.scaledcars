@@ -21,7 +21,7 @@
 #define SIDEWAYSPARKER_H_
 
 #include "opendavinci/odcore/base/module/DataTriggeredConferenceClientModule.h"
-
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
 
 namespace automotive {
     namespace miniature {

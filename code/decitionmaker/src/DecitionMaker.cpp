@@ -9,9 +9,10 @@
 #include "opendavinci/odcore/data/Container.h"
 
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+//#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 #include "DecitionMaker.h"
+
 
 
 
@@ -52,6 +53,7 @@ namespace automotive {
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecitionMaker::body() {
 
+            Test test;
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 // 1. Get most recent vehicle data:
@@ -61,7 +63,8 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-                double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
+
+                //double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
 
 
                 //Todo somehow get the state to set what to do
@@ -93,8 +96,9 @@ namespace automotive {
 
                                 if(!parking){
                                     stop();
-                                    int num = 6;
-                                    Test test(num);
+                                    string send = "hello";
+
+                                    test(send);
                                     Container c(test);
                                     getConference().send(c);
                                     parking = true;
@@ -114,7 +118,7 @@ namespace automotive {
                                 //LaneFollowing::laneFollow();
                                 forward();
                             }
-                            if(!overtakingActive){
+                            if(!overtaking){
                                 stop();
                                 if(!overtaking){
                                     //Overtaking::overtake();
@@ -150,11 +154,11 @@ namespace automotive {
             vc.setSteeringWheelAngle(0);
         }
 
-        void SidewaysParker::forward(){
+        void DecitionMaker::forward(){
             vc.setSpeed(2);
         }
 
-        void SidewaysParker::slowForward(){
+        void DecitionMaker::slowForward(){
             vc.setSpeed(.5);
 
         }
