@@ -337,8 +337,8 @@ void LaneFollower::processImage() {
 
                 }
 
-                cerr << "This is the average right pixel" << rightPixelResult << endl;
-                cerr << "This is the average left pixel" << leftPixelResult << endl;
+                //cerr << "This is the average right pixel" << rightPixelResult << endl;
+                //cerr << "This is the average left pixel" << leftPixelResult << endl;
 
 
 
@@ -421,12 +421,12 @@ void LaneFollower::processImage() {
                 if (desiredSteering < -25.0) {
                     desiredSteering = -25.0;
                 }
-                cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
-                     << ", y = " << y << endl;
+                //cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
+                     //<< ", y = " << y << endl;
                 // We are using OpenDaVINCI's std::shared_ptr to automatically
                 // release any acquired resources.
 
-                cerr << lineCounter << endl;
+                //cerr << lineCounter << endl;
 
                 // Go forward.
                 //for SIM
@@ -535,7 +535,7 @@ void LaneFollower::processImage() {
                         // Use m_vehicleControl data from image processing.
                         cerr << "FORWARD" << endl;
 
-                        m_vehicleControl.setSpeed(1.2);
+                        m_vehicleControl.setSpeed(2); //stable sim speed 1.2
 
 
                         stageToRightLaneLeftTurn = 0;
@@ -545,7 +545,7 @@ void LaneFollower::processImage() {
                         // Move to the left lane: Turn left part until both IRs see something.
                     	cerr << "TO_LEFT_LANE_LEFT_TURN" << endl;
 
-                        m_vehicleControl.setSpeed(0.2);
+                        m_vehicleControl.setSpeed(0.8);
                         m_vehicleControl.setSteeringWheelAngle(-6);
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
@@ -556,7 +556,7 @@ void LaneFollower::processImage() {
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     	cerr << "TO_LEFT_LANE_RIGHT_TURN" << endl;
-                        m_vehicleControl.setSpeed(0.3);
+                        m_vehicleControl.setSpeed(1.2);
                         m_vehicleControl.setSteeringWheelAngle(2);
                         //m_vehicleControl.setSteeringWheelAngle(desiredSteering + 6);
 
@@ -571,7 +571,7 @@ void LaneFollower::processImage() {
 
                     	//added
                     	for(int i = 0; i<3; i++){
-							m_vehicleControl.setSpeed(0.2);
+							m_vehicleControl.setSpeed(0.8);
 							m_vehicleControl.setSteeringWheelAngle(desiredSteering);
                     	}
 
@@ -589,7 +589,7 @@ void LaneFollower::processImage() {
                         
 
                         //if(!lastEnum) {
-							m_vehicleControl.setSpeed(0.2);
+							m_vehicleControl.setSpeed(0.8);
 							m_vehicleControl.setSteeringWheelAngle(25);
 
                             stageToRightLaneRightTurn-= 1;
@@ -613,7 +613,7 @@ void LaneFollower::processImage() {
 
                     	cerr << "TO_RIGHT_LANE_LEFT_TURN, stageToRightLaneLeftTurn = " << stageToRightLaneLeftTurn << endl;
 
-                        m_vehicleControl.setSpeed(0.8);
+                        m_vehicleControl.setSpeed(1.6);
                         m_vehicleControl.setSteeringWheelAngle(desiredSteering - 30);
 
                         stageToRightLaneLeftTurn-=5;
@@ -698,18 +698,18 @@ void LaneFollower::processImage() {
                         if (distanceToObstacle < 0) {
                         	if(chooseBox == 0)
                             {
-                            	stageToRightLaneRightTurn -= 70;
+                            	stageToRightLaneRightTurn -= 30; //stable sim value 70
                             	chooseBox++;
                             } else if (chooseBox == 1)
                             { 
-                            	stageToRightLaneRightTurn -= 50;
+                            	stageToRightLaneRightTurn -= 10; //stable sim value 50
                             	chooseBox++;
 
                             } else if (chooseBox == 2) {
-                            	stageToRightLaneRightTurn += 98;
+                            	stageToRightLaneRightTurn += 140; //stable sim value 98
                             	chooseBox++;
                             } else if (chooseBox == 3) {
-                            	stageToRightLaneRightTurn -= 50;
+                            	stageToRightLaneRightTurn -= 10; //stable sim value 50
                             	chooseBox = 0;
                             }
                             // Move to right lane again.
