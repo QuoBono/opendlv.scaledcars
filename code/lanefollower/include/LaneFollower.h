@@ -86,6 +86,7 @@ namespace automotive { //check this namespaces for future stuff
             private:
 	            bool m_hasAttachedToSharedImageMemory;
 	            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+                std::shared_ptr<odcore::wrapper::SerialPort> serial;
 	            IplImage *m_image;
                 bool m_debug;
                 CvFont m_font;
