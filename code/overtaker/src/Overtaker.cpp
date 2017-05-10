@@ -57,6 +57,21 @@ namespace automotive {
             // This method will be call automatically _after_ return from body().
         }
 
+            //This method will call the next container in order to fix the 
+        void Overtaker::nextContainer(Container &c) {
+
+        if (c.getDataType() == ParkMSG::ID()) {
+            OvertakeMSG om = c.getData<OvertakeMSG> ();
+            automotive::VehicleControl vcontrol = om.getControl();
+            automotive::miniature::SensorBoardData sdata = om.getData();
+            automotive::VehicleData vdata = om.getVehicleData();
+            cerr << sdata.toString() << endl;
+           findSpot(vcontrol,sdata,vdata);
+        }
+
+    }
+
+
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body() {
             const int32_t ULTRASONIC_FRONT_CENTER = 3;
