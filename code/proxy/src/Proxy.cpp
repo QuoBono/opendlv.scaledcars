@@ -180,29 +180,29 @@ namespace automotive {
 
         }
 
-        void Proxy::distributeSerial(Container c) {
-            // Store data to recorder.
-            if (serialBool) {
-                // Time stamp data before storing.
-                c.setReceivedTimeStamp(TimeStamp());
-                serial->store(c);
-            }
+        // void Proxy::distributeSerial(Container c) {
+        //     // Store data to recorder.
+        //     if (serialBool) {
+        //         // Time stamp data before storing.
+        //         c.setReceivedTimeStamp(TimeStamp());
+        //         serial->store(c);
+        //     }
 
-            // Share data.
-            getConference().send(c);
-        }
+        //     // Share data.
+        //     getConference().send(c);
+        // }
 
-        void Proxy::distribute(Container c) {
-            // Store data to recorder.
-            if (m_recorder.get() != NULL) {
-                // Time stamp data before storing.
-                c.setReceivedTimeStamp(TimeStamp());
-                m_recorder->store(c);
-            }
+        // void Proxy::distribute(Container c) {
+        //     // Store data to recorder.
+        //     if (m_recorder.get() != NULL) {
+        //         // Time stamp data before storing.
+        //         c.setReceivedTimeStamp(TimeStamp());
+        //         m_recorder->store(c);
+        //     }
 
-            // Share data.
-            getConference().send(c);
-        }
+        //     // Share data.
+        //     getConference().send(c);
+        // }
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Proxy::body() {
