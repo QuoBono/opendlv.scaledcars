@@ -10,6 +10,9 @@
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
 #include "opendavinci/odcore/data/Container.h"
 
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 
 
@@ -17,8 +20,10 @@
 namespace scaledcars {
 
         using namespace std;
+        using namespace scaledcars;
 
-        /**
+
+    /**
          * This class is a skeleton to send driving commands to Hesperia-light's vehicle driving dynamics simulation.
          */
         class DecitionMaker : public odcore::base::module::TimeTriggeredConferenceClientModule {
@@ -51,6 +56,9 @@ namespace scaledcars {
                  */
                 DecitionMaker(const int32_t &argc, char **argv);
 
+
+
+
                 virtual ~DecitionMaker();
 
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
@@ -61,11 +69,16 @@ namespace scaledcars {
             bool parking = false;
             bool overtaking = false;
 
+            int passive = 0;
             int laneFollow = 1;
             int park = 2;
             int overtake = 3;
             int currentState = 0;
 
+
+            automotive::miniature::SensorBoardData sData;
+            automotive::VehicleData vData;
+            automotive::VehicleControl vControl;
 
             virtual void setUp();
 
@@ -81,7 +94,13 @@ namespace scaledcars {
 
             virtual void slowReverse();
 
+//            virtual void setVehicleData(scaledcars::VehicleData);
+//
+//            virtual void setSensorData(scaledcars::SensorBoardData);
+//
+//            virtual void setState(scaledcars::StateMSG);
 
+            //virtual void nextContainer(odcore::data::Container&);
 
         };
 

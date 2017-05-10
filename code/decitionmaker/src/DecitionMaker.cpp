@@ -40,12 +40,25 @@ namespace scaledcars {
             // This method will be call automatically _after_ return from body().
         }
 
+//    void DecitionMaker::nextContainer(Container &c) {
+//
+//        if (c.getDataType() == StateMSG::ID()) {
+//            StateMSG state = c.getData<StateMSG>();
+//            cout << "switching state to:   "     << endl;
+//            DecitionMaker::setState(state);
+//        }
+//        if (c.getDataType() == VehicleData::ID()) {
+//            VehicleData tmpvdata = c.getData<VehicleData>();
+//            DecitionMaker::setVehicleData(tmpvdata);
+//        }
+//        if (c.getDataType() == SensorBoardData::ID()) {
+//            SensorBoardData tmpsdata = c.getData<SensorBoardData>();
+//            DecitionMaker::setSensorData(tmpsdata);
+//
+//
+//        }
+//    }
 
-
-
-
-        // Create vehicle control data.
-        VehicleControl vc;
 
 
 
@@ -53,26 +66,40 @@ namespace scaledcars {
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecitionMaker::body() {
 
 
-
-
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-                // 1. Get most recent vehicle data:
-                Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-                VehicleData vd = containerVehicleData.getData<VehicleData> ();
 
-                // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+                sData = containerSensorBoardData.getData<SensorBoardData> ();
+
+                cerr << "sensordata: " << sData.toString() << endl;
+
+                Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+                vData = containerVehicleData.getData<VehicleData> ();
+
+
+                Container containerStateMSG = getKeyValueDataStore().get(scaledcars::StateMSG::ID());
+                StateMSG tmpstate = containerStateMSG.getData<StateMSG> ();
+                currentState = tmpstate.getState();
+
 
                 //double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
-
-
                 //Todo somehow get the state to set what to do
                 currentState = park;
-
+                //cerr << "current state is: "<< currentState << endl;
 
                 // Measuring state machine.
                 switch (currentState) {
+                    case 0:
+                    {
+                        //Todo do nothing
+                        stop();
+                        if(laneFollowing){
+                            //scaledcars::LaneFollowing::stopLaneFollow();
+                            laneFollowing = false;
+                        }
+
+                    }
+                        break;
                     case 1:
                         {
                             //Todo Lanefollowing
@@ -96,19 +123,14 @@ namespace scaledcars {
 
                                 if(!parking){
                                     stop();
-                                    string send = "hello";
-                                    ExampleMessage em;
-                                    cout << em.toString() << endl;
-                                    em.setField1(1234);
-                                    Container c(em);
+                                    ParkMSG tmpmsg;
+                                    tmpmsg.setControl(vControl);
+                                    tmpmsg.setData(sData);
+                                    tmpmsg.setVehicleData(vData);
+                                    Container c(tmpmsg);
                                     getConference().send(c);
-                                    parking = true;
-                                    cerr << "Parking!" << endl;
-                                }
 
-//                                if(automotive::miniature::SidewaysParker::isParked()){
-//                                     cerr << "Parked!" << endl;
-//                                }
+                                }
 
                         }
                     break;
@@ -132,7 +154,7 @@ namespace scaledcars {
                 }
 
                 // Create container for finally sending the data.
-                Container c(vc);
+                Container c(vControl);
                 // Send container.
                 getConference().send(c);
             }
@@ -141,28 +163,40 @@ namespace scaledcars {
         }
 
         void DecitionMaker::stop(){
-            vc.setSpeed(0);
-            vc.setSteeringWheelAngle(0);
+            vControl.setSpeed(0);
+            vControl.setSteeringWheelAngle(0);
         }
 
         void DecitionMaker::reverse(){
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(0);
+            vControl.setSpeed(2);
+            vControl.setSteeringWheelAngle(0);
         }
 
         void DecitionMaker::slowReverse(){
-            vc.setSpeed(-0.5);
-            vc.setSteeringWheelAngle(0);
+            vControl.setSpeed(-0.5);
+            vControl.setSteeringWheelAngle(0);
         }
 
         void DecitionMaker::forward(){
-            vc.setSpeed(2);
+            vControl.setSpeed(2);
         }
 
         void DecitionMaker::slowForward(){
-            vc.setSpeed(.5);
+            vControl.setSpeed(.5);
 
         }
+
+//        void DecitionMaker::setVehicleData(scaledcars::VehicleData vvdata){
+//            vData = vvdata;
+//        }
+//
+//        void DecitionMaker::setSensorData(scaledcars::SensorBoardData ssdata){
+//            sData = ssdata;
+//        }
+//
+//        void DecitionMaker::setState(scaledcars::StateMSG state){
+//            currentState = state.getState();
+//        }
 
 
 

@@ -25,7 +25,9 @@
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
 #include "opendavinci/odcore/data/Container.h"
 
-
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 
 
@@ -33,6 +35,9 @@ namespace scaledcars {
 
 
         using namespace std;
+        using namespace scaledcars;
+        using namespace automotive::miniature;
+        using namespace automotive;
 
         /**
          * This class is a skeleton to send driving commands to Hesperia-light's vehicle driving dynamics simulation.
@@ -69,14 +74,35 @@ namespace scaledcars {
 
             virtual ~SidewaysParker();
 
+
             odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
         private:
+
+
+            double distanceOld = 0;
+            double absPathStart = 0;
+            double absPathEnd = 0;
+            double absPathParkStart = 0;
+            double absPathParkEnd = 0;
+            int stageMoving = 0;
+            int stageMeasuring = 0;
+            int parkAfterCar = 0;
+
+            automotive::miniature::SensorBoardData data;
+            automotive::VehicleData vd;
+            automotive::VehicleControl vc;
+
+
+            bool parked = false;
+
             virtual void setUp();
 
             virtual void tearDown();
 
             virtual void parallelPark();
+
+            virtual void findSpot(automotive::VehicleControl, automotive::miniature::SensorBoardData, automotive::VehicleData);
 
             virtual void stop();
 

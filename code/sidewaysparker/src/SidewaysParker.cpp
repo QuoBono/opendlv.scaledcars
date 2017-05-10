@@ -57,39 +57,90 @@ namespace scaledcars {
             // This method will be call automatically _after_ return from body().
         }
 
-        int stageMoving = 0;
-        int stageMeasuring = 0;
-        int parkAfterCar = 0;
-        SensorBoardData data;
-        VehicleData vd;
+    void SidewaysParker::nextContainer(Container &c) {
 
-        // Create vehicle control data.
-        VehicleControl vc;
+        if (c.getDataType() == ParkMSG::ID()) {
+            ParkMSG pm = c.getData<ParkMSG> ();
+            automotive::VehicleControl vcontrol = pm.getControl();
+            automotive::miniature::SensorBoardData sdata = pm.getData();
+            automotive::VehicleData vdata = pm.getVehicleData();
+            cerr << sdata.toString() << endl;
+           findSpot(vcontrol,sdata,vdata);
+        }
+
+    }
+
+
+
+
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
-
-            double distanceOld = 0;
-            double absPathStart = 0;
-            double absPathEnd = 0;
-            double absPathParkStart = 0;
-            double absPathParkEnd = 0;
-
-
-
-
-
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
+                //cerr << "StageMoving: " << stageMoving << endl;
+//                Container containerParkMSG = getKeyValueDataStore().get(scaledcars::ParkMSG::ID());
+//                ParkMSG pm = containerParkMSG.getData<ParkMSG> ();
+//                vc = pm.getControl();
+//                data = pm.getData();
+            }
+            return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+        }
+
+
+        void SidewaysParker::stop(){
+
+            vc.setSpeed(0);
+            vc.setSteeringWheelAngle(0);
+
+        }
+
+
+        void SidewaysParker::reverse(){
+            vc.setSpeed(2);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void SidewaysParker::slowReverse(){
+            vc.setSpeed(-0.5);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void SidewaysParker::forward(){
+            vc.setSpeed(2);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void SidewaysParker::slowForward(){
+            vc.setSpeed(.4);
+            vc.setSteeringWheelAngle(0);
+        }
+
+        void SidewaysParker::reverseTurnRight(){
+            vc.setSpeed(-2);
+            vc.setSteeringWheelAngle(45);
+        }
+
+        void SidewaysParker::reverseTurnLeftSlow(){
+            vc.setSpeed(-.5);
+            vc.setSteeringWheelAngle(-45);
+        }
 
 
 
-                double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
 
-                // Our code for parking!!
-                parallelPark();
+        void SidewaysParker::findSpot(automotive::VehicleControl vcontrol, automotive::miniature::SensorBoardData sdata, automotive::VehicleData vdata){
+            data = sdata;
+            vc = vcontrol;
+            vd = vdata;
 
 
+
+            double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
+
+
+
+            SidewaysParker::parallelPark();
 
 
 
@@ -108,6 +159,8 @@ namespace scaledcars {
                     {
                         absPathParkStart = vd.getAbsTraveledPath();
 
+                        //cerr << "case1"<<endl;
+
                         if(absPathParkStart - absPathParkEnd > 6){
                             if(parkAfterCar != 1){
                                 stageMoving = 1;
@@ -119,6 +172,8 @@ namespace scaledcars {
 
                         // Checking for sequence +, -.
                         if ((distanceOld > 0) && (frontRightInfrared < 0)) {
+
+
                             // Found sequence +, -.
                             stageMeasuring = 2;
                             absPathStart = vd.getAbsTraveledPath();
@@ -126,15 +181,17 @@ namespace scaledcars {
 
 
                         }
-                        cerr << "absParkStart: " << absPathParkStart << endl;
-                        cerr << "absParkEnd: " << absPathParkEnd << endl;
+                        //cerr << "absParkStart: " << absPathParkStart << endl;
+                        //cerr << "absParkEnd: " << absPathParkEnd << endl;
 
 
                         distanceOld = frontRightInfrared;
                     }
                         break;
                     case 2:
-                    {
+                        //cerr << "case2"<<endl;
+
+                        {
 
                         if(vd.getAbsTraveledPath() - absPathStart > 5){
                             if(parkAfterCar != 3){
@@ -171,73 +228,12 @@ namespace scaledcars {
                 getConference().send(c);
             }
 
-            return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
-        }
-
-        void SidewaysParker::stop(){
-
-            vc.setSpeed(0);
-            vc.setSteeringWheelAngle(0);
-
-        }
-
-        void SidewaysParker::reverse(){
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(0);
-        }
-
-        void SidewaysParker::slowReverse(){
-            vc.setSpeed(-0.5);
-            vc.setSteeringWheelAngle(0);
-        }
-
-        void SidewaysParker::forward(){
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(0);
-        }
-
-        void SidewaysParker::slowForward(){
-            vc.setSpeed(.4);
-            vc.setSteeringWheelAngle(0);
-        }
-
-        void SidewaysParker::reverseTurnRight(){
-            vc.setSpeed(-2);
-            vc.setSteeringWheelAngle(45);
-        }
-
-        void SidewaysParker::reverseTurnLeftSlow(){
-            vc.setSpeed(-.5);
-            vc.setSteeringWheelAngle(-45);
-        }
-
-        void SidewaysParker::nextContainer(Container &c) {
-
-
-
-            if (c.getDataType() == SensorBoardData::ID()) {
-                data = c.getData<SensorBoardData>();
-                cout << "Received a message!:  " << data.toString() << endl;
-            }
-
-            if (c.getDataType() == VehicleData::ID()) {
-                vd = c.getData<VehicleData>();
-                cout << "Received a message!:  " << vd.toString() << endl;
-            }
-
-            if (c.getDataType() == ExampleMessage::ID()) {
-                ExampleMessage stuff = c.getData<ExampleMessage>();
-                cout << "Received a message!:  " << stuff.toString() << endl;
-            }
-        }
-
 
         void SidewaysParker::parallelPark() {
 
-            cerr << "StageMoving: " << stageMoving << endl;
+        cerr << stageMoving << endl;
 
-
-            cerr << "parkaeftercar: " << parkAfterCar << endl;
+            //cerr << "parkaeftercar: " << parkAfterCar << endl;
 
             //double rearRightInfrared = data.getValueForKey_MapOfDistances(2);
             //double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
@@ -280,8 +276,16 @@ namespace scaledcars {
                     stageMoving++;
                 }
                 if (stageMoving >= 108) {
-                    // Stop.
-                    stop();
+                    if (rearInfrared > 2.5) {
+                        slowReverse();
+                    } else {
+                        // Stop.
+                        stop();
+                        StateMSG stop;
+                        stop.setState(0);
+                        Container c(stop);
+                        getConference().send(c);
+                    }
                 }
             }
 
@@ -312,6 +316,11 @@ namespace scaledcars {
                         slowForward();
                     } else {
                         stop();
+                        StateMSG stop;
+                        stop.setState(0);
+                        Container c(stop);
+                        getConference().send(c);
+
                     }
 
                 }
@@ -347,10 +356,14 @@ namespace scaledcars {
                     stageMoving++;
                 }
                 if (stageMoving >= 127) {
-                    if (rearInfrared > 2.5) {
+                    if (rearInfrared > 2) {
                         slowReverse();
                     } else {
                         stop();
+                        StateMSG stop;
+                        stop.setState(0);
+                        Container c(stop);
+                        getConference().send(c);
                     }
 
 

@@ -19,8 +19,46 @@
 message scaledcars.ExampleMessage [id = 801] {
     uint32 field1   [id = 1];
 }
-
-message automotive.Test [id = 802] {
-    uint32 test   [id = 2];
+message scaledcars.ParkMSG [id = 802] {
+    automotive.VehicleControl control   [id = 1];
+    automotive.miniature.SensorBoardData data     [id = 2];
+    automotive.VehicleData vehicleData [id = 3];
+}
+message scaledcars.StateMSG [id = 803] {
+    uint32 state     [id = 1];
 }
 
+message scaledcars.SerialMSG [id = 808] {
+    string serialMsg [id = 1];
+}
+message scaledcars.OvertakeMSG [id = 809] {
+   automotive.VehicleControl control [id = 1];
+   automotive.miniature.SensorBoardData sensorData [id = 2];
+   automotive.VehicleData vehicleData [id = 3];
+}
+message automotive.VehicleData [id = 39] {
+    cartesian.Point2 position [id = 1];
+    cartesian.Point2 velocity [id = 2];
+    double heading [id = 3];
+    double absTraveledPath [id = 4];
+    double relTraveledPath [id = 5];
+    double speed [id = 6];
+    double v_log [id = 7];
+    double v_batt [id = 8];
+    double temp [id = 9];
+}
+message automotive.VehicleControl [id = 41] {
+    double speed [id = 1];
+    double acceleration [id = 2];
+    double steeringWheelAngle [id = 3];
+    bool brakeLights [id = 4];
+    bool flashingLightsLeft [id = 5];
+    bool flashingLightsRight [id = 6];
+}
+message cartesian.Point2 [id = 51] {
+    float p[2] [id = 1];
+}
+message automotive.miniature.SensorBoardData [id = 81] {
+    uint32 numberOfSensors [id = 1];
+    map<uint32, double> distances [id = 2];
+}
