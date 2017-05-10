@@ -48,8 +48,7 @@
 
 
 
-namespace automotive {
-    namespace miniature {
+namespace scaledcars {
 
         using namespace std;
         using namespace odcore::base;
