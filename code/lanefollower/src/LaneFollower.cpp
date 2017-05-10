@@ -528,14 +528,13 @@ void LaneFollower::processImage() {
                     // 2. Get most recent sensor board data:
                     Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                     SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-                    bool lastEnum = false;
 
                     // Moving state machine.
                     if (stageMoving == FORWARD) {
                         // Use m_vehicleControl data from image processing.
                         cerr << "FORWARD" << endl;
 
-                        m_vehicleControl.setSpeed(2); //slow sim speed 1.2, better sim speed 2
+                        m_vehicleControl.setSpeed(2); //better sim speed 2
 
 
                         stageToRightLaneLeftTurn = 0;
@@ -545,7 +544,7 @@ void LaneFollower::processImage() {
                         // Move to the left lane: Turn left part until both IRs see something.
                     	cerr << "TO_LEFT_LANE_LEFT_TURN" << endl;
 
-                        m_vehicleControl.setSpeed(1.6); //sim speed 0.8
+                        m_vehicleControl.setSpeed(1.6); //better sim speed 1.6
                         m_vehicleControl.setSteeringWheelAngle(-6);
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
@@ -556,10 +555,8 @@ void LaneFollower::processImage() {
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     	cerr << "TO_LEFT_LANE_RIGHT_TURN" << endl;
-                        m_vehicleControl.setSpeed(2.4); //sim speed 1.2
+                        m_vehicleControl.setSpeed(2.4); //better sim speed 2.4
                         m_vehicleControl.setSteeringWheelAngle(2);
-                        //m_vehicleControl.setSteeringWheelAngle(desiredSteering + 6);
-
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -571,13 +568,12 @@ void LaneFollower::processImage() {
 
                     	//added
                     	for(int i = 0; i<3; i++){
-							m_vehicleControl.setSpeed(1.6); //sim speed 0.8
+							m_vehicleControl.setSpeed(1.6); //better sim speed 1.6
 							m_vehicleControl.setSteeringWheelAngle(desiredSteering);
                     	}
 
                         // Move to the left lane: Passing stage.
-
-                        // Use m_vehicleControl data from image processing.
+						// Use m_vehicleControl data from image processing.
 
                         // Find end of object.
                         stageMeasuring = END_OF_OBJECT;
@@ -588,8 +584,7 @@ void LaneFollower::processImage() {
                         cerr << "chooseBox = " << chooseBox << endl;
                         
 
-                        //if(!lastEnum) {
-							m_vehicleControl.setSpeed(1.6); //sim speed 0.8
+							m_vehicleControl.setSpeed(1.6); //better sim speed 1.6
 							m_vehicleControl.setSteeringWheelAngle(25);
 
                             stageToRightLaneRightTurn-= 1;
@@ -600,20 +595,14 @@ void LaneFollower::processImage() {
                                 
                             }
 
-                        //}
-
-                        //m_vehicleControl.setSpeed(10);
-                        //m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
                     }
                     else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part.
-                        //m_vehicleControl.setSpeed(1.5);
-                        //m_vehicleControl.setSteeringWheelAngle(0);
 
                     	cerr << "TO_RIGHT_LANE_LEFT_TURN, stageToRightLaneLeftTurn = " << stageToRightLaneLeftTurn << endl;
 
-                        m_vehicleControl.setSpeed(3.2); //sim speed 1.6
+                        m_vehicleControl.setSpeed(3.2); //better sim speed 3.2
                         m_vehicleControl.setSteeringWheelAngle(desiredSteering - 30);
 
                         stageToRightLaneLeftTurn-=5;
@@ -714,11 +703,7 @@ void LaneFollower::processImage() {
                             }
                             // Move to right lane again.
                             stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
-                            if(lastEnum){
-                                lastEnum = false;
-                            }
-
-                            lastEnum = true;
+                            
 
 
                             // Disable measuring until requested from moving state machine again.
