@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h> 
+#include <opendavinci/odtools/player/Player.h>
 
 
     namespace scaledcars {
@@ -41,6 +42,7 @@
         using namespace odcore::data;
         using namespace automotive;
         using namespace automotive::miniature;
+        using namespace scaledcars;
 
         Overtaker::Overtaker(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "overtaker") {
@@ -50,30 +52,30 @@
 
         void Overtaker::setUp() {
             // This method will be call automatically _before_ running body().
-            if (m_debug) {
+            //if (m_debug) {
                 // Create an OpenCV- Debug window.
-                cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE); //Fixed size of debug screen
+                //cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE); //Fixed size of debug screen
 
                 //Test stuff
                 //cvNamedWindow("Test screen", CV_WINDOW_AUTOSIZE);
                 //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
 
-            }
+            //}
         }
 
         void Overtaker::tearDown() {
             // This method will be call automatically _after_ return from body().
-               if (m_image != NULL) {
+             /*  if (m_image != NULL) {
                 cvReleaseImage(&m_image);
                 m_image_black.deallocate();
                 m_image_black_new.deallocate();
             }
-
-            if (m_debug) {
+*/
+           /* if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 cvDestroyWindow("Test screen");
 
-            }
+            }*/
 
         }
 
