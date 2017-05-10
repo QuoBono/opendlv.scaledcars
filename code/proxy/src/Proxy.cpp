@@ -39,6 +39,8 @@
 //serial test
 #include <iostream>
 #include <fstream>
+//end for serial test
+
 
 #include "OpenCVCamera.h"
 
@@ -64,19 +66,24 @@ namespace automotive {
         //the serial communication
 //        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
 //        const uint32_t BAUD_RATE = 9600;
-        bool serialBool = false;
-        std::shared_ptr<SerialPort> serial;
+
+        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        //const uint32_t BAUD_RATE = 9600; //serial speed
+        bool serialBool = false;//boolean for the beginning of the connection
+        //const string SERIAL_PORT = "/dev/pts/2";
+        //const uint32_t BAUD_RATE = 19200;
+        std::shared_ptr<SerialPort> serial; //used to create the serial
 
         //FOR TESTING WITH A FAKE SERIAL PORT
 
-        //const string SERIAL_PORT = "/dev/pts/2";
-        //const uint32_t BAUD_RATE = 19200;
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
             m_recorder(),
+            //serialBool(false),
             m_camera()
+            //serial()
         {}
 
         Proxy::~Proxy() {
@@ -161,48 +168,48 @@ namespace automotive {
         void Proxy::tearDown() {
             // This method will be call automatically _after_ return from body().
             //stop the serial connection
-            if(serialBool){
-                serial -> stop();
+            if (serialBool){
+                    serial -> stop();
             }
         }
 
-        void Proxy::sendSerial(string &number){
+//        void Proxy::sendSerial(string &number){
+//
+//            try {
+//                //cerr << "Sending to SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
+//
+//                serial->send(number + "\r\n");
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Serial port could not be created: " << exception << endl;
+//            }
+//
+//        }
 
-            try {
-                //cerr << "Sending to SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
+//        void Proxy::distributeSerial(Container c) {
+//            // Store data to recorder.
+//            if (serialBool) {
+//                // Time stamp data before storing.
+//                c.setReceivedTimeStamp(TimeStamp());
+//                serial->store(c);
+//            }
+//
+//            // Share data.
+//            getConference().send(c);
+//        }
 
-                serial->send(number + "\r\n");
-
+        void Proxy::distribute(Container c) {
+            // Store data to recorder.
+            if (m_recorder.get() != NULL) {
+                // Time stamp data before storing.
+                c.setReceivedTimeStamp(TimeStamp());
+                m_recorder->store(c);
             }
-            catch(string &exception) {
-                cerr << "Serial port could not be created: " << exception << endl;
-            }
 
+            // Share data.
+            getConference().send(c);
         }
-
-        // void Proxy::distributeSerial(Container c) {
-        //     // Store data to recorder.
-        //     if (serialBool) {
-        //         // Time stamp data before storing.
-        //         c.setReceivedTimeStamp(TimeStamp());
-        //         serial->store(c);
-        //     }
-
-        //     // Share data.
-        //     getConference().send(c);
-        // }
-
-        // void Proxy::distribute(Container c) {
-        //     // Store data to recorder.
-        //     if (m_recorder.get() != NULL) {
-        //         // Time stamp data before storing.
-        //         c.setReceivedTimeStamp(TimeStamp());
-        //         m_recorder->store(c);
-        //     }
-
-        //     // Share data.
-        //     getConference().send(c);
-        // }
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Proxy::body() {

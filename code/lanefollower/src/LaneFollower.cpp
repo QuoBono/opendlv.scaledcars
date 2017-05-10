@@ -75,9 +75,9 @@ namespace automotive {
         using namespace odcore::wrapper;
 
 //        //the serial communication
-        // const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        // const uint32_t BAUD_RATE = 9600;
-        // bool serialBool = false;
+        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
+        //const uint32_t BAUD_RATE = 9600;
+        //bool serialBool = false;
         //std::shared_ptr<SerialPort> serial;
 //        bool serialBool = false;
 
@@ -92,6 +92,7 @@ namespace automotive {
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
                                                                        m_sharedImageMemory(),
+                                                                       //serial(),
                                                                        m_image(NULL),
                                                                        m_debug(false),
                                                                        m_font(),
