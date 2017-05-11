@@ -30,90 +30,93 @@
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 
-namespace automotive { //check this namespaces for future stuff
-    namespace miniature {
+namespace scaledcars{
 
         using namespace std;
+    using namespace std;
+    using namespace automotive::miniature;
+    using namespace automotive;
+    using namespace scaledcars;
 
         /**
          * This class is an exemplary skeleton for processing video data.
          */
         class LaneFollower: public odcore::base::module::TimeTriggeredConferenceClientModule {
-            private:
-	            /**
-	             * "Forbidden" copy constructor. Goal: The compiler should warn
-	             * already at compile time for unwanted bugs caused by any misuse
-	             * of the copy constructor.
-	             *
-	             * @param obj Reference to an object of this class.
-	             */
-	            LaneFollower(const LaneFollower &/*obj*/);
+        private:
+            /**
+             * "Forbidden" copy constructor. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the copy constructor.
+             *
+             * @param obj Reference to an object of this class.
+             */
+            LaneFollower(const LaneFollower &/*obj*/);
 
-	            /**
-	             * "Forbidden" assignment operator. Goal: The compiler should warn
-	             * already at compile time for unwanted bugs caused by any misuse
-	             * of the assignment operator.
-	             *
-	             * @param obj Reference to an object of this class.
-	             * @return Reference to this instance.
-	             */
-	            LaneFollower& operator=(const LaneFollower &/*obj*/);
+            /**
+             * "Forbidden" assignment operator. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the assignment operator.
+             *
+             * @param obj Reference to an object of this class.
+             * @return Reference to this instance.
+             */
+            LaneFollower& operator=(const LaneFollower &/*obj*/);
 
-            public:
-	            /**
-	             * Constructor.
-	             *
-	             * @param argc Number of command line arguments.
-	             * @param argv Command line arguments.
-	             */
-	            LaneFollower(const int32_t &argc, char **argv);
+        public:
+            /**
+             * Constructor.
+             *
+             * @param argc Number of command line arguments.
+             * @param argv Command line arguments.
+             */
+            LaneFollower(const int32_t &argc, char **argv);
 
-	            virtual ~LaneFollower();
+            virtual ~LaneFollower();
 
-	            odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+            odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
-            protected:
-	            /**
-	             * This method is called to process an incoming container.
-	             *
-	             * @param c Container to process.
-	             * @return true if c was successfully processed.
-	             */
-	            bool readSharedImage(odcore::data::Container &c);
+        protected:
+            /**
+             * This method is called to process an incoming container.
+             *
+             * @param c Container to process.
+             * @return true if c was successfully processed.
+             */
+            bool readSharedImage(odcore::data::Container &c);
 
-            private:
-	            bool m_hasAttachedToSharedImageMemory;
-	            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
-	            IplImage *m_image;
-                bool m_debug;
-                CvFont m_font;
+        private:
+            bool m_hasAttachedToSharedImageMemory;
+            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            IplImage *m_image;
+            bool m_debug;
+            CvFont m_font;
 
-                odcore::data::TimeStamp m_previousTime;
-                double m_eSum;
-                double m_eOld;
+            odcore::data::TimeStamp m_previousTime;
+            double m_eSum;
+            double m_eOld;
 
-			//For the PID (Proportional, derivative and Integral terms.)
+            //For the PID (Proportional, derivative and Integral terms.)
 
-				// The proportional Control set the car steering harder the further we are from the desired
-				// trajectory. we use 1.30
-				double proportionalGain;
+            // The proportional Control set the car steering harder the further we are from the desired
+            // trajectory. we use 1.30
+            double proportionalGain;
 
-				//Explain for integral 0.01
-				double integralGain;
+            //Explain for integral 0.01
+            double integralGain;
 
-				//Explain for derivative 0.10
-				double derivativeGain;
+            //Explain for derivative 0.10
+            double derivativeGain;
 
-                automotive::VehicleControl m_vehicleControl;
+            automotive::VehicleControl m_vehicleControl;
 
-	            virtual void setUp();
+            virtual void setUp();
 
-	            virtual void tearDown();
+            virtual void tearDown();
 
-                void processImage();
+            void processImage();
         };
 
-    }
-} // automotive::miniature
+
+} // scaledcars
 
 #endif /*LANEFOLLOWER_H_*/
