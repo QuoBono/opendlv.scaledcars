@@ -62,3 +62,7 @@ message automotive.miniature.SensorBoardData [id = 81] {
     uint32 numberOfSensors [id = 1];
     map<uint32, double> distances [id = 2];
 }
+message scaledcars.LaneFollowMSG [id = 810]{
+    bool lanefollow [id = 1];
+    automotive.VehicleControl control [id = 2];
+}

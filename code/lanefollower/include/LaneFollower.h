@@ -109,9 +109,13 @@ namespace scaledcars{
 
             automotive::VehicleControl m_vehicleControl;
 
+            bool lanefollow;
+
             virtual void setUp();
 
             virtual void tearDown();
+
+            virtual void setvalues(bool, automotive::VehicleControl){
 
             void processImage();
         };
