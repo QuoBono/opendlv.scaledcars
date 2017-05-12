@@ -21,6 +21,9 @@
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <../../overtaker/include/Overtaker.h>
+
+
 
 #include "opendavinci/odcore/base/KeyValueConfiguration.h"
 #include "opendavinci/odcore/base/Lock.h"
