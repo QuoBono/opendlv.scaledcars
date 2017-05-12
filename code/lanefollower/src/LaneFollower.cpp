@@ -48,7 +48,8 @@
 
 
 
-namespace scaledcars {
+namespace automotive {
+    namespace miniature {
 
         using namespace std;
         using namespace odcore::base;
@@ -511,7 +512,8 @@ void LaneFollower::processImage() {
                     // Example for processing the received container.
                     has_next_frame = readSharedImage(c);
                 }
-                 // Process the read image and calculate regular lane following set values for control algorithm.
+
+                // Process the read image and calculate regular lane following set values for control algorithm.
                 if (true == has_next_frame) {
                     processImage();
                 }

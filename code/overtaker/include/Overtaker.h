@@ -20,21 +20,12 @@
 #ifndef OVERTAKER_H_
 #define OVERTAKER_H_
 
-#include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 
-#include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include "opendavinci/odcore/data/Container.h"
-
-#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
-#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
-
-namespace scaledcars {
+namespace automotive {
+    namespace miniature {
 
         using namespace std;
-        using namespace scaledcars;
-        using namespace automotive;
-        using namespace automotive::miniature;
 
         /**
          * This class is a skeleton to send driving commands to Hesperia-light's vehicle driving dynamics simulation.
@@ -78,12 +69,10 @@ namespace scaledcars {
 
                 virtual void tearDown();
 
-                virtual void nextContainer(odcore::data::Container&);
-
                 //virtual int ls(const char *dir);
         };
 
     }
- // automotive::miniature
+} // automotive::miniature
 
 #endif /*OVERTAKER_H_*/

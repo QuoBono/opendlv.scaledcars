@@ -26,23 +26,24 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
+#include <../../lanefollower/include/LaneFollower.h>
+
 #include "Overtaker.h"
 #include <iostream>
 
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h> 
-#include <opendavinci/odtools/player/Player.h>
 
 
-    namespace scaledcars {
+namespace automotive {
+    namespace miniature {
 
         using namespace std;
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace automotive;
         using namespace automotive::miniature;
-        using namespace scaledcars;
 
         Overtaker::Overtaker(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "overtaker") {
@@ -52,46 +53,11 @@
 
         void Overtaker::setUp() {
             // This method will be call automatically _before_ running body().
-            //if (m_debug) {
-                // Create an OpenCV- Debug window.
-                //cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE); //Fixed size of debug screen
-
-                //Test stuff
-                //cvNamedWindow("Test screen", CV_WINDOW_AUTOSIZE);
-                //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
-
-            //}
         }
 
         void Overtaker::tearDown() {
             // This method will be call automatically _after_ return from body().
-             /*  if (m_image != NULL) {
-                cvReleaseImage(&m_image);
-                m_image_black.deallocate();
-                m_image_black_new.deallocate();
-            }
-*/
-           /* if (m_debug) {
-                cvDestroyWindow("Debug screen");
-                cvDestroyWindow("Test screen");
-
-            }*/
-
         }
-
-            //This method will call the next container in order to fix the 
-        void Overtaker::nextContainer(Container &c) {
-
-        if (c.getDataType() == OvertakeMSG::ID()) {
-            OvertakeMSG om = c.getData<OvertakeMSG> ();
-            automotive::VehicleControl vcontrol = om.getControl();
-            automotive::miniature::SensorBoardData sdata = om.getData();
-            automotive::VehicleData vdata = om.getVehicleData();
-            cerr << sdata.toString() << endl;
-           overtake(vcontrol,sdata,vdata);
-        }
-
-    }
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body() {
@@ -298,5 +264,6 @@
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
 
+    }
 
-} // scaledcars
+} // automotive::miniature
