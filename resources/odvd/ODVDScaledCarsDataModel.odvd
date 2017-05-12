@@ -66,3 +66,7 @@ message scaledcars.LaneFollowMSG [id = 810]{
     bool lanefollow [id = 1];
     automotive.VehicleControl control [id = 2];
 }
+
+message scaledcars.ReturnVehicleControl [id = 811]{
+     automotive.VehicleControl control [id = 1];
+}

@@ -84,23 +84,7 @@ namespace scaledcars {
 
             virtual void tearDown();
 
-            virtual void stop();
 
-            virtual void forward();
-
-            virtual void slowForward();
-
-            virtual void reverse();
-
-            virtual void slowReverse();
-
-//            virtual void setVehicleData(scaledcars::VehicleData);
-//
-//            virtual void setSensorData(scaledcars::SensorBoardData);
-//
-//            virtual void setState(scaledcars::StateMSG);
-
-            //virtual void nextContainer(odcore::data::Container&);
 
         };
 

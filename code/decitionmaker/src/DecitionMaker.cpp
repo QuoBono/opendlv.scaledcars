@@ -17,6 +17,7 @@
 #include <../../sidewaysparker/include/SidewaysParker.h>
 
 
+
 namespace scaledcars {
 
 
@@ -40,24 +41,6 @@ namespace scaledcars {
             // This method will be call automatically _after_ return from body().
         }
 
-//    void DecitionMaker::nextContainer(Container &c) {
-//
-//        if (c.getDataType() == StateMSG::ID()) {
-//            StateMSG state = c.getData<StateMSG>();
-//            cout << "switching state to:   "     << endl;
-//            DecitionMaker::setState(state);
-//        }
-//        if (c.getDataType() == VehicleData::ID()) {
-//            VehicleData tmpvdata = c.getData<VehicleData>();
-//            DecitionMaker::setVehicleData(tmpvdata);
-//        }
-//        if (c.getDataType() == SensorBoardData::ID()) {
-//            SensorBoardData tmpsdata = c.getData<SensorBoardData>();
-//            DecitionMaker::setSensorData(tmpsdata);
-//
-//
-//        }
-//    }
 
 
 
@@ -82,6 +65,8 @@ namespace scaledcars {
                 currentState = tmpstate.getState();
 
 
+
+
                 //double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
                 //Todo somehow get the state to set what to do
                 currentState = park;
@@ -92,37 +77,27 @@ namespace scaledcars {
                     case 0:
                     {
                         //Todo do nothing
-                        stop();
-                        if(laneFollowing){
-                            //scaledcars::LaneFollowing::stopLaneFollow();
-                            laneFollowing = false;
-                        }
+                        LaneFollowMSG tmpmsg;
+                        tmpmsg.setControl(vControl);
+                        tmpmsg.setLanefollow(false);
+                        Container c(tmpmsg);
+                        getConference().send(c);
 
                     }
                         break;
                     case 1:
                         {
-                            //Todo Lanefollowing
-                            forward();
-                            if(!laneFollowing){
-                                //LaneFollowing::laneFollow();
-                                laneFollowing = true;
-                            }
+                            LaneFollowMSG tmpmsg;
+                            tmpmsg.setControl(vControl);
+                            tmpmsg.setLanefollow(true);
+                            Container c(tmpmsg);
+                            getConference().send(c);
 
                         }
                     break;
                     case 2:
                         {
-                            //Todo Parking
-                            if(!laneFollowing){
-                                //LaneFollowing::laneFollow();
-                                forward();
-                                laneFollowing = true;
-                            }
 
-
-                                if(!parking){
-                                    stop();
                                     ParkMSG tmpmsg;
                                     tmpmsg.setControl(vControl);
                                     tmpmsg.setData(sData);
@@ -130,29 +105,25 @@ namespace scaledcars {
                                     Container c(tmpmsg);
                                     getConference().send(c);
 
-                                }
+
 
                         }
                     break;
                     case 3:
                         {
-                            //Todo LanefollowingWithOvertaking
-                            if(!laneFollowing){
-                                //LaneFollowing::laneFollow();
-                                forward();
-                            }
-                            if(!overtaking){
-                                stop();
-                                if(!overtaking){
-                                    //Overtaking::overtake();
-                                }
 
-                            }
+
+
+
+
+
 
                         }
                     break;
                 }
-
+                Container containerReturnMSG = getKeyValueDataStore().get(scaledcars::ReturnVehicleControl::ID());
+                ReturnVehicleControl tmpreturn = containerReturnMSG.getData<ReturnVehicleControl> ();
+                vControl = tmpreturn.getControl();
                 // Create container for finally sending the data.
                 Container c(vControl);
                 // Send container.
@@ -162,29 +133,7 @@ namespace scaledcars {
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
 
-        void DecitionMaker::stop(){
-            vControl.setSpeed(0);
-            vControl.setSteeringWheelAngle(0);
-        }
 
-        void DecitionMaker::reverse(){
-            vControl.setSpeed(2);
-            vControl.setSteeringWheelAngle(0);
-        }
-
-        void DecitionMaker::slowReverse(){
-            vControl.setSpeed(-0.5);
-            vControl.setSteeringWheelAngle(0);
-        }
-
-        void DecitionMaker::forward(){
-            vControl.setSpeed(2);
-        }
-
-        void DecitionMaker::slowForward(){
-            vControl.setSpeed(.5);
-
-        }
 
 //        void DecitionMaker::setVehicleData(scaledcars::VehicleData vvdata){
 //            vData = vvdata;

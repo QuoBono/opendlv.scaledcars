@@ -88,6 +88,7 @@ namespace scaledcars {
             int stageMoving = 0;
             int stageMeasuring = 0;
             int parkAfterCar = 0;
+            bool foundSpot = false;
 
             automotive::miniature::SensorBoardData data;
             automotive::VehicleData vd;
@@ -100,7 +101,7 @@ namespace scaledcars {
 
             virtual void tearDown();
 
-            virtual void parallelPark();
+            virtual void parallelPark(automotive::VehicleControl, automotive::miniature::SensorBoardData, automotive::VehicleData);
 
             virtual void findSpot(automotive::VehicleControl, automotive::miniature::SensorBoardData, automotive::VehicleData);
 
@@ -112,13 +113,15 @@ namespace scaledcars {
 
             virtual void reverseTurnRight();
 
-            virtual void reverse();
-
             virtual void slowReverse();
 
             virtual void reverseTurnLeftSlow();
 
             virtual void nextContainer(odcore::data::Container&);
+
+            virtual void forwardWithLaneFollower();
+
+            virtual void stopWithLaneFollower();
         };
 
 

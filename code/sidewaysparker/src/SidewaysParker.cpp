@@ -60,70 +60,117 @@ namespace scaledcars {
     void SidewaysParker::nextContainer(Container &c) {
 
         if (c.getDataType() == ParkMSG::ID()) {
-            ParkMSG pm = c.getData<ParkMSG> ();
+            ParkMSG pm = c.getData<ParkMSG>();
             automotive::VehicleControl vcontrol = pm.getControl();
             automotive::miniature::SensorBoardData sdata = pm.getData();
             automotive::VehicleData vdata = pm.getVehicleData();
-            cerr << sdata.toString() << endl;
-           findSpot(vcontrol,sdata,vdata);
-        }
+            //cerr << sdata.toString() << endl;
 
+            if (foundSpot) {
+                parallelPark(vcontrol, sdata, vdata);
+            } else {
+                findSpot(vcontrol, sdata, vdata);
+            }
+        }
     }
 
 
 
 
 
-        // This method will do the main data processing job.
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
-            while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
-                //cerr << "StageMoving: " << stageMoving << endl;
+
+    // This method will do the main data processing job.
+    odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
+        while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+
+            //cerr << "StageMoving: " << stageMoving << endl;
 //                Container containerParkMSG = getKeyValueDataStore().get(scaledcars::ParkMSG::ID());
 //                ParkMSG pm = containerParkMSG.getData<ParkMSG> ();
 //                vc = pm.getControl();
 //                data = pm.getData();
-            }
-            return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
+        return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+    }
 
 
-        void SidewaysParker::stop(){
+    void SidewaysParker::stop(){
 
             vc.setSpeed(0);
             vc.setSteeringWheelAngle(0);
+        ReturnVehicleControl rtmp;
+        rtmp.setControl(vc);
+        Container send(rtmp);
+        getConference().send(send);
+        cerr << "sent vc from sidewaysparker " << endl;
 
         }
 
-
-        void SidewaysParker::reverse(){
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(0);
-        }
 
         void SidewaysParker::slowReverse(){
             vc.setSpeed(-0.5);
             vc.setSteeringWheelAngle(0);
+            ReturnVehicleControl rtmp;
+            rtmp.setControl(vc);
+            Container send(rtmp);
+            getConference().send(send);
+            cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::forward(){
             vc.setSpeed(2);
             vc.setSteeringWheelAngle(0);
+            ReturnVehicleControl rtmp;
+            rtmp.setControl(vc);
+            Container send(rtmp);
+            getConference().send(send);
+            cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::slowForward(){
             vc.setSpeed(.4);
             vc.setSteeringWheelAngle(0);
+            ReturnVehicleControl rtmp;
+            rtmp.setControl(vc);
+            Container send(rtmp);
+            getConference().send(send);
+            cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::reverseTurnRight(){
             vc.setSpeed(-2);
-            vc.setSteeringWheelAngle(45);
+            vc.setSteeringWheelAngle(25);
+            ReturnVehicleControl rtmp;
+            rtmp.setControl(vc);
+            Container send(rtmp);
+            getConference().send(send);
+            cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::reverseTurnLeftSlow(){
             vc.setSpeed(-.5);
-            vc.setSteeringWheelAngle(-45);
+            vc.setSteeringWheelAngle(-25);
+            ReturnVehicleControl rtmp;
+            rtmp.setControl(vc);
+            Container send(rtmp);
+            getConference().send(send);
+            cerr << "sent vc from sidewaysparker " << endl;
+        }
+
+        void SidewaysParker::forwardWithLaneFollower(){
+            LaneFollowMSG tmpmsg;
+            tmpmsg.setControl(vc);
+            tmpmsg.setLanefollow(true);
+            Container c(tmpmsg);
+            getConference().send(c);
+        }
+
+        void SidewaysParker::stopWithLaneFollower(){
+            LaneFollowMSG tmpmsg;
+            tmpmsg.setControl(vc);
+            tmpmsg.setLanefollow(false);
+            Container c(tmpmsg);
+            getConference().send(c);
         }
 
 
@@ -131,18 +178,12 @@ namespace scaledcars {
 
         void SidewaysParker::findSpot(automotive::VehicleControl vcontrol, automotive::miniature::SensorBoardData sdata, automotive::VehicleData vdata){
             data = sdata;
-            vc = vcontrol;
+            VehicleControl svc = vcontrol;
             vd = vdata;
 
-
+            forwardWithLaneFollower();
 
             double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
-
-
-
-            SidewaysParker::parallelPark();
-
-
 
 
                 // Measuring state machine.
@@ -162,10 +203,11 @@ namespace scaledcars {
                         //cerr << "case1"<<endl;
 
                         if(absPathParkStart - absPathParkEnd > 6){
-                            if(parkAfterCar != 1){
-                                stageMoving = 1;
-                            }
+
+                                    stageMoving = 1;
+                                    foundSpot = true;
                             parkAfterCar = 1;
+                            cerr << "set park car to 1" << endl;
 
                         }
 
@@ -193,12 +235,14 @@ namespace scaledcars {
 
                         {
 
-                        if(vd.getAbsTraveledPath() - absPathStart > 5){
-                            if(parkAfterCar != 3){
-                                stageMoving = 1;
-                            }
+                        if(vd.getAbsTraveledPath() - absPathStart > 6){
+                                    stageMoving = 1;
+                                foundSpot = true;
                             parkAfterCar = 3;
-                        }
+                            cerr << "set park car to 3" << endl;
+                            }
+
+
 
                         // Checking for sequence -, +.
                         if ((distanceOld < 0) && (frontRightInfrared > 0)) {
@@ -213,8 +257,13 @@ namespace scaledcars {
                             cerr << "Size = " << GAP_SIZE << endl;
 
                             if ((stageMoving < 1) && (GAP_SIZE > 5)) {
-                                stageMoving = 1;
-                                parkAfterCar = 2;
+                                    stageMoving = 1;
+                                foundSpot = true;
+                                    parkAfterCar = 2;
+                                    cerr << "set park car to 2" << endl;
+
+
+
                             }
                         }
                         distanceOld = frontRightInfrared;
@@ -222,16 +271,17 @@ namespace scaledcars {
                         break;
                 }
 
-                // Create container for finally sending the data.
-                Container c(vc);
-                // Send container.
-                getConference().send(c);
+
             }
 
 
-        void SidewaysParker::parallelPark() {
+        void SidewaysParker::parallelPark(automotive::VehicleControl vControl, automotive::miniature::SensorBoardData sData, automotive::VehicleData vData) {
+            data = sData;
+            VehicleControl svc = vControl;
+            vd = vData;
+            //cerr << parkAfterCar << endl;
 
-        cerr << stageMoving << endl;
+            //cerr << stageMoving << endl;
 
             //cerr << "parkaeftercar: " << parkAfterCar << endl;
 
@@ -245,10 +295,11 @@ namespace scaledcars {
             // Moving state machine.
             if (stageMoving == 0) {
                 // Go forward.
-                forward();
+
             }
 
             if (parkAfterCar == 1) {
+                stopWithLaneFollower();
 
                 if ((stageMoving > 0) && (stageMoving < 15)) {
                     // forward
@@ -290,7 +341,7 @@ namespace scaledcars {
             }
 
             if (parkAfterCar == 2) {
-
+                stopWithLaneFollower();
                 if ((stageMoving > 0) && (stageMoving < 25)) {
                     // Move slightly forward.
                     slowForward();
@@ -328,7 +379,7 @@ namespace scaledcars {
 
             }
             if (parkAfterCar == 3) {
-
+                stopWithLaneFollower();
 
                 if ((stageMoving > 0) && (stageMoving < 20)) {
                     // Move forward.
@@ -345,17 +396,18 @@ namespace scaledcars {
                     stop();
                     stageMoving++;
                 }
-                if ((stageMoving >= 50) && (stageMoving < 86)) {
+                if ((stageMoving >= 50) && (stageMoving < 81)) {
                     // Backwards, steering wheel to the right.
                     reverseTurnRight();
+                    cerr << "turning right" << endl;
                     stageMoving++;
                 }
-                if ((stageMoving >= 86) && (stageMoving < 127)) {
+                if ((stageMoving >= 81) && (stageMoving < 130)) {
                     // Backwards, steering wheel to the left.
                     reverseTurnLeftSlow();
                     stageMoving++;
                 }
-                if (stageMoving >= 127) {
+                if (stageMoving >= 130) {
                     if (rearInfrared > 2) {
                         slowReverse();
                     } else {
@@ -364,11 +416,13 @@ namespace scaledcars {
                         stop.setState(0);
                         Container c(stop);
                         getConference().send(c);
+                        cerr << "Stopped everything" << endl;
                     }
 
 
                 }
             }
+            // Create container for finally sending the data.
 
     }
 } // automotive::miniature

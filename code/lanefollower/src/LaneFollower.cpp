@@ -30,6 +30,8 @@
 
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
+#include <../../decitionmaker/include/DecitionMaker.h>
 
 
 //for MAT
@@ -53,7 +55,8 @@
 
 
 
-namespace scaledcars{
+namespace automotive {
+    namespace miniature {
 
         using namespace std;
         using namespace odcore::base;
@@ -73,7 +76,8 @@ namespace scaledcars{
         bool stopLineBool = false;
 
 
-        LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
+        LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv,
+                                                                                                           "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
                                                                        m_sharedImageMemory(),
                                                                        m_image(NULL),
@@ -125,31 +129,31 @@ namespace scaledcars{
 
         }
 
-    void LaneFollower::nextContainer(Container &c) {
+//        void LaneFollower::nextContainer(Container &c) {
+//
+//            if (c.getDataType() == LaneFollowMSG::ID()) {
+//                LaneFollowMSG lm = c.getData<LaneFollowMSG>();
+//                automotive::VehicleControl vcontrol = lm.getControl();
+//                bool lane = lm.getLanefollow();
+//
+//
+//                setValues(lane, vcontrol);
+//            }
+//
+//        }
 
-        if (c.getDataType() == LaneFolloweMSG::ID()) {
-            LaneFolloweMSG lm = c.getData<LaneFolloweMSG> ();
-            automotive::VehicleControl vcontrol = lm.getControl();
-            bool lane = false;
-
-
-            setValues(lane,vcontrol);
-        }
-
-    }
-
-    void LaneFollower::setvalues(bool lanefollows, automotive::VehicleControl control){
-
-        lanefollow = lanefollows;
-        m_vehicleControl = control;
-}
+//        void LaneFollower::setValues(bool lanefollows, automotive::VehicleControl control) {
+//
+//            lanefollow = lanefollows;
+//            m_vehicleControl = control;
+//        }
 
         bool LaneFollower::readSharedImage(Container &c) {
-
+            cerr << "readsharedimage "<< endl;
             bool retVal = false;
 
             if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                SharedImage si = c.getData<SharedImage> ();
+                SharedImage si = c.getData<SharedImage>();
 
                 // Check if we have already attached to the shared memory.
                 if (!m_hasAttachedToSharedImageMemory) {
@@ -183,7 +187,6 @@ namespace scaledcars{
                         cv::flip(m_image_black, m_image_black_new, -1);
                         m_image_black = m_image_black_new.clone();
                     }
-
 
 
                     retVal = true;
@@ -420,7 +423,7 @@ namespace scaledcars{
 
             //double desiredSteering = 0;
 
-            if(rightPixelResult < 0 && leftPixelResult < 0){
+            if (rightPixelResult < 0 && leftPixelResult < 0) {
                 y = 0;
             }
 
@@ -446,9 +449,9 @@ namespace scaledcars{
             // Go forward.
             //for SIM
 
-            if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+            if (fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300) {
 
-                if(sleep(3)){
+                if (sleep(3)) {
 
                     if (m_debug) {
                         if (m_image != NULL) {
@@ -465,11 +468,10 @@ namespace scaledcars{
 
             } else {
 
-                m_vehicleControl.setSpeed(5);
+                m_vehicleControl.setSpeed(2);
+                cerr << "moving and steering" << endl;
                 m_vehicleControl.setSteeringWheelAngle(desiredSteering);
             }
-
-
 
 
         }
@@ -479,7 +481,7 @@ namespace scaledcars{
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration data.
             KeyValueConfiguration kv = getKeyValueConfiguration();
-            m_debug = kv.getValue<int32_t> ("lanefollower.debug") == 1;
+            m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
 
             // Initialize fonts.
             const double hscale = 0.4;
@@ -492,11 +494,18 @@ namespace scaledcars{
 
 
             // Overall state machine handler.
-            while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+            while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
+                   odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
                 // Get the most recent available container for a SharedImage.
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+
+
+                Container containerLaneFollowMSG = getKeyValueDataStore().get(scaledcars::LaneFollowMSG::ID());
+                LaneFollowMSG tmpmsg = containerLaneFollowMSG.getData<LaneFollowMSG> ();
+                m_vehicleControl = tmpmsg.getControl();
+                lanefollow = tmpmsg.getLanefollow();
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                     // Example for processing the received container.
@@ -505,7 +514,9 @@ namespace scaledcars{
 
                 // Process the read image and calculate regular lane following set values for control algorithm.
                 if (true == has_next_frame) {
-                    if(lanefollw){
+                    cerr << "lanefollow was not true" << lanefollow << endl;
+                    if (lanefollow) {
+                        cerr << "lanefollow was true" << lanefollow << endl;
                         processImage();
                     }
 
@@ -513,14 +524,15 @@ namespace scaledcars{
 
 
                 // Create container for finally sending the set values for the control algorithm.
-                Container c2(m_vehicleControl);
-                // Send container.
-                getConference().send(c2);
+                ReturnVehicleControl rtmp;
+                rtmp.setControl(m_vehicleControl);
+                Container send(rtmp);
+                getConference().send(send);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
 
-
+    }
 } // scaledcars
 

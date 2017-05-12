@@ -26,22 +26,26 @@
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 #include "opendavinci/odcore/data/TimeStamp.h"
 #include "opendavinci/odcore/wrapper/SharedMemory.h"
-
+#include "opendavinci/odcore/io/conference/ContainerConference.h"
+#include "opendavinci/odcore/data/Container.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "odvdscaledcarsdatamodel/GeneratedHeaders_ODVDScaledCarsDataModel.h"
 
-namespace scaledcars{
+
+namespace automotive {
+    namespace miniature {
 
         using namespace std;
-    using namespace std;
-    using namespace automotive::miniature;
-    using namespace automotive;
-    using namespace scaledcars;
+        using namespace std;
+        using namespace automotive::miniature;
+        using namespace automotive;
+        using namespace scaledcars;
 
         /**
          * This class is an exemplary skeleton for processing video data.
          */
-        class LaneFollower: public odcore::base::module::TimeTriggeredConferenceClientModule {
+        class LaneFollower : public odcore::base::module::TimeTriggeredConferenceClientModule {
         private:
             /**
              * "Forbidden" copy constructor. Goal: The compiler should warn
@@ -60,7 +64,7 @@ namespace scaledcars{
              * @param obj Reference to an object of this class.
              * @return Reference to this instance.
              */
-            LaneFollower& operator=(const LaneFollower &/*obj*/);
+            LaneFollower &operator=(const LaneFollower &/*obj*/);
 
         public:
             /**
@@ -86,7 +90,7 @@ namespace scaledcars{
 
         private:
             bool m_hasAttachedToSharedImageMemory;
-            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            std::shared_ptr <odcore::wrapper::SharedMemory> m_sharedImageMemory;
             IplImage *m_image;
             bool m_debug;
             CvFont m_font;
@@ -115,12 +119,12 @@ namespace scaledcars{
 
             virtual void tearDown();
 
-            virtual void setvalues(bool, automotive::VehicleControl){
+           // virtual void setValues(bool, automotive::VehicleControl);
 
-            void processImage();
-        };
+            //virtual void nextContainer(odcore::data::Container&);
 
-
-} // scaledcars
-
+                void processImage();
+            };
+        }
+}// automotive::miniature
 #endif /*LANEFOLLOWER_H_*/
