@@ -97,6 +97,8 @@ namespace automotive {
 
                 virtual void tearDown();
 
+                void readSerial();
+
                 void distribute(odcore::data::Container c);
 
 

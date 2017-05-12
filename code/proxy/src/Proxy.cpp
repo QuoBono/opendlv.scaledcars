@@ -50,6 +50,11 @@
 
 #include "Proxy.h"
 
+//this is the string listener.
+#include <opendavinci/odcore/io/StringListener.h>
+#include <SerialReceiveBytes.hpp>
+
+
 
 namespace automotive {
     namespace miniature {
@@ -63,19 +68,10 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
-        //the serial communication
-//        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-//        const uint32_t BAUD_RATE = 9600;
-
-        //const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        //const uint32_t BAUD_RATE = 9600; //serial speed
         bool serialBool = false;//boolean for the beginning of the connection
-        //const string SERIAL_PORT = "/dev/pts/2";
-        //const uint32_t BAUD_RATE = 19200;
+
         std::shared_ptr<SerialPort> serial; //used to create the serial
-
-        //FOR TESTING WITH A FAKE SERIAL PORT
-
+        SerialReceiveBytes handler;
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
@@ -170,6 +166,8 @@ namespace automotive {
             //stop the serial connection
             if (serialBool){
                     serial -> stop();
+                    serial->setStringListener(NULL);
+
             }
         }
 
@@ -186,6 +184,18 @@ namespace automotive {
 //            }
 //
 //        }
+
+        void Proxy::readSerial(){
+
+            try {
+                serial->setStringListener(&handler);
+
+            }
+            catch(string &exception) {
+                cerr << "Serial port could not be received: " << exception << endl;
+            }
+
+        }
 
 //        void Proxy::distributeSerial(Container c) {
 //            // Store data to recorder.
@@ -222,6 +232,10 @@ namespace automotive {
                     Container c(si);
                     distribute(c);
                     captureCounter++;
+                }
+
+                if(serialBool){
+                    readSerial();
                 }
 
                 // Get sensor data from IR/US.
