@@ -79,14 +79,9 @@ namespace automotive {
         const uint32_t BAUD_RATE = 9600;
         bool serialBool = false;
         std::shared_ptr<SerialPort> serial;
-//        bool serialBool = false;
-
-
-
-        //const string SERIAL_PORT = "/dev/pts/2";
-        //const uint32_t BAUD_RATE = 19200;
 
         cv::Mat m_image_black; //added grey image matrix
+        cv::Mat m_image_black_new;
 
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
@@ -94,6 +89,8 @@ namespace automotive {
                                                                        m_sharedImageMemory(),
                                                                        m_image(NULL),
                                                                        m_debug(false),
+                                                                       m_simulation(false),
+                                                                       m_serial(false),
                                                                        m_font(),
                                                                        m_previousTime(),
                                                                        m_eSum(0),
@@ -114,30 +111,8 @@ namespace automotive {
             if (m_debug) {
                 // Create an OpenCV- Debug window.
                 cvNamedWindow("Debug screen", CV_WINDOW_AUTOSIZE); //Fixed size of debug screen
-
-                //Test stuff
-                //cvNamedWindow("Test screen", CV_WINDOW_AUTOSIZE);
-                //cvMoveWindow("Test screen", 1000 + m_image->width + 5, 100);
-
             }
 
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
-            }
 
         }
 
@@ -146,15 +121,15 @@ namespace automotive {
             if (m_image != NULL) {
                 cvReleaseImage(&m_image);
                 m_image_black.deallocate();
+
+                if(m_simulation){
+                    m_image_black_new.deallocate();
+                }
             }
 
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 cvDestroyWindow("Test screen");
-            }
-
-            if(serialBool){
-                serial -> stop();
             }
 
         }
@@ -184,16 +159,33 @@ namespace automotive {
                         m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
                     }
 
-                    // Copying the image data is very expensive...
-                    if (m_image != NULL) {
-                        memcpy(m_image->imageData,
-                               m_sharedImageMemory->getSharedMemory(),
-                               si.getWidth() * si.getHeight() * numberOfChannels);
-                        cv::Mat m_image_temp = cv::cvarrToMat(m_image);
-                        cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
-                        Canny(m_image_black, m_image_black, 100, 200, 3);
 
+                    if(m_simulation){
+                        // if the simulation camera is true we need to mirror the image
+                        if (m_image != NULL) {
+                            memcpy(m_image->imageData,
+                                   m_sharedImageMemory->getSharedMemory(),
+                                   si.getWidth() * si.getHeight() * numberOfChannels);
+                            cv::Mat m_image_temp = cv::cvarrToMat(m_image);
+                            cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
+                            Canny(m_image_black, m_image_black, 100, 200, 3);
+
+                            // Mirror the image.
+                            cv::flip(m_image_black, m_image_black_new, -1);
+                            m_image_black = m_image_black_new.clone();
+                        }
+                    } else {
+                        //
+                        if (m_image != NULL) {
+                            memcpy(m_image->imageData,
+                                   m_sharedImageMemory->getSharedMemory(),
+                                   si.getWidth() * si.getHeight() * numberOfChannels);
+                            cv::Mat m_image_temp = cv::cvarrToMat(m_image);
+                            cv::cvtColor(m_image_temp, m_image_black, cv::COLOR_BGR2GRAY);
+                            Canny(m_image_black, m_image_black, 100, 200, 3);
+                        }
                     }
+
                     
 
 
@@ -211,8 +203,6 @@ namespace automotive {
             //Cross Track Error
             double e = 0;
 
-            //const int32_t CONTROL_SCANLINE = 460; //462 calibrated length to right: 280px
-            //const int32_t SECOND_CONTROL_SCANLINE = 470;
             const int32_t distance = 280; //280
 
             double rightPixelAverage = 0;
@@ -224,10 +214,6 @@ namespace automotive {
             int counterAverageLeft = 0;
             int counterAverageRight = 0;
 
-            int lineCounter = 0;
-
-            double desiredSteering = 0;
-
             TimeStamp beforeImageProcessing;
 
             TimeStamp currentTime;
@@ -236,7 +222,6 @@ namespace automotive {
 
 
             //Check the pixels fromm the top of the car
-
             uchar pixelTopLeft;
             cv::Point leftTop;
             leftTop.y = 445;
@@ -283,9 +268,7 @@ namespace automotive {
                         0.5, white);
             }
 
-//            if (fabs(leftTop.y - rightTop.y) < 10 && rightTop.y > 300 && leftTop.y > 300) {
-//
-//            }
+
 
             //This for loop will iterate for the scanline (each Y is the y of the line we draw
             for (int32_t y = m_image_black.rows - 10; y > 445; y -= 4) {
@@ -329,8 +312,6 @@ namespace automotive {
                         break;
                     }
                 }
-
-                lineCounter++;
 
 
 
@@ -407,7 +388,6 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-
                     imshow("Camera Original Image", m_image_black);
                     cv::waitKey(10);
                     cvWaitKey(10); //we need a wait key
@@ -431,7 +411,7 @@ namespace automotive {
 
             double y = p + i + d; //before y
 
-            //double desiredSteering = 0;
+            double desiredSteering = 0;
 
             if(rightPixelResult < 0 && leftPixelResult < 0){
                 y = 0;
@@ -451,54 +431,61 @@ namespace automotive {
             }
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
                  << ", y = " << y << endl;
-            // We are using OpenDaVINCI's std::shared_ptr to automatically
-            // release any acquired resources.
-
-            cerr << lineCounter << endl;
 
             // Go forward.
             //for SIM
+            if(m_simulation){
+                if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
 
-            if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+                    if(sleep(3)){
 
-                try {
-                    cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+                        if (m_debug) {
+                            if (m_image != NULL) {
 
-                    int jesus = (int) ((desiredSteering*180)/M_PI);
-                    string steer = to_string(jesus);
-                    serial->send(steer + "\r\n");
+                                imshow("Camera Original Image", m_image_black);
+                                cv::waitKey(10);
+                                cvWaitKey(10); //we need a wait key
+                            }
+                        }
+                        m_vehicleControl.setSpeed(0);
+                        m_vehicleControl.setSteeringWheelAngle(0);
 
-                } catch(string &exception) {
-                    cerr << "Serial port could not be created: " << exception << endl;
+                    }
+
                 }
 
-            } else {
-
-                try {
-                    cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-                    int jesus = (int) ((desiredSteering*180)/M_PI);
-                    string steer = to_string(jesus);
-                    serial->send(steer + "\r\n");
-
-                   } catch(string &exception) {
-                    cerr << "Serial port could not be created: " << exception << endl;
-                }
-
+                m_vehicleControl.setSpeed(5);
+                m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
             }
 
+                if(m_serial){
+                    try {
+                        cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
 
+                        int carSteering = (int) ((desiredSteering*180)/M_PI);
+                        string steer = to_string(carSteering);
+                        serial->send(steer + "\r\n");
 
+                    } catch(string &exception) {
+                        cerr << "Serial port could not be created: " << exception << endl;
+                    }
+                }
 
-        }
+            //end of process Image
+            }
 
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration data.
             KeyValueConfiguration kv = getKeyValueConfiguration();
+            //Get Debug Screen
             m_debug = kv.getValue<int32_t> ("lanefollower.debug") == 1;
+            //Choose if it's simulation cam or real cam
+            m_simulation = getKeyValueConfiguration().getValue<uint32_t>("lanefollower.Simulation") == 1;
+            //Choose if we want to send values to the serial/arduino
+            m_serial = getKeyValueConfiguration().getValue<uint32_t>("lanefollower.Serial") == 1;
 
             // Initialize fonts.
             const double hscale = 0.4;
@@ -509,29 +496,6 @@ namespace automotive {
 
             cvInitFont(&m_font, CV_FONT_HERSHEY_DUPLEX, hscale, vscale, shear, thickness, lineType);
 
-            // Parameters for overtaking.
-            const int32_t ULTRASONIC_FRONT_CENTER = 3;
-            const int32_t ULTRASONIC_FRONT_RIGHT = 4;
-            const int32_t INFRARED_FRONT_RIGHT = 0;
-            const int32_t INFRARED_REAR_RIGHT = 2;
-
-            const double OVERTAKING_DISTANCE = 5.5;
-            const double HEADING_PARALLEL = 0.04;
-
-            // Overall state machines for moving and measuring.
-            enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
-            enum StateMachineMeasuring { DISABLE, FIND_OBJECT_INIT, FIND_OBJECT, FIND_OBJECT_PLAUSIBLE, HAVE_BOTH_IR, HAVE_BOTH_IR_SAME_DISTANCE, END_OF_OBJECT };
-
-            StateMachineMoving stageMoving = FORWARD;
-            StateMachineMeasuring stageMeasuring = FIND_OBJECT_INIT;
-
-            // State counter for dynamically moving back to right lane.
-            int32_t stageToRightLaneRightTurn = 0;
-            int32_t stageToRightLaneLeftTurn = 0;
-
-            // Distance variables to ensure we are overtaking only stationary or slowly driving obstacles.
-            double distanceToObstacle = 0;
-            double distanceToObstacleOld = 0;
 
             // Overall state machine handler.
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -548,145 +512,6 @@ namespace automotive {
                 // Process the read image and calculate regular lane following set values for control algorithm.
                 if (true == has_next_frame) {
                     processImage();
-                }
-
-
-                // Overtaking part.
-                {
-                    // 1. Get most recent vehicle data:
-                    Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-                    VehicleData vd = containerVehicleData.getData<VehicleData> ();
-
-                    // 2. Get most recent sensor board data:
-                    Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-                    SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-
-                    // Moving state machine.
-                    if (stageMoving == FORWARD) {
-                        // Use m_vehicleControl data from image processing.
-
-                        stageToRightLaneLeftTurn = 0;
-                        stageToRightLaneRightTurn = 0;
-                    }
-                    else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
-                        // Move to the left lane: Turn left part until both IRs see something.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
-
-                        // State machine measuring: Both IRs need to see something before leaving this moving state.
-                        stageMeasuring = HAVE_BOTH_IR;
-
-                        stageToRightLaneRightTurn++;
-                    }
-                    else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
-                        // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(25);
-
-                        // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
-                        stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
-
-                        stageToRightLaneLeftTurn++;
-                    }
-                    else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
-                        // Move to the left lane: Passing stage.
-
-                        // Use m_vehicleControl data from image processing.
-
-                        // Find end of object.
-                        stageMeasuring = END_OF_OBJECT;
-                    }
-                    else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
-                        // Move to the right lane: Turn right part.
-                        m_vehicleControl.setSpeed(1.5);
-                        m_vehicleControl.setSteeringWheelAngle(25);
-
-                        stageToRightLaneRightTurn--;
-                        if (stageToRightLaneRightTurn == 0) {
-                            stageMoving = TO_RIGHT_LANE_LEFT_TURN;
-                        }
-                    }
-                    else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
-                        // Move to the left lane: Turn left part.
-                        m_vehicleControl.setSpeed(.9);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
-
-                        stageToRightLaneLeftTurn--;
-                        if (stageToRightLaneLeftTurn == 0) {
-                            // Start over.
-                            stageMoving = FORWARD;
-                            stageMeasuring = FIND_OBJECT_INIT;
-
-                            distanceToObstacle = 0;
-                            distanceToObstacleOld = 0;
-
-                            // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                    }
-
-                    // Measuring state machine.
-                    if (stageMeasuring == FIND_OBJECT_INIT) {
-                        distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
-                        stageMeasuring = FIND_OBJECT;
-                    }
-                    else if (stageMeasuring == FIND_OBJECT) {
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
-
-                        // Approaching an obstacle (stationary or driving slower than us).
-                        if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
-                            // Check if overtaking shall be started.                        
-                            stageMeasuring = FIND_OBJECT_PLAUSIBLE;
-                        }
-
-                        distanceToObstacleOld = distanceToObstacle;
-                    }
-                    else if (stageMeasuring == FIND_OBJECT_PLAUSIBLE) {
-                        if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE) {
-                            stageMoving = TO_LEFT_LANE_LEFT_TURN;
-
-                            // Disable measuring until requested from moving state machine again.
-                            stageMeasuring = DISABLE;
-                        }
-                        else {
-                            stageMeasuring = FIND_OBJECT;
-                        }
-                    }
-                    else if (stageMeasuring == HAVE_BOTH_IR) {
-                        // Remain in this stage until both IRs see something.
-                        if ( (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0) ) {
-                            // Turn to right.
-                            stageMoving = TO_LEFT_LANE_RIGHT_TURN;
-                        }
-                    }
-                    else if (stageMeasuring == HAVE_BOTH_IR_SAME_DISTANCE) {
-                        // Remain in this stage until both IRs have the similar distance to obstacle (i.e. turn car)
-                        // and the driven parts of the turn are plausible.
-                        const double IR_FR = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-                        const double IR_RR = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
-
-                        if ((fabs(IR_FR - IR_RR) < HEADING_PARALLEL) && ((stageToRightLaneLeftTurn - stageToRightLaneRightTurn) > 0)) {
-                            // Straight forward again.
-                            stageMoving = CONTINUE_ON_LEFT_LANE;
-
-                            // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
-                        }
-                    }
-                    else if (stageMeasuring == END_OF_OBJECT) {
-                        // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-
-                        if (distanceToObstacle < 0) {
-                            // Move to right lane again.
-                            stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
-
-                            // Disable measuring until requested from moving state machine again.
-                            stageMeasuring = DISABLE;
-                        }
-                    }
                 }
 
                 // Create container for finally sending the set values for the control algorithm.
