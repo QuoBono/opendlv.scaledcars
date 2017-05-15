@@ -32,31 +32,32 @@ using namespace std;
 void SerialReceiveBytes::nextString(const string &s) {
 	//cout << "original" << s << endl;
 
-	if(s.length() > 13 && !s.empty()){
+    int serialStart = s.find("{");
+    int serialEnd = s.find("}");
+
+    if(s.length() > 10 && !s.empty() && serialStart != -1 && serialEnd != -1){
+
+ 	serialStart = s.find("{");
 
 
-	//s.erase(remove(s.begin(), s.end(), '\n'), s.end());
-
- 	int serialStart = s.find("{");
-	
-	
 	string tmp;
-	int serialEnd = 0;
+	serialEnd = 0;
 
-	if((int) s.length() > (int) serialStart && (int) s.length() > 12){
-	tmp = s.substr(serialStart, s.length());
-	serialEnd = tmp.find("}");
+	if((int) s.length() > (int) serialStart && (int) s.length() > 10){
+
+            tmp = s.substr(serialStart, s.length());
+            serialEnd = tmp.find("}");
+
 	}
 
-	
-	//cout << "bigger than 10 " << endl;
-
-	if((int) serialEnd > (int) serialStart && (int) tmp.length() > 12){
+	if((int) serialEnd > (int) serialStart && (int) tmp.length() > 10){
 	string serialValues = tmp.substr (1, serialEnd -1);
 	cerr << "Received new" << serialValues.length() << " bytes containing '" << serialValues << "'" << endl;
 	}
-	//cout << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
+
 	}
+
+    //cerr << "REAL ONE" << s.length() << " bytes containing '" << s << "'" << endl;
 	
 }
 
