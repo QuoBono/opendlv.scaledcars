@@ -27,6 +27,10 @@
 
 #include "SerialReceiveBytes.hpp"
 
+//for converting the string to double
+#include <stdio.h>      /* printf, NULL */
+#include <stdlib.h> /* strtod */
+
 using namespace std;
 
 void SerialReceiveBytes::nextString(const string &s) {
@@ -53,6 +57,48 @@ void SerialReceiveBytes::nextString(const string &s) {
 	if((int) serialEnd > (int) serialStart && (int) tmp.length() > 10){
 	string serialValues = tmp.substr (1, serialEnd -1);
 	cerr << "Received new" << serialValues.length() << " bytes containing '" << serialValues << "'" << endl;
+
+		//we create this object in order to send the sensor data to the conference "handles the containers"
+		//SensorBoardData sendData;
+
+		//we create a temporal string
+		string sendSensortmp = serialValues;
+
+		//
+		string sensor0 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+
+		//double sensorZERO = atof(sensor0);
+		cerr << "this is sensorZERO" << sensor0 << endl;
+		//cut the string
+        string tmp2 = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+        cerr << "TMP2 IS THIS " << tmp2 << endl;
+		//sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor1 = tmp2.substr(0, tmp2.find(" "));
+		//double sensorONE = atof(sensor1);
+		cerr << "this is sensorONE" << sensor1 << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor2 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		//double sensorTWO = atof(sensorTWO);
+		cerr << "this is sensorTWO" << sensor2 << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor3 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		//double sensorTHREE = atof(sensor3);
+		cerr << "this is sensorTHREE" << sensor3 << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor4 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		//double sensorFOUR = atof(sensor4);
+		cerr << "this is sensorFOUR" << sensor4 << endl;
+
+		//Map dataMap;
+
+
 	}
 
 	}
