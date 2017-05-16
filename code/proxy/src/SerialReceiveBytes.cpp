@@ -67,34 +67,42 @@ void SerialReceiveBytes::nextString(const string &s) {
 		//
 		string sensor0 = sendSensortmp.substr(0, sendSensortmp.find(" "));
 
-		//double sensorZERO = atof(sensor0);
-		cerr << "this is sensorZERO" << sensor0 << endl;
+		double sensorZERO = atof(sensor0.c_str());
+		cerr << "this is sensorZERO " << sensorZERO << endl;
+
 		//cut the string
-        string tmp2 = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
-        cerr << "TMP2 IS THIS " << tmp2 << endl;
-		//sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+        //string tmp2 = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+        //cerr << "TMP2 IS THIS " << tmp2 << endl;
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
+        cerr << "THIS IS sendSensortmp " << sendSensortmp << endl;
 		//
-		string sensor1 = tmp2.substr(0, tmp2.find(" "));
-		//double sensorONE = atof(sensor1);
-		cerr << "this is sensorONE" << sensor1 << endl;
+		string sensor1 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorONE = atof(sensor1.c_str());
+		cerr << "this is sensorONE " << sensorONE << endl;
+
 		//cut the string
-		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
+        cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
 		//
 		string sensor2 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-		//double sensorTWO = atof(sensorTWO);
-		cerr << "this is sensorTWO" << sensor2 << endl;
+		double sensorTWO = atof(sensor2.c_str());
+		cerr << "this is sensorTWO " << sensorTWO << endl;
+
 		//cut the string
-		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
+        cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
 		//
 		string sensor3 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-		//double sensorTHREE = atof(sensor3);
-		cerr << "this is sensorTHREE" << sensor3 << endl;
+		double sensorTHREE = atof(sensor3.c_str());
+		cerr << "this is sensorTHREE " << sensorTHREE << endl;
+
 		//cut the string
-		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
+        cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
 		//
 		string sensor4 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-		//double sensorFOUR = atof(sensor4);
-		cerr << "this is sensorFOUR" << sensor4 << endl;
+		double sensorFOUR = atof(sensor4.c_str());
+		cerr << "this is sensorFOUR " << sensorFOUR << endl;
 
 		//Map dataMap;
 
