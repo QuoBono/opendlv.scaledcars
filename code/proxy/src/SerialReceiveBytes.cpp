@@ -31,7 +31,32 @@
 #include <stdio.h>      /* printf, NULL */
 #include <stdlib.h> /* strtod */
 
+//For Mapping the sensors
+#include <map>
+
+//for accesing the methods from sensor board data
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+
+//For the Containers
+#include "opendavinci/odcore/data/Container.h"
+#include "opendavinci/odcore/io/conference/ContainerConference.h"
+
+#include <Proxy.h>
+
+
+
 using namespace std;
+// We add some of OpenDaVINCI's namespaces for the sake of readability.
+using namespace odcore;
+using namespace odcore::wrapper;
+using namespace odcore::base;
+using namespace odcore::data;
+using namespace automotive;
+using namespace automotive::miniature;
+
+
+
 
 void SerialReceiveBytes::nextString(const string &s) {
 	//cout << "original" << s << endl;
@@ -58,9 +83,6 @@ void SerialReceiveBytes::nextString(const string &s) {
 	string serialValues = tmp.substr (1, serialEnd -1);
 	cerr << "Received new" << serialValues.length() << " bytes containing '" << serialValues << "'" << endl;
 
-		//we create this object in order to send the sensor data to the conference "handles the containers"
-		//SensorBoardData sendData;
-
 		//we create a temporal string
 		string sendSensortmp = serialValues;
 
@@ -71,8 +93,6 @@ void SerialReceiveBytes::nextString(const string &s) {
 		cerr << "this is sensorZERO " << sensorZERO << endl;
 
 		//cut the string
-        //string tmp2 = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
-        //cerr << "TMP2 IS THIS " << tmp2 << endl;
 		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
         cerr << "THIS IS sendSensortmp " << sendSensortmp << endl;
 		//
@@ -104,7 +124,49 @@ void SerialReceiveBytes::nextString(const string &s) {
 		double sensorFOUR = atof(sensor4.c_str());
 		cerr << "this is sensorFOUR " << sensorFOUR << endl;
 
-		//Map dataMap;
+        //USED FOR DEBUGGING
+        //Map the values for sending the sensors values.
+//		map<int,double> sensorsMap;
+//        sensorsMap.insert (pair<int,double>(0,sensorZERO) );
+//        sensorsMap.insert (pair<int,double>(1,sensorONE) );
+//        sensorsMap.insert (pair<int,double>(2,sensorTWO) );
+//        sensorsMap.insert (pair<int,double>(3,sensorTHREE) );
+//        sensorsMap.insert (pair<int,double>(4,sensorFOUR) );
+
+        // showing contents:
+//        cerr << "sensorsMap contains:\n";
+//        map<int,double>::iterator it;
+//        for (it=sensorsMap.begin(); it!=sensorsMap.end(); ++it)
+//            cerr << it->first << " => " << it->second << endl;
+
+
+
+        automotive::miniature::SensorBoardData sensorsData;
+
+
+        sensorsData.setNumberOfSensors(5);
+
+        sensorsData.putTo_MapOfDistances(0, sensorZERO);
+        sensorsData.putTo_MapOfDistances(1, sensorONE);
+        sensorsData.putTo_MapOfDistances(2, sensorTWO);
+        sensorsData.putTo_MapOfDistances(3, sensorTHREE);
+        sensorsData.putTo_MapOfDistances(4, sensorFOUR);
+
+        odcore::data::Container sensors(sensorsData);
+        Proxy::getConference().send(sensors);
+
+
+
+//        Proxy::sendData.setNumberOfSensors(5);
+//
+//        Proxy::sendData.putTo_MapOfDistances(0, sensorZERO);
+//        Proxy::sendData.putTo_MapOfDistances(1, sensorONE);
+//        Proxy::sendData.putTo_MapOfDistances(2, sensorTWO);
+//        Proxy::sendData.putTo_MapOfDistances(3, sensorTHREE);
+//        Proxy::sendData.putTo_MapOfDistances(4, sensorFOUR);
+
+        //getConference().send(sensors);
+
 
 
 	}

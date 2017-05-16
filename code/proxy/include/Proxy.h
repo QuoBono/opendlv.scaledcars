@@ -90,6 +90,8 @@ namespace automotive {
                 virtual ~Proxy();
 
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+                //we create this object in order to send the sensor data to the conference "handles the containers"
+                //static automotive::miniature::SensorBoardData sendData;
 
             private:
 

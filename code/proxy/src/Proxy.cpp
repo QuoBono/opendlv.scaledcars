@@ -56,6 +56,7 @@
 
 
 
+
 namespace automotive {
     namespace miniature {
 
@@ -190,6 +191,7 @@ namespace automotive {
             try {
                 serial->setStringListener(&handler);
 
+
             }
             catch(string &exception) {
                 cerr << "Serial port could not be received: " << exception << endl;
@@ -236,6 +238,7 @@ namespace automotive {
 
                 if(serialBool){
                     readSerial();
+
                 }
 
                 // Get sensor data from IR/US.
