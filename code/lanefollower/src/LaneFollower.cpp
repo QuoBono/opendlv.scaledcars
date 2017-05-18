@@ -114,23 +114,26 @@ namespace automotive {
             }
 
 
-            //make the serial connection. wait a second to make it work and start the serial
-            try {
-                if(!serialBool){
+            if(m_simulation) {
+                //make the serial connection. wait a second to make it work and start the serial
+                try {
+                    if (!serialBool) {
 
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
+                        serial = std::shared_ptr<SerialPort>(
+                                SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+                        const uint32_t ONE_SECOND = 1000 * 1000;
+                        odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+                        // Start receiving bytes.
+                        serial->start();
+                        serialBool = true;
+                    }
+
+                    cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
                 }
-
-                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
+                catch (string &exception) {
+                    cerr << "Set up error Serial port could not be created: " << exception << endl;
+                }
             }
 
 
@@ -505,10 +508,12 @@ namespace automotive {
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
+
             // Get configuration data.
             KeyValueConfiguration kv = getKeyValueConfiguration();
             //Get Debug Screen
             m_debug = kv.getValue<int32_t> ("lanefollower.debug") == 1;
+
             //Choose if it's simulation cam or real cam
             m_simulation = getKeyValueConfiguration().getValue<uint32_t>("lanefollower.Simulation") == 1;
             //Choose if we want to send values to the serial/arduino
@@ -530,6 +535,14 @@ namespace automotive {
 
                 // Get the most recent available container for a SharedImage.
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+
+                // 2. Get most recent sensor board data:
+                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+
+                double sensor0 = sbd.getValueForKey_MapOfDistances(3);
+
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor0 << endl;
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                     // Example for processing the received container.
