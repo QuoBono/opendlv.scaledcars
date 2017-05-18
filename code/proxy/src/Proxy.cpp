@@ -68,10 +68,10 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
-        bool serialBool = false;//boolean for the beginning of the connection
+//        bool serialBool = false;//boolean for the beginning of the connection
 
-        std::shared_ptr<SerialPort> serial; //used to create the serial
-        SerialReceiveBytes handler;
+//        std::shared_ptr<SerialPort> serial; //used to create the serial
+//        SerialReceiveBytes handler;
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
@@ -135,27 +135,27 @@ namespace automotive {
             }
 
             //get the serial PortNumber and serial BaudRate
-            const string Port = getKeyValueConfiguration().getValue<string>("proxy.Sensor.SerialPort");
-            const uint32_t SerialSpeed = getKeyValueConfiguration().getValue<uint32_t>("proxy.Sensor.SerialSpeed");
+//            const string Port = getKeyValueConfiguration().getValue<string>("proxy.Sensor.SerialPort");
+//            const uint32_t SerialSpeed = getKeyValueConfiguration().getValue<uint32_t>("proxy.Sensor.SerialSpeed");
 
-            //make the serial connection. wait a second to make it work and start the serial
-            try {
-                if(!serialBool){
-
-                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(Port, SerialSpeed));
-                    const uint32_t ONE_SECOND = 1000 * 1000;
-                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                    // Start receiving bytes.
-                    serial->start();
-                    serialBool = true;
-                }
-
-                cerr << "Setup with SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
-
-            }
-            catch(string &exception) {
-                cerr << "Set up error Serial port could not be created: " << exception << endl;
-            }
+//            //make the serial connection. wait a second to make it work and start the serial
+//            try {
+//                if(!serialBool){
+//
+//                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(Port, SerialSpeed));
+//                    const uint32_t ONE_SECOND = 1000 * 1000;
+//                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+//                    // Start receiving bytes.
+//                    serial->start();
+//                    serialBool = true;
+//                }
+//
+//                cerr << "Setup with SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Set up error Serial port could not be created: " << exception << endl;
+//            }
 
 
 
@@ -164,11 +164,11 @@ namespace automotive {
         void Proxy::tearDown() {
             // This method will be call automatically _after_ return from body().
             //stop the serial connection
-            if (serialBool){
-                    serial -> stop();
-                    serial->setStringListener(NULL);
-
-            }
+//            if (serialBool){
+//                    serial -> stop();
+//                    serial->setStringListener(NULL);
+//
+//            }
         }
 
 //        void Proxy::sendSerial(string &number){
@@ -187,13 +187,13 @@ namespace automotive {
 
         void Proxy::readSerial(){
 
-            try {
-                serial->setStringListener(&handler);
-
-            }
-            catch(string &exception) {
-                cerr << "Serial port could not be received: " << exception << endl;
-            }
+//            try {
+//                serial->setStringListener(&handler);
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Serial port could not be received: " << exception << endl;
+//            }
 
         }
 
@@ -234,9 +234,9 @@ namespace automotive {
                     captureCounter++;
                 }
 
-                if(serialBool){
-                    readSerial();
-                }
+//                if(serialBool){
+//                    readSerial();
+//                }
 
                 // Get sensor data from IR/US.
             }

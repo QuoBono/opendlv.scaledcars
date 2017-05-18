@@ -114,6 +114,26 @@ namespace automotive {
             }
 
 
+            //make the serial connection. wait a second to make it work and start the serial
+            try {
+                if(!serialBool){
+
+                    serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
+                    const uint32_t ONE_SECOND = 1000 * 1000;
+                    odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+                    // Start receiving bytes.
+                    serial->start();
+                    serialBool = true;
+                }
+
+                cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
+
+            }
+            catch(string &exception) {
+                cerr << "Set up error Serial port could not be created: " << exception << endl;
+            }
+
+
         }
 
         void LaneFollower::tearDown() {
@@ -130,6 +150,13 @@ namespace automotive {
             if (m_debug) {
                 cvDestroyWindow("Debug screen");
                 cvDestroyWindow("Test screen");
+            }
+
+            //stop the serial connection
+            if (serialBool){
+                serial -> stop();
+                serial->setStringListener(NULL);
+
             }
 
         }
