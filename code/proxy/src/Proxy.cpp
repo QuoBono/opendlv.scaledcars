@@ -56,7 +56,6 @@
 
 
 
-
 namespace automotive {
     namespace miniature {
 
@@ -72,15 +71,13 @@ namespace automotive {
         bool serialBool = false;//boolean for the beginning of the connection
 
         std::shared_ptr<SerialPort> serial; //used to create the serial
-        SerialReceiveBytes handler;
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
             m_recorder(),
-            //serialBool(false),
-            m_camera()
-            //serial()
+            m_camera(),
+            serialReceiveBytes(getConference())
         {}
 
         Proxy::~Proxy() {
@@ -143,11 +140,17 @@ namespace automotive {
             try {
                 if(!serialBool){
 
+                    //create the serial port and wait one second for the connection to succeed
                     serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(Port, SerialSpeed));
                     const uint32_t ONE_SECOND = 1000 * 1000;
                     odcore::base::Thread::usleepFor(10 * ONE_SECOND);
+
+                    serial->setStringListener(&serialReceiveBytes);
+
                     // Start receiving bytes.
                     serial->start();
+
+                    //Serial Connection is true
                     serialBool = true;
                 }
 
@@ -164,6 +167,7 @@ namespace automotive {
 
         void Proxy::tearDown() {
             // This method will be call automatically _after_ return from body().
+
             //stop the serial connection
             if (serialBool){
                     serial -> stop();
@@ -172,44 +176,7 @@ namespace automotive {
             }
         }
 
-//        void Proxy::sendSerial(string &number){
-//
-//            try {
-//                //cerr << "Sending to SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
-//
-//                serial->send(number + "\r\n");
-//
-//            }
-//            catch(string &exception) {
-//                cerr << "Serial port could not be created: " << exception << endl;
-//            }
-//
-//        }
 
-        void Proxy::readSerial(){
-
-            try {
-                serial->setStringListener(&handler);
-
-
-            }
-            catch(string &exception) {
-                cerr << "Serial port could not be received: " << exception << endl;
-            }
-
-        }
-
-//        void Proxy::distributeSerial(Container c) {
-//            // Store data to recorder.
-//            if (serialBool) {
-//                // Time stamp data before storing.
-//                c.setReceivedTimeStamp(TimeStamp());
-//                serial->store(c);
-//            }
-//
-//            // Share data.
-//            getConference().send(c);
-//        }
 
         void Proxy::distribute(Container c) {
             // Store data to recorder.
@@ -234,11 +201,6 @@ namespace automotive {
                     Container c(si);
                     distribute(c);
                     captureCounter++;
-                }
-
-                if(serialBool){
-                    readSerial();
-
                 }
 
                 // Get sensor data from IR/US.
