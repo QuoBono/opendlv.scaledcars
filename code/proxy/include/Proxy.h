@@ -90,6 +90,8 @@ namespace automotive {
 
                 virtual ~Proxy();
 
+                virtual void readContainer(odcore::data::Container &c);
+
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
             private:

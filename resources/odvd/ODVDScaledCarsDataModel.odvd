@@ -20,8 +20,27 @@ message chalmersrevere.scaledcars.ExampleMessage [id = 801] {
     uint32 field1   [id = 1];
 }
 
-message chalmersrevere.scaledcars.SensorBoardData [id = 802] {
+message chalmersrevere.scaledcars.RawSensorBoardData [id = 802] {
     uint32 numberOfSensors [id = 1];
     map<uint32, double> distances [id = 2];
 }
 
+message automotive.VehicleData [id = 39] {
+    cartesian.Point2 position [id = 1];
+    cartesian.Point2 velocity [id = 2];
+    double heading [id = 3];
+    double absTraveledPath [id = 4];
+    double relTraveledPath [id = 5];
+    double speed [id = 6];
+    double v_log [id = 7];
+    double v_batt [id = 8];
+    double temp [id = 9];
+}
+message automotive.VehicleControl [id = 41] {
+    double speed [id = 1];
+    double acceleration [id = 2];
+    double steeringWheelAngle [id = 3];
+    bool brakeLights [id = 4];
+    bool flashingLightsLeft [id = 5];
+    bool flashingLightsRight [id = 6];
+}
