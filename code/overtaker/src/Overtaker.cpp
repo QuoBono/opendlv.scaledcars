@@ -78,12 +78,13 @@ namespace automotive {
 
             // State counter for dynamically moving back to right lane.
             int32_t stageToRightLaneRightTurn = 0;
-            int32_t stageToRightLaneLeftTurn = 0;
+            int32_t stageToRightLaneLeftTurn = 15;
 
             // Distance variables to ensure we are overtaking only stationary or slowly driving obstacles.
             double distanceToObstacle = 0;
             double distanceToObstacleOld = 0;
-            double distanceToObstacleBackSensor = 0;
+            //double distanceToObstacleBackSensor = 0;
+
             double irf = 0;
             double irr = 0;
 
@@ -102,13 +103,11 @@ namespace automotive {
 
 				std::cout<<"stageMoving" << stageMoving << std::endl;
             	
+            	//Get the used infrared sensors and print their values
             	irf = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
             	irr = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
-
-
             	cerr<<"irf" << irf << endl;	
             	cerr<<"irr" << irr << endl;
-
 
                 // Create vehicle control data.
                 VehicleControl vc;
@@ -117,14 +116,10 @@ namespace automotive {
                 // The car moves forward until the object, where it stops.
                 if (stageMoving == FORWARD) {
                     // Go forward.
-                    vc.setSpeed(2);
- 					//cout << "The \"lanefollower\" script will be executed"; 
-  					//system("./lanefollower_script.sh"); 
-  					//std::cout << "returned: " << ls("sudo ./lanefollower --cid=111 --freq=10") << std::endl;
-                   
+                    vc.setSpeed(2);                   
                     vc.setSteeringWheelAngle(0);
 
-                    stageToRightLaneLeftTurn = 0;
+                    stageToRightLaneLeftTurn = 15;
                     stageToRightLaneRightTurn = 0;
                 }
                 
@@ -133,44 +128,47 @@ namespace automotive {
                     // The car moves left, overtaking the object, until it reaches the left lane, then stops.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(-25);
+
                     // State machine measuring: Both IRs need to see something before leaving this moving state.
                     stageMeasuring = HAVE_BOTH_IR;
                     stageToRightLaneRightTurn++;
                 }
 
                 //else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
-                    // Move to the left lane: Passing stage.
+                // Move to the left lane: Passing stage.
                 //    vc.setSpeed(2);
                 //    vc.setSteeringWheelAngle(0);
+
                     // Find end of object.
-                //    stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
+                //    stageMeasuring = END_OF_OBJECT;
                 //}
-                
-                
+                               
                 else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                     // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(25);
+               
                     // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                     stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
                     stageToRightLaneLeftTurn++;
-
                 }
-
 
                 else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                     // Move to the left lane: Passing stage.
                     vc.setSpeed(2);
                     vc.setSteeringWheelAngle(0);
+               
                     // Find end of object.
-                    stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
+                    stageMeasuring = END_OF_OBJECT;
                 }
                 
                 else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                     // Move to the right lane: Turn right part.
-                    vc.setSpeed(1.5);
+                    vc.setSpeed(1);
                     vc.setSteeringWheelAngle(25);
+
                     stageToRightLaneRightTurn--;
+                    
                     if (stageToRightLaneRightTurn == 0) {
                         stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                     }
@@ -178,24 +176,30 @@ namespace automotive {
                                                
                 else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                     // Move to the left lane: Turn left part.
-                    vc.setSpeed(.9);
+                    vc.setSpeed(1);
                     vc.setSteeringWheelAngle(-25);
+
                     stageToRightLaneLeftTurn--;
-                    /*if (stageToRightLaneLeftTurn == 0) {
+                    if (stageToRightLaneLeftTurn == 0) {
                         // Start over.
-                        //stageMoving = FORWARD;
+						stageToRightLaneRightTurn = 0;
+						stageToRightLaneLeftTurn = 15;
+                        stageMoving = FORWARD;
                         stageMeasuring = FIND_OBJECT_INIT;
+
                         distanceToObstacle = 0;
                         distanceToObstacleOld = 0;
-                    }*/
+                    }
                 
                 }
                
                 // Measuring state machine.
                 if (stageMeasuring == FIND_OBJECT_INIT) {
+                    
                     distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
                     stageMeasuring = FIND_OBJECT;
                 }
+
                 else if (stageMeasuring == FIND_OBJECT) {
                     distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
 
@@ -207,6 +211,7 @@ namespace automotive {
 
                     distanceToObstacleOld = distanceToObstacle;
                 }
+
                 else if (stageMeasuring == FIND_OBJECT_PLAUSIBLE) {
                     if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE) {
                         stageMoving = TO_LEFT_LANE_LEFT_TURN;
@@ -218,6 +223,7 @@ namespace automotive {
                         stageMeasuring = FIND_OBJECT;
                     }
                 }
+
                 else if (stageMeasuring == HAVE_BOTH_IR) {
                     // Remain in this stage until both IRs see something.
                     if ( (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0) ) {
@@ -225,6 +231,7 @@ namespace automotive {
                         stageMoving = TO_LEFT_LANE_RIGHT_TURN;
                     }
                 }
+
                 else if (stageMeasuring == HAVE_BOTH_IR_SAME_DISTANCE) {
                     // Remain in this stage until both IRs have the similar distance to obstacle (i.e. turn car)
                     // and the driven parts of the turn are plausible.
@@ -240,15 +247,15 @@ namespace automotive {
                 else if (stageMeasuring == END_OF_OBJECT) {
                     // Find end of object.
                     distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-                    distanceToObstacleBackSensor = sbd.getValueForKey_MapOfDistances(0);
+                   /// distanceToObstacleBackSensor = sbd.getValueForKey_MapOfDistances(0);
 
                     if (distanceToObstacle < 0) {
                         // Move to right lane again.
                         stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
-                    if (distanceToObstacleBackSensor < 0){
-                    	stageMoving = TO_RIGHT_LANE_LEFT_TURN;
-                    }
+                    //if (distanceToObstacleBackSensor < 0){
+                    //	stageMoving = TO_RIGHT_LANE_LEFT_TURN;
+                    //}
                         // Disable measuring until requested from moving state machine again.
                         stageMeasuring = DISABLE;
                         std::system("$HOME/Git/opendlv.scaledcars/docker/builds/scaledcars-on-opendlv-on-opendlv-core-on-opendavinci-on-base-2017.Q1.feature.overtakeSimulation/opt/opendlv.scaledcars/bin/lanefollower --cid=111 --freq=10");
