@@ -89,7 +89,6 @@ namespace automotive { //check this namespaces for future stuff
 	            IplImage *m_image;
                 bool m_debug;
 				bool m_simulation;
-				bool m_serial;
                 CvFont m_font;
                 odcore::data::TimeStamp m_previousTime;
                 double m_eSum;

@@ -74,12 +74,6 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
-//        //the serial communication
-        const string SERIAL_PORT = "/dev/ttyACM0"; //port that we will send -> arduino
-        const uint32_t BAUD_RATE = 9600;
-        bool serialBool = false;
-        std::shared_ptr<SerialPort> serial;
-
         cv::Mat m_image_black; //added grey image matrix
         cv::Mat m_image_black_new;
 
@@ -90,7 +84,6 @@ namespace automotive {
                                                                        m_image(NULL),
                                                                        m_debug(false),
                                                                        m_simulation(false),
-                                                                       m_serial(false),
                                                                        m_font(),
                                                                        m_previousTime(),
                                                                        m_eSum(0),
@@ -114,29 +107,6 @@ namespace automotive {
             }
 
 
-            if(m_simulation) {
-                //make the serial connection. wait a second to make it work and start the serial
-                try {
-                    if (!serialBool) {
-
-                        serial = std::shared_ptr<SerialPort>(
-                                SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-                        const uint32_t ONE_SECOND = 1000 * 1000;
-                        odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-                        // Start receiving bytes.
-                        serial->start();
-                        serialBool = true;
-                    }
-
-                    cerr << "Setup with SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
-
-                }
-                catch (string &exception) {
-                    cerr << "Set up error Serial port could not be created: " << exception << endl;
-                }
-            }
-
-
         }
 
         void LaneFollower::tearDown() {
@@ -155,12 +125,6 @@ namespace automotive {
                 cvDestroyWindow("Test screen");
             }
 
-            //stop the serial connection
-            if (serialBool){
-                serial -> stop();
-                serial->setStringListener(NULL);
-
-            }
 
         }
 
@@ -489,18 +453,9 @@ namespace automotive {
 
             }
 
-                if(m_serial){
-                    try {
-                        cerr << "Sending to SERIAL_PORT: " << SERIAL_PORT << ", BAUD_RATE = " << BAUD_RATE << endl;
 
-                        int carSteering = (int) ((desiredSteering*180)/M_PI);
-                        string steer = to_string(carSteering);
-                        serial->send(steer + "\r\n");
-
-                    } catch(string &exception) {
-                        cerr << "Serial port could not be created: " << exception << endl;
-                    }
-                }
+            m_vehicleControl.setSpeed(5);
+            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
 
             //end of process Image
             }
@@ -516,8 +471,6 @@ namespace automotive {
 
             //Choose if it's simulation cam or real cam
             m_simulation = getKeyValueConfiguration().getValue<uint32_t>("lanefollower.Simulation") == 1;
-            //Choose if we want to send values to the serial/arduino
-            m_serial = getKeyValueConfiguration().getValue<uint32_t>("lanefollower.Serial") == 1;
 
             // Initialize fonts.
             const double hscale = 0.4;
@@ -536,13 +489,13 @@ namespace automotive {
                 // Get the most recent available container for a SharedImage.
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
-                // 2. Get most recent sensor board data:
-                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-
-                double sensor0 = sbd.getValueForKey_MapOfDistances(3);
-
-                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor0 << endl;
+                //PLAYING WITH SENSORS
+//                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+//                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+//
+//                double sensor0 = sbd.getValueForKey_MapOfDistances(3);
+                //cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor0 << endl;
+                //END OF PLAYING WITH SENSORS
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                     // Example for processing the received container.
