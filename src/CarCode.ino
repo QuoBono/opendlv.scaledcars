@@ -318,5 +318,6 @@ void loop() {
   }
 
   delay(1);
-  FastLED.stop();
+ // FastLED.stop();
 }
+
