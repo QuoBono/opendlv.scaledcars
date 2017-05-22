@@ -69,7 +69,7 @@ namespace scaledcars {
 
                 //double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
                 //Todo somehow get the state to set what to do
-                currentState = park;
+                    currentState = park;
                 //cerr << "current state is: "<< currentState << endl;
 
                 // Measuring state machine.
