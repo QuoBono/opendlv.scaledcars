@@ -150,6 +150,8 @@ void readSensors() {
   irFrontRight = getInfraredRange(IR_FRONT_RIGHT);
   irRear =  getInfraredRange(IR_REAR);
   irRearRight = getInfraredRange(IR_REAR_RIGHT);
+  
+  unsigned long odometerDistance = encoder.getDistance()*2;
 
   unsigned char startTransmissionVal = 255;
   unsigned char endTransmissionVal = 254;
@@ -210,6 +212,8 @@ void setup() {
   SteerServo.attach(9); //steering
   SteerServo.write(straight);
   EscServo.writeMicroseconds(NEUTRAL);
+  
+  encoder.attach(13);
 
   delay(100);                                     // Waits to make sure everything is powered up
 
