@@ -6,11 +6,11 @@
 
 //the includes
 #include <Wire.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <Servo.h>
 #include <FastLED.h>
 #include <Smartcar.h>
-#include <SharpIR.h>
+//#include <SharpIR.h>
 
 //definitions of the sensors
 #define SRF_ADDRESS1         0x71
