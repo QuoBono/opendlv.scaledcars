@@ -144,11 +144,7 @@ namespace automotive {
 //        for (it=sensorsMap.begin(); it!=sensorsMap.end(); ++it)
 //            cerr << it->first << " => " << it->second << endl;
 
-
-
                     automotive::miniature::SensorBoardData sensorsData;
-
-
                     sensorsData.setNumberOfSensors(5);
 
                     sensorsData.putTo_MapOfDistances(0, sensorZERO);

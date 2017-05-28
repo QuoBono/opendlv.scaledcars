@@ -112,7 +112,7 @@ namespace automotive { //check this namespaces for future stuff
 
 	            virtual void tearDown();
 
-                void processImage();
+                void processImage(odcore::data::Container &containerVehicleControl);
         };
 
     }

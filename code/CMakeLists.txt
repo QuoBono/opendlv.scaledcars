@@ -52,6 +52,7 @@ add_subdirectory(control)
 add_subdirectory(lanedetector)
 add_subdirectory(lanefollower)
 add_subdirectory(proxy)
+add_subdirectory(overtaker)
 
 
 ###########################################################################

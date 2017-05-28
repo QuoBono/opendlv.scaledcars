@@ -51,12 +51,15 @@
 
 #include "LaneFollower.h"
 
+
+
  //serial test
 #include <iostream>
 #include <fstream>
 
  // Used for debugging
 #include <opendavinci/odtools/player/Player.h>
+
 
 
 
@@ -74,16 +77,18 @@ namespace automotive {
         using namespace odcore;
         using namespace odcore::wrapper;
 
+
         cv::Mat m_image_black; //added grey image matrix
         cv::Mat m_image_black_new;
 
 
-        LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
+        LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv,
+                                                                                                           "lanefollower"),
                                                                        m_hasAttachedToSharedImageMemory(false),
                                                                        m_sharedImageMemory(),
                                                                        m_image(NULL),
                                                                        m_debug(false),
-                                                                       m_simulation(false),
+                                                                       m_simulation(false), //added
                                                                        m_font(),
                                                                        m_previousTime(),
                                                                        m_eSum(0),
@@ -115,7 +120,7 @@ namespace automotive {
                 cvReleaseImage(&m_image);
                 m_image_black.deallocate();
 
-                if(m_simulation){
+                if (m_simulation) {
                     m_image_black_new.deallocate();
                 }
             }
@@ -133,7 +138,7 @@ namespace automotive {
             bool retVal = false;
 
             if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                SharedImage si = c.getData<SharedImage> ();
+                SharedImage si = c.getData<SharedImage>();
 
                 // Check if we have already attached to the shared memory.
                 if (!m_hasAttachedToSharedImageMemory) {
@@ -154,7 +159,7 @@ namespace automotive {
                     }
 
 
-                    if(m_simulation){
+                    if (m_simulation) {
                         // if the simulation camera is true we need to mirror the image
                         if (m_image != NULL) {
                             memcpy(m_image->imageData,
@@ -180,8 +185,6 @@ namespace automotive {
                         }
                     }
 
-                    
-
 
                     retVal = true;
                 }
@@ -189,14 +192,13 @@ namespace automotive {
             return retVal;
         }
 
-        void LaneFollower::processImage() {
+        void LaneFollower::processImage(Container &containerVehicleControl) {
 
             //boolean for the right lane marking
             static bool useRightLaneMarking = true;
 
             //Cross Track Error
             double e = 0;
-
             const int32_t distance = 280; //280
 
             double rightPixelAverage = 0;
@@ -219,23 +221,26 @@ namespace automotive {
             uchar pixelTopLeft;
             cv::Point leftTop;
             leftTop.y = 445;
-            leftTop.x = m_image_black.cols / 2 + 55;
+            leftTop.x = m_image_black.cols / 2 + 55; //x position of the straight line
 
             uchar pixelTopRight;
             cv::Point rightTop;
             rightTop.y = 445;
-            rightTop.x = m_image_black.cols / 2 - 55;
+            rightTop.x = m_image_black.cols / 2 - 55; //x position of the straight line
 
+            //Find the pixel in the straight line from starting from the middle-ish
             for (int y = 445; y > 0; y--) {
-                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 + 55, y));
+                pixelTopLeft = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 , y));
                 if (pixelTopLeft > 200) {
                     leftTop.y = y;
                     break;
                 }
             }
 
+
+            //Find the pixel in the straight line from starting from the middle-ish
             for (int y = 445; y > 0; y--) {
-                pixelTopRight = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 - 55, y));
+                pixelTopRight = m_image_black.at<uchar>(cv::Point(m_image_black.cols / 2 , y));
                 if (pixelTopRight > 200) {
                     rightTop.y = y;
                     break;
@@ -243,9 +248,11 @@ namespace automotive {
             }
 
             if (leftTop.y > 0) {
+                //Draw the line
                 cv::Scalar white = CV_RGB(255, 255, 255);
                 line(m_image_black, cv::Point(leftTop.x, m_image_black.rows - 40), leftTop, white);
 
+                //text and value of the line.
                 stringstream sstr;
                 sstr << (leftTop.y - 445);
                 putText(m_image_black, sstr.str().c_str(), cv::Point(leftTop.x, leftTop.y), cv::FONT_HERSHEY_PLAIN,
@@ -253,9 +260,11 @@ namespace automotive {
             }
 
             if (rightTop.y > 0) {
+                //Draw the line
                 cv::Scalar white = CV_RGB(255, 255, 255);
                 line(m_image_black, cv::Point(rightTop.x, m_image_black.rows - 40), rightTop, white);
 
+                //text and value of the line.
                 stringstream sstr;
                 sstr << (rightTop.y - 445);
                 putText(m_image_black, sstr.str().c_str(), cv::Point(rightTop.x, rightTop.y), cv::FONT_HERSHEY_PLAIN,
@@ -264,16 +273,18 @@ namespace automotive {
 
 
 
-            //This for loop will iterate for the scanline (each Y is the y of the line we draw
+            //This for loop will iterate for the scanline (each Y is the y of the line we draw)
             for (int32_t y = m_image_black.rows - 10; y > 445; y -= 4) {
                 //cerr << "this is y: " << y << endl;
                 uchar pixelLeft;
                 cv::Point left;
                 left.y = y;
                 left.x = -1;
+
+                //Check the middle-left side of lane.
                 for (int x = m_image_black.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelLeft > 200) {
+                    if (pixelLeft >= 200) {
                         left.x = x;
                         //Increment the counter for the average
                         counterAverageLeft++;
@@ -291,10 +302,10 @@ namespace automotive {
                 right.y = y;
                 right.x = -1;
 
-                //check right
+                //Check the middle-right side of lane.
                 for (int x = m_image_black.cols / 2; x < m_image_black.cols; x++) {
                     pixelRight = m_image_black.at<uchar>(cv::Point(x, y));
-                    if (pixelRight > 200) {
+                    if (pixelRight >= 200) {
                         right.x = x;
                         //Increment the counter for the average
                         counterAverageRight++;
@@ -314,26 +325,30 @@ namespace automotive {
                 if (m_debug) {
 
                     if (left.x > 0) {
+                        //Draw the line
                         cv::Scalar white = CV_RGB(255, 255, 255);
+                        cv::Scalar pink = CV_RGB(204, 0, 102);
                         line(m_image_black, cv::Point(m_image_black.cols / 2, y), left, white);
 
-                        //text and value of the line to the
+                        //text and value of the line. (Font is pink, white will cause problems when detecting white pixel)
                         stringstream sstr;
                         sstr << (m_image_black.cols / 2 - left.x);
-                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 - 100, y - 2),
+                        putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 - 100, y - 1),
                                 cv::FONT_HERSHEY_PLAIN,
-                                0.5, white);
+                                0.4, pink);
                     }
 
                     if (right.x > 0) {
+                        //Draw the Line
                         cv::Scalar pink = CV_RGB(204, 0, 102);
                         line(m_image_black, cv::Point(m_image_black.cols / 2, y), right, pink);
 
+                        //text and value of the line.
                         stringstream sstr;
                         sstr << (right.x - m_image_black.cols / 2);
                         putText(m_image_black, sstr.str().c_str(), cv::Point(m_image_black.cols / 2 + 100, y - 2),
                                 cv::FONT_HERSHEY_PLAIN,
-                                0.5, pink);
+                                0.4, pink);
                     }
                 }
 
@@ -407,8 +422,19 @@ namespace automotive {
 
             double desiredSteering = 0;
 
-            if(rightPixelResult < 0 && leftPixelResult < 0){
-                y = 0;
+            //If the car doesn't detect any border then the car will go straight.
+            if (rightPixelResult < 0 && leftPixelResult < 0) {
+                desiredSteering = 0;
+
+                //If the car detects a stopline then the car should stop
+                if (fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300) {
+
+                    m_vehicleControl.setSpeed(0);
+                    m_vehicleControl.setSteeringWheelAngle(0);
+                    cerr << "STOPLINE DETECTED" << endl;
+
+                }
+
             }
 
             // If the absolute value of the Cross TRack Error 'e' is bigger than 0.002 then we use the PID for steering
@@ -416,49 +442,67 @@ namespace automotive {
                 desiredSteering = y; //before y
             }
 
-            if (desiredSteering > 25.0) {
-                desiredSteering = 25.0;
-            }
 
-            if (desiredSteering < -25.0) {
-                desiredSteering = -25.0;
-            }
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering
                  << ", y = " << y << endl;
 
             // Go forward.
             //for SIM
-            if(m_simulation){
-                if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+//            if(m_simulation){
+//                if(fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300){
+//
+//                    if(sleep(3)){
+//
+//                        if (m_debug) {
+//                            if (m_image != NULL) {
+//
+//                                imshow("Camera Original Image", m_image_black);
+//                                cv::waitKey(10);
+//                                cvWaitKey(10); //we need a wait key
+//                            }
+//                        }
+//                        m_vehicleControl.setSpeed(0);
+//                        m_vehicleControl.setSteeringWheelAngle(0);
+//
+//                    }
+//
+//                }
+//
+//            }
 
-                    if(sleep(3)){
+            // Get the  Vehicle control container. We use it to communicate with Overtaker.
+            VehicleControl vd = containerVehicleControl.getData<VehicleControl>();
 
-                        if (m_debug) {
-                            if (m_image != NULL) {
+            bool lane = vd.getBrakeLights(); //this variable is a boolean for lanefollowing or not.
 
-                                imshow("Camera Original Image", m_image_black);
-                                cv::waitKey(10);
-                                cvWaitKey(10); //we need a wait key
-                            }
-                        }
-                        m_vehicleControl.setSpeed(0);
-                        m_vehicleControl.setSteeringWheelAngle(0);
+            if(lane){
+                cerr << "THis is lane following" << endl;
+            }
 
-                    }
+            //Here we detect the stopline and tell he car to stop.
 
-                }
+//                if (fabs(leftTop.y - rightTop.y) < 5 && rightTop.y > 300 && leftTop.y > 300) {
+//
+//                    m_vehicleControl.setSpeed(0);
+//                    m_vehicleControl.setSteeringWheelAngle(0);
+//                    cerr << "STOPLINE DETECTED" << endl;
+//
+//                }
 
-                m_vehicleControl.setSpeed(5);
                 m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+                m_vehicleControl.setSpeed(1);
 
-            }
 
+//            else {
+//
+//                m_vehicleControl.setSteeringWheelAngle(vd.getSteeringWheelAngle());
+//                m_vehicleControl.setSpeed(vd.getSpeed());
+//
+//                cerr << "this is overtaker" << lane << endl;
+//            }
 
-            m_vehicleControl.setSpeed(5);
-            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+    }//end of process Image
 
-            //end of process Image
-            }
 
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
@@ -489,13 +533,28 @@ namespace automotive {
                 // Get the most recent available container for a SharedImage.
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
+                // Get most recent data from Vehicle-Control (for communication with overtake)
+                Container containerVehicleControl = getKeyValueDataStore().get(automotive::VehicleControl::ID());
+
+
                 //PLAYING WITH SENSORS
-//                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-//                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-//
-//                double sensor0 = sbd.getValueForKey_MapOfDistances(3);
-                //cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor0 << endl;
+                Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+                SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+
+                double sensor0 = sbd.getValueForKey_MapOfDistances(0);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor0 << endl;
+                double sensor1 = sbd.getValueForKey_MapOfDistances(1);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor1 << endl;
+                double sensor2 = sbd.getValueForKey_MapOfDistances(2);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor2 << endl;
+                double sensor3 = sbd.getValueForKey_MapOfDistances(3);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor3 << endl;
+                double sensor4 = sbd.getValueForKey_MapOfDistances(4);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor4 << endl;
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor4 << endl;
                 //END OF PLAYING WITH SENSORS
+
+
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                     // Example for processing the received container.
@@ -504,7 +563,7 @@ namespace automotive {
 
                 // Process the read image and calculate regular lane following set values for control algorithm.
                 if (true == has_next_frame) {
-                    processImage();
+                    processImage(containerVehicleControl);
                 }
 
                 // Create container for finally sending the set values for the control algorithm.

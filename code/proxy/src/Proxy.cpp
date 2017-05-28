@@ -54,11 +54,13 @@
 #include <opendavinci/odcore/io/StringListener.h>
 #include <SerialReceiveBytes.hpp>
 
-
+struct CarData {
+    unsigned char speedOfCar : 4;
+    unsigned char steeringOfCar : 8;
+} arduinoCar;
 
 namespace automotive {
     namespace miniature {
-
         using namespace std;
         using namespace odcore::base;
         using namespace odcore::data;
@@ -196,26 +198,94 @@ namespace automotive {
         void Proxy::readContainer(odcore::data::Container &c) {
             //Original Vehicle Data stored from other components e.g. lanefollower
             VehicleControl vc = c.getData<VehicleControl> ();
-            cerr << "THIS IS THE ANGLE " << vc.getSteeringWheelAngle() << endl;
+            //cerr << "THIS IS THE ANGLE " << vc.getSteeringWheelAngle() << endl;
 
             //Here we transform from Radians to Degrees.
             int carSteering = (int) (vc.getSteeringWheelAngle()*(180/M_PI));
+            //Increment 70 for the servo, because 0 degrees is is 70
+            carSteering += 70;
+
+
+            if(carSteering < 10){
+                carSteering = 10;
+            }
+
+            if(carSteering > 95){
+                carSteering = 95;
+            }
+
             string steer = to_string(carSteering);
-            cerr << "THIS IS THE our made up ANGLE " << steer << endl;
+
+
+
+            //cerr << "THIS IS THE our made up ANGLE " << steer << " In degrees is: " << carSteering <<  endl;
+
+
+            //Here we get the Vehicle Speed.
+            int carSpeed = (int) (vc.getSpeed());
+
+            string speed = to_string(carSpeed);
+            //cerr << "THIS IS THE speed: " << speed << endl;
+
+            //add the speed and steering
+            string serialValues = "T" + speed + "Q" + steer;
+
+            cerr << "This is the bytes "  << serialValues.length() << endl;
+            cerr << serialValues << endl;
+
+
+
+
+            //ALTERNATIVE Version Sending Bytes.
+            uint16_t bytes[3]; //utf16 characters
+            unsigned int cSteer = carSteering;
+            unsigned int cSpeed = carSpeed;
+
+
+            //This way we assign the steering to one byte as a hexadecimal.
+            bytes[0] = cSteer & 0xFF;
+            bytes[1] = cSpeed & 0xFF;
+
+            //This way we include two integers in a unsigned 16 bit integer.
+            bytes[3] = (cSteer << 8);
+            bytes[3] |= cSpeed;
+
+            //Used for debugging.
+            printf("Steering in hexadecimal is %x\n", bytes[0]);
+            printf("Speed in hexadecimal is %x\n", bytes[1]);
+
+            //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
+            arduinoCar.steeringOfCar =  (bytes[3]>>8);
+            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
+            //Here we read the values for the speed.
+            arduinoCar.speedOfCar =  bytes[3];
+            printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+
+
 
             //Here we send the wheel steering angle to the arduino/serial.
             if(serialBool) {
-                serial->setStringListener(NULL);
 
                 try {
                     //Here we send as a string the serial
-                    serial->send(steer + "\r\n");
+                    //cerr << "SENDING SERIAL_PORT: " << endl;
+                    serial->setStringListener(NULL);
+                    //Version for sending as a string.
+                    //serial->send(serialValues + "\r\n");
+                    //Version for sending two separate bytes one for speed another for steering
+                    //serial->send(string(1, bytes[0]) + string(1, bytes[1]) + "\r\n");
+                    //Version for sending in one byte the speed and steering. (use structs to read from the arduino)
+                    serial->send(string(1, bytes[3]) + "\r\n");
+                    //delay(80);
+                    serial->setStringListener(&serialReceiveBytes);
+
 
                 } catch (string &exception) {
                     cerr << "Serial port could not be created: " << exception << endl;
 
                 }
-                serial->setStringListener(&serialReceiveBytes);
+
+
 
             }
         }
@@ -233,9 +303,11 @@ namespace automotive {
                     captureCounter++;
                 }
 
+
                 //read the vehicle container
                 Container car = getKeyValueDataStore().get(automotive::VehicleControl::ID());
                 readContainer(car);
+
 
             }
 
