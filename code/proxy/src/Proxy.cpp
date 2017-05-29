@@ -148,7 +148,7 @@ namespace automotive {
                     odcore::base::Thread::usleepFor(10 * ONE_SECOND);
 
                     //read received values from the serial.
-                    //serial->setStringListener(&serialReceiveBytes);
+                    serial->setStringListener(&serialReceiveBytes);
 
                     // Start receiving bytes.
                     serial->start();
@@ -233,7 +233,7 @@ namespace automotive {
             //add the speed and steering
             string serialValues = "T" + speed + "Q" + steer;
 
-            cerr << "This is the bytes "  << serialValues.length() << endl;
+            //cerr << "This is the bytes "  << serialValues.length() << endl;
             cerr << serialValues << endl;
 
 
@@ -254,15 +254,15 @@ namespace automotive {
             bytes[3] |= cSpeed;
 
             //Used for debugging.
-            printf("Steering in hexadecimal is %x\n", bytes[0]);
-            printf("Speed in hexadecimal is %x\n", bytes[1]);
+            //printf("Steering in hexadecimal is %x\n", bytes[0]);
+            //printf("Speed in hexadecimal is %x\n", bytes[1]);
 
             //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
             arduinoCar.steeringOfCar =  (bytes[3]>>5);
-            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
+            //printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
             //Here we read the values for the speed.
             arduinoCar.speedOfCar =  bytes[3];
-            printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+            //printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
 
 
 
@@ -270,8 +270,6 @@ namespace automotive {
             if(serialBool) {
 
                 try {
-                    //Here we send as a string the serial
-                    //serial->setStringListener(NULL);
 
                     //Version for sending as a string.
                     //serial->send(serialValues + "\r\n");
@@ -280,9 +278,7 @@ namespace automotive {
                     //serial->send(string(1, bytes[0]) + string(1, bytes[1]) + "\r\n");
 
                     //Version for sending in one byte the speed and steering. (use structs to read from the arduino)
-                    serial->send(string(1, bytes[3]));
-
-                    //serial->setStringListener(&serialReceiveBytes);
+                    serial->send(string(1, bytes[3]) + "\n");
 
 
                 } catch (string &exception) {
