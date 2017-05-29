@@ -55,8 +55,8 @@
 #include <SerialReceiveBytes.hpp>
 
 struct CarData {
-    unsigned char speedOfCar : 4;
-    unsigned char steeringOfCar : 8;
+    unsigned char speedOfCar : 3;
+    unsigned char steeringOfCar : 5;
 } arduinoCar;
 
 namespace automotive {
@@ -148,7 +148,7 @@ namespace automotive {
                     odcore::base::Thread::usleepFor(10 * ONE_SECOND);
 
                     //read received values from the serial.
-                    serial->setStringListener(&serialReceiveBytes);
+                    //serial->setStringListener(&serialReceiveBytes);
 
                     // Start receiving bytes.
                     serial->start();
@@ -210,9 +210,12 @@ namespace automotive {
                 carSteering = 10;
             }
 
-            if(carSteering > 95){
-                carSteering = 95;
+            if(carSteering > 90){
+                carSteering = 90;
             }
+
+            carSteering = carSteering / 6; //because we can only take up to 30 in 5 bits
+
 
             string steer = to_string(carSteering);
 
@@ -237,7 +240,7 @@ namespace automotive {
 
 
             //ALTERNATIVE Version Sending Bytes.
-            uint16_t bytes[3]; //utf16 characters
+            uint8_t bytes[3]; //utf16 characters
             unsigned int cSteer = carSteering;
             unsigned int cSpeed = carSpeed;
 
@@ -247,7 +250,7 @@ namespace automotive {
             bytes[1] = cSpeed & 0xFF;
 
             //This way we include two integers in a unsigned 16 bit integer.
-            bytes[3] = (cSteer << 8);
+            bytes[3] = (cSteer << 5);
             bytes[3] |= cSpeed;
 
             //Used for debugging.
@@ -255,7 +258,7 @@ namespace automotive {
             printf("Speed in hexadecimal is %x\n", bytes[1]);
 
             //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
-            arduinoCar.steeringOfCar =  (bytes[3]>>8);
+            arduinoCar.steeringOfCar =  (bytes[3]>>5);
             printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
             //Here we read the values for the speed.
             arduinoCar.speedOfCar =  bytes[3];
@@ -268,16 +271,18 @@ namespace automotive {
 
                 try {
                     //Here we send as a string the serial
-                    //cerr << "SENDING SERIAL_PORT: " << endl;
-                    serial->setStringListener(NULL);
+                    //serial->setStringListener(NULL);
+
                     //Version for sending as a string.
                     //serial->send(serialValues + "\r\n");
+
                     //Version for sending two separate bytes one for speed another for steering
                     //serial->send(string(1, bytes[0]) + string(1, bytes[1]) + "\r\n");
+
                     //Version for sending in one byte the speed and steering. (use structs to read from the arduino)
-                    serial->send(string(1, bytes[3]) + "\r\n");
-                    //delay(80);
-                    serial->setStringListener(&serialReceiveBytes);
+                    serial->send(string(1, bytes[3]));
+
+                    //serial->setStringListener(&serialReceiveBytes);
 
 
                 } catch (string &exception) {

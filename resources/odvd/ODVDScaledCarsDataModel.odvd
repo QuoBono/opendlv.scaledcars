@@ -42,6 +42,7 @@ message cartesian.Point2 [id = 51] {
     float p[2] [id = 1];
 
 }
+
 message automotive.VehicleControl [id = 41] {
     double speed [id = 1];
     double acceleration [id = 2];
