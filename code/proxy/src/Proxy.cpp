@@ -55,8 +55,8 @@
 #include <SerialReceiveBytes.hpp>
 
 struct CarData {
-    unsigned char speedOfCar : 3;
-    unsigned char steeringOfCar : 5;
+    unsigned char speedOfCar : 2;
+    unsigned char steeringOfCar : 6;
 } arduinoCar;
 
 namespace automotive {
@@ -210,11 +210,11 @@ namespace automotive {
                 carSteering = 10;
             }
 
-            if(carSteering > 90){
-                carSteering = 90;
+            if(carSteering > 95){
+                carSteering = 95;
             }
 
-            carSteering = carSteering / 6; //because we can only take up to 30 in 5 bits
+            carSteering = carSteering / 2; //because we can only take up to 30 in 5 bits
 
 
             string steer = to_string(carSteering);
@@ -250,7 +250,7 @@ namespace automotive {
             bytes[1] = cSpeed & 0xFF;
 
             //This way we include two integers in a unsigned 16 bit integer.
-            bytes[3] = (cSteer << 5);
+            bytes[3] = (cSteer << 2);
             bytes[3] |= cSpeed;
 
             //Used for debugging.
@@ -258,8 +258,8 @@ namespace automotive {
             //printf("Speed in hexadecimal is %x\n", bytes[1]);
 
             //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
-            arduinoCar.steeringOfCar =  (bytes[3]>>5);
-            //printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
+            arduinoCar.steeringOfCar =  (bytes[3]>>2);
+            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
             //Here we read the values for the speed.
             arduinoCar.speedOfCar =  bytes[3];
             //printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
