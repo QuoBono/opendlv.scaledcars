@@ -90,11 +90,11 @@ namespace automotive {
 
         private:
             bool m_hasAttachedToSharedImageMemory;
-            std::shared_ptr <odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
             IplImage *m_image;
             bool m_debug;
+            bool m_simulation;
             CvFont m_font;
-
             odcore::data::TimeStamp m_previousTime;
             double m_eSum;
             double m_eOld;
@@ -123,7 +123,7 @@ namespace automotive {
 
             //virtual void nextContainer(odcore::data::Container&);
 
-                void processImage();
+                void processImage(odcore::data::Container &containerVehicleControl);
             };
         }
 }// automotive::miniature

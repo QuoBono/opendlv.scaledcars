@@ -54,7 +54,7 @@ namespace scaledcars {
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 sData = containerSensorBoardData.getData<SensorBoardData> ();
 
-                cerr << "sensordata: " << sData.toString() << endl;
+                //cerr << "sensordata: " << sData.toString() << endl;
 
                 Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
                 vData = containerVehicleData.getData<VehicleData> ();
@@ -69,7 +69,7 @@ namespace scaledcars {
 
                 //double frontRightInfrared = sbd.getValueForKey_MapOfDistances(0);
                 //Todo somehow get the state to set what to do
-                    currentState = park;
+                    currentState = 2;
                 //cerr << "current state is: "<< currentState << endl;
 
                 // Measuring state machine.
@@ -87,6 +87,7 @@ namespace scaledcars {
                         break;
                     case 1:
                         {
+
                             LaneFollowMSG tmpmsg;
                             tmpmsg.setControl(vControl);
                             tmpmsg.setLanefollow(true);
@@ -97,7 +98,7 @@ namespace scaledcars {
                     break;
                     case 2:
                         {
-
+                            cerr << "parking" << endl;
                                     ParkMSG tmpmsg;
                                     tmpmsg.setControl(vControl);
                                     tmpmsg.setData(sData);

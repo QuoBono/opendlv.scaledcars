@@ -1,7 +1,5 @@
-# proxy - proxy is an example application to demonstrate how to 
-#         abstract from embedded software realized on Arudino or
-#         STM32F4 Discovery Board with OpenDaVINCI
-# Copyright (C) 2012 - 2015  Christian Berger
+# Example - Example code.
+# Copyright (C) 2016 Christian Berger
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,11 +17,11 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (proxy)
+PROJECT (scaledcars-control-example)
 
 ###########################################################################
 # Set the search path for .cmake files.
-SET (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.Modules" ${CMAKE_MODULE_PATH})
+SET (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake.Modules" ${CMAKE_MODULE_PATH})
 
 # Add a local CMake module search path dependent on the desired installation destination.
 # Thus, artifacts from the complete source build can be given precendence over any installed versions.
@@ -40,60 +38,50 @@ INCLUDE (CompileFlags)
 
 ###########################################################################
 # Find and configure CxxTest.
-#SET (CXXTEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../cxxtest") 
-#INCLUDE (CheckCxxTestEnvironment)
+INCLUDE (CheckCxxTestEnvironment)
 
 ###########################################################################
 # Find OpenDaVINCI.
-SET(OPENDAVINCI_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (OpenDaVINCI REQUIRED)
 
 ###########################################################################
+# Find OpenCV.
+FIND_PACKAGE(OpenCV REQUIRED)
+
+###########################################################################
 # Find AutomotiveData.
-SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (AutomotiveData REQUIRED)
 
 ###########################################################################
-# Find OpenCV.
-SET(OPENCV_ROOT_DIR "/usr")
-FIND_PACKAGE (OpenCV REQUIRED)
+# Find ODVDScaledCarsDataModel.
+find_package(ODVDScaledCarsDataModel REQUIRED)
 
-###########################################################################
-# Find uEye drivers.
-SET(UEYE_PATH "/usr/local")
-FIND_PACKAGE(UEYE)
-
-###########################################################################
-# Set linking libraries to successfully link test suites and binaries.
-IF(UEYE_FOUND)
-    SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES} ${UEYE_LIBRARIES})
-ELSE()
-    SET (LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
-ENDIF()
-
-###########################################################################
-# Set header files from OpenDaVINCI.
-INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
-# Set header files from AutomotiveData.
-INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS})
+###############################################################################
 # Set header files from OpenCV.
-INCLUDE_DIRECTORIES (${OPENCV_INCLUDE_DIRS})
-IF(UEYE_FOUND)
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_UEYE")
-    # Set header files from uEye.
-    INCLUDE_DIRECTORIES (${UEYE_INCLUDE_DIR})
-ENDIF()
+INCLUDE_DIRECTORIES (SYSTEM ${OpenCV_INCLUDE_DIR})
+# Set header files from ODVDScaledCarsDataModel.
+INCLUDE_DIRECTORIES (SYSTEM ${ODVDSCALEDCARSDATAMODEL_INCLUDE_DIRS})
+# Set header files from OpenDaVINCI.
+INCLUDE_DIRECTORIES (SYSTEM ${OPENDAVINCI_INCLUDE_DIRS})
+# Set header files from AutomotiveData.
+INCLUDE_DIRECTORIES (SYSTEM ${AUTOMOTIVEDATA_INCLUDE_DIRS})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 
-###########################################################################
+# Set libraries to link against.
+set(LIBRARIES ${OPENDAVINCI_LIBRARIES}
+              ${AUTOMOTIVEDATA_LIBRARIES}
+              ${ODVDSCALEDCARSDATAMODEL_LIBRARIES}
+              ${OpenCV_LIBS})
+
+###############################################################################
 # Build this project.
 FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-ADD_LIBRARY (${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
+ADD_LIBRARY (${PROJECT_NAME}-static STATIC ${thisproject-sources})
 ADD_EXECUTABLE (${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/apps/${PROJECT_NAME}.cpp")
-TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES}) 
+TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}-static ${LIBRARIES}) 
 
-###########################################################################
+###############################################################################
 # Enable CxxTest for all available testsuites.
 IF(CXXTEST_FOUND)
     FILE(GLOB thisproject-testsuites "${CMAKE_CURRENT_SOURCE_DIR}/testsuites/*.h")
@@ -121,13 +109,16 @@ IF(CXXTEST_FOUND)
             SET_SOURCE_FILES_PROPERTIES(${testsuite-short}-TestSuite.cpp PROPERTIES COMPILE_FLAGS "")
         ENDIF()
         SET_TESTS_PROPERTIES(${testsuite-short}-TestSuite PROPERTIES TIMEOUT 3000)
-        TARGET_LINK_LIBRARIES(${testsuite-short}-TestSuite ${PROJECT_NAME}lib-static ${LIBRARIES})
+        TARGET_LINK_LIBRARIES(${testsuite-short}-TestSuite ${PROJECT_NAME}-static ${LIBRARIES})
     ENDFOREACH()
 ENDIF(CXXTEST_FOUND)
 
-###########################################################################
+###############################################################################
 # Install this project.
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT software)
-# This project does not have a manual page so far.
-#INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT software)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT scaledcars-software)
+INSTALL(TARGETS ${PROJECT_NAME}-static DESTINATION lib COMPONENT scaledcars-software)
+INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT scaledcars-software)
+
+# Install header files.
+INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include/scaledcars-control-example COMPONENT scaledcars-software)
 

@@ -67,8 +67,11 @@ namespace scaledcars {
             //cerr << sdata.toString() << endl;
 
             if (foundSpot) {
+                cerr << "Found spot" << endl;
+
                 parallelPark(vcontrol, sdata, vdata);
             } else {
+                cerr << "Finding spot" << endl;
                 findSpot(vcontrol, sdata, vdata);
             }
         }
@@ -90,6 +93,7 @@ namespace scaledcars {
 //                vc = pm.getControl();
 //                data = pm.getData();
         }
+
         return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
     }
 
@@ -180,6 +184,7 @@ namespace scaledcars {
             data = sdata;
             VehicleControl svc = vcontrol;
             vd = vdata;
+            double traveledPath = sdata.getValueForKey_MapOfDistances(5);
 
             forwardWithLaneFollower();
 
@@ -198,8 +203,8 @@ namespace scaledcars {
                         break;
                     case 1:
                     {
-                        absPathParkStart = vd.getAbsTraveledPath();
-
+                        //absPathParkStart = vd.getAbsTraveledPath();
+                        absPathParkStart = traveledPath;
                         //cerr << "case1"<<endl;
 
                         if(absPathParkStart - absPathParkEnd > 6){
@@ -218,7 +223,9 @@ namespace scaledcars {
 
                             // Found sequence +, -.
                             stageMeasuring = 2;
-                            absPathStart = vd.getAbsTraveledPath();
+                            //absPathStart = vd.getAbsTraveledPath();
+                            absPathStart = traveledPath;
+
 
 
 
@@ -234,9 +241,11 @@ namespace scaledcars {
                         //cerr << "case2"<<endl;
 
                         {
+                            //if(vd.getAbsTraveledPath() - absPathStart > 6){
 
-                        if(vd.getAbsTraveledPath() - absPathStart > 6){
-                                    stageMoving = 1;
+                            if(traveledPath - absPathStart > 6){
+
+                                stageMoving = 1;
                                 foundSpot = true;
                             parkAfterCar = 3;
                             cerr << "set park car to 3" << endl;
@@ -248,8 +257,10 @@ namespace scaledcars {
                         if ((distanceOld < 0) && (frontRightInfrared > 0)) {
                             // Found sequence -, +.
                             stageMeasuring = 1;
-                            absPathEnd = vd.getAbsTraveledPath();
-                            absPathParkEnd = vd.getAbsTraveledPath();
+                            absPathEnd = traveledPath;
+                            //absPathEnd = vd.getAbsTraveledPath();
+                            absPathParkEnd = traveledPath;
+                            //absPathParkEnd = vd.getAbsTraveledPath();
 
 
                             const double GAP_SIZE = (absPathEnd - absPathStart);
@@ -291,6 +302,8 @@ namespace scaledcars {
             //double rearRightUltrasonic = data.getValueForKey_MapOfDistances(5);
             double rearInfrared = data.getValueForKey_MapOfDistances(1);
             double frontUltrasonic = data.getValueForKey_MapOfDistances(3);
+            //double traveledPath = sdata.getValueForKey_MapOfDistances(5);
+
 
             // Moving state machine.
             if (stageMoving == 0) {
@@ -386,38 +399,43 @@ namespace scaledcars {
                     forward();
                     stageMoving++;
                 }
-                if ((stageMoving >= 20) && (stageMoving < 45)) {
+                if ((stageMoving >= 20) && (stageMoving < 50)) {
                     // Move slightly forward.
                     slowForward();
                     stageMoving++;
                 }
-                if ((stageMoving >= 45) && (stageMoving < 50)) {
+                if ((stageMoving >= 50) && (stageMoving < 55)) {
                     // Stop.
                     stop();
                     stageMoving++;
                 }
-                if ((stageMoving >= 50) && (stageMoving < 81)) {
+                if ((stageMoving >= 55) && (stageMoving < 84)) {
                     // Backwards, steering wheel to the right.
                     reverseTurnRight();
                     cerr << "turning right" << endl;
                     stageMoving++;
                 }
-                if ((stageMoving >= 81) && (stageMoving < 130)) {
+                if ((stageMoving >= 84) && (stageMoving < 115)) {
                     // Backwards, steering wheel to the left.
-                    reverseTurnLeftSlow();
-                    stageMoving++;
-                }
-                if (stageMoving >= 130) {
-                    if (rearInfrared > 2) {
-                        slowReverse();
+
+                    if (rearInfrared < 2 && rearInfrared > 0) {
+                        stop();
+                        stageMoving++;
                     } else {
+                        reverseTurnLeftSlow();
+                        stageMoving++;
+
+                    }
+
+                }
+                if (stageMoving >= 115) {
+
                         stop();
                         StateMSG stop;
                         stop.setState(0);
                         Container c(stop);
                         getConference().send(c);
                         cerr << "Stopped everything" << endl;
-                    }
 
 
                 }

@@ -27,12 +27,33 @@
 #include "opendavinci/odcore/data/Container.h"
 #include "opendavinci/odtools/recorder/Recorder.h"
 
+//this is for the serial communication
+#include <stdint.h>
+#include <iostream>
+#include <string>
+#include <memory>
+#include <opendavinci/odcore/base/Thread.h>
+#include <opendavinci/odcore/wrapper/SerialPort.h>
+#include <opendavinci/odcore/wrapper/SerialPortFactory.h>
+//end for the serial communication
+
+//serial test
+#include <iostream>
+#include <fstream>
+//end for serial test
+
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+
 #include "Camera.h"
+#include <SerialReceiveBytes.hpp>
 
 namespace automotive {
     namespace miniature {
 
         using namespace std;
+        using namespace odcore;
+        using namespace odcore::wrapper;
 
         /**
          * This class wraps the software/hardware interface board.
@@ -69,18 +90,24 @@ namespace automotive {
 
                 virtual ~Proxy();
 
+                virtual void readContainer(odcore::data::Container &c);
+
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
             private:
+
                 virtual void setUp();
 
                 virtual void tearDown();
 
                 void distribute(odcore::data::Container c);
 
+
+
             private:
                 unique_ptr<odtools::recorder::Recorder> m_recorder;
                 unique_ptr<Camera> m_camera;
+                SerialReceiveBytes serialReceiveBytes;
         };
 
     }
