@@ -1,7 +1,7 @@
 /**
   Group 9
   Arduino code for the car
-  
+
 */
 
 
@@ -156,9 +156,9 @@ unsigned char getInfraredRange(int sensor) {
   int reading = analogRead(sensor);
 
   if (reading > 100 && reading < 490) {
-    range = 2076 / (reading - 20); 
-    
-    } else {
+    range = 2076 / (reading - 20);
+
+  } else {
     range = 0;
 
   }
@@ -234,7 +234,7 @@ void setup() {
 
   pinMode(12, OUTPUT);
 
-  
+
 
   delay(100);
 
@@ -259,8 +259,8 @@ void setup() {
 void loop() {
 
   /*
-   * READ SENSORS
-   */
+     READ SENSORS
+  */
   if (counterClock == 10) {
     readSensors();
     counterClock = 0;
@@ -296,8 +296,16 @@ void loop() {
          Speed Command
       */
       s.carSpeed = inputValues[0];
-
-      int tmpInt = (s.carSpeed * 50) + 1400;
+      int tmpInt = 0;
+      //The speeds from can be 0,1,2 and 3
+      //0 is stop
+      //1 and 2 is forward
+      //3 is backwards
+      if (s.carSpeed < 3) {
+        tmpInt = (s.carSpeed * 50) + 1400;
+      } else {
+        tmpInt = 1200;
+      }
 
       EscServo.writeMicroseconds( tmpInt);
 
