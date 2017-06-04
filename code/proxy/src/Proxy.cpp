@@ -234,7 +234,7 @@ namespace automotive {
             string serialValues = "T" + speed + "Q" + steer;
 
             //cerr << "This is the bytes "  << serialValues.length() << endl;
-            cerr << serialValues << endl;
+            //cerr << serialValues << endl;
 
 
 
@@ -258,11 +258,12 @@ namespace automotive {
             //printf("Speed in hexadecimal is %x\n", bytes[1]);
 
             //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
-            arduinoCar.steeringOfCar =  (bytes[3]>>2);
-            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
-            //Here we read the values for the speed.
-            arduinoCar.speedOfCar =  bytes[3];
-            //printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+//            arduinoCar.steeringOfCar =  (bytes[3]>>2);
+//            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
+//            //Here we read the values for the speed.
+//            arduinoCar.speedOfCar =  bytes[3];
+//            printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+//            printf("THis is bytes[3] %x\n", bytes[3]);
 
 
 
@@ -278,7 +279,7 @@ namespace automotive {
                     //serial->send(string(1, bytes[0]) + string(1, bytes[1]) + "\r\n");
 
                     //Version for sending in one byte the speed and steering. (use structs to read from the arduino)
-                    serial->send(string(1, bytes[3]) + "\n");
+                    serial->send(string(1, bytes[3]));
 
 
                 } catch (string &exception) {

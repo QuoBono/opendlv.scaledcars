@@ -551,7 +551,8 @@ namespace automotive {
                 cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor3 << endl;
                 double sensor4 = sbd.getValueForKey_MapOfDistances(4);
                 cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor4 << endl;
-                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor4 << endl;
+                double sensor5 = sbd.getValueForKey_MapOfDistances(5);
+                cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor5 << endl;
                 //END OF PLAYING WITH SENSORS
 
 
@@ -565,7 +566,6 @@ namespace automotive {
                 if (true == has_next_frame) {
                     processImage(containerVehicleControl);
                 }
-
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);
                 // Send container.

@@ -65,6 +65,13 @@ namespace automotive {
 
         void SerialReceiveBytes::nextString(const string &s) {
 
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+
             int serialStart = s.find("{");
             int serialEnd = s.find("}");
 
@@ -129,6 +136,13 @@ namespace automotive {
                     double sensorFOUR = atof(sensor4.c_str());
                     cerr << "this is sensorFOUR " << sensorFOUR << endl;
 
+                    //cut the string
+                    sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
+                    //
+                    string sensor5 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+                    double sensorFIVE = atof(sensor5.c_str());
+                    cerr << "this is sensorFIVE " << sensorFIVE << endl;
+
                     //USED FOR DEBUGGING
                     //Map the values for sending the sensors values.
 //		map<int,double> sensorsMap;
@@ -145,13 +159,14 @@ namespace automotive {
 //            cerr << it->first << " => " << it->second << endl;
 
                     automotive::miniature::SensorBoardData sensorsData;
-                    sensorsData.setNumberOfSensors(5);
+                    sensorsData.setNumberOfSensors(6);
 
                     sensorsData.putTo_MapOfDistances(0, sensorZERO);
                     sensorsData.putTo_MapOfDistances(1, sensorONE);
                     sensorsData.putTo_MapOfDistances(2, sensorTWO);
                     sensorsData.putTo_MapOfDistances(3, sensorTHREE);
                     sensorsData.putTo_MapOfDistances(4, sensorFOUR);
+                    sensorsData.putTo_MapOfDistances(5, sensorFIVE);
 
                     Container sensors(sensorsData);
                     m_conference.send(sensors);
