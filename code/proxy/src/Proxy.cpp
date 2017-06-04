@@ -71,13 +71,15 @@ namespace automotive {
         bool serialBool = false;//boolean for the beginning of the connection
 
         std::shared_ptr<SerialPort> serial; //used to create the serial
+        SerialReceiveBytes handler;
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
             m_recorder(),
-            m_camera(),
-            serialReceiveBytes(getConference())
+            //serialBool(false),
+            m_camera()
+            //serial()
         {}
 
         Proxy::~Proxy() {
@@ -132,7 +134,7 @@ namespace automotive {
                 cerr << "No valid camera type defined." << endl;
             }
 
-            //get the serial PortNumber and serial BaudRate from the configuration file.
+            //get the serial PortNumber and serial BaudRate
             const string Port = getKeyValueConfiguration().getValue<string>("proxy.Sensor.SerialPort");
             const uint32_t SerialSpeed = getKeyValueConfiguration().getValue<uint32_t>("proxy.Sensor.SerialSpeed");
 
@@ -140,18 +142,11 @@ namespace automotive {
             try {
                 if(!serialBool){
 
-                    //create the serial port and wait one second for the connection to succeed
                     serial = std::shared_ptr<SerialPort>(SerialPortFactory::createSerialPort(Port, SerialSpeed));
                     const uint32_t ONE_SECOND = 1000 * 1000;
                     odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-
-                    //read received values from the serial.
-                    serial->setStringListener(&serialReceiveBytes);
-
                     // Start receiving bytes.
                     serial->start();
-
-                    //Serial Connection is true
                     serialBool = true;
                 }
 
@@ -164,8 +159,6 @@ namespace automotive {
 
 
 
-
-
         }
 
         void Proxy::tearDown() {
@@ -174,11 +167,47 @@ namespace automotive {
             if (serialBool){
                     serial -> stop();
                     serial->setStringListener(NULL);
-                    cerr << "Proxy stopped - Serial Closed" << endl;
 
+            }
+        }
+
+//        void Proxy::sendSerial(string &number){
+//
+//            try {
+//                //cerr << "Sending to SERIAL_PORT: " << Port << ", BAUD_RATE = " << SerialSpeed << endl;
+//
+//                serial->send(number + "\r\n");
+//
+//            }
+//            catch(string &exception) {
+//                cerr << "Serial port could not be created: " << exception << endl;
+//            }
+//
+//        }
+
+        void Proxy::readSerial(){
+
+            try {
+                serial->setStringListener(&handler);
+
+            }
+            catch(string &exception) {
+                cerr << "Serial port could not be received: " << exception << endl;
             }
 
         }
+
+//        void Proxy::distributeSerial(Container c) {
+//            // Store data to recorder.
+//            if (serialBool) {
+//                // Time stamp data before storing.
+//                c.setReceivedTimeStamp(TimeStamp());
+//                serial->store(c);
+//            }
+//
+//            // Share data.
+//            getConference().send(c);
+//        }
 
         void Proxy::distribute(Container c) {
             // Store data to recorder.
@@ -186,38 +215,10 @@ namespace automotive {
                 // Time stamp data before storing.
                 c.setReceivedTimeStamp(TimeStamp());
                 m_recorder->store(c);
-
             }
+
             // Share data.
             getConference().send(c);
-
-        }
-
-        void Proxy::readContainer(odcore::data::Container &c) {
-            //Original Vehicle Data stored from other components e.g. lanefollower
-            VehicleControl vc = c.getData<VehicleControl> ();
-            cerr << "THIS IS THE ANGLE " << vc.getSteeringWheelAngle() << endl;
-
-            //Here we transform from Radians to Degrees.
-            int carSteering = (int) (vc.getSteeringWheelAngle()*(180/M_PI));
-            string steer = to_string(carSteering);
-            cerr << "THIS IS THE our made up ANGLE " << steer << endl;
-
-            //Here we send the wheel steering angle to the arduino/serial.
-            if(serialBool) {
-                serial->setStringListener(NULL);
-
-                try {
-                    //Here we send as a string the serial
-                    serial->send(steer + "\r\n");
-
-                } catch (string &exception) {
-                    cerr << "Serial port could not be created: " << exception << endl;
-
-                }
-                serial->setStringListener(&serialReceiveBytes);
-
-            }
         }
 
         // This method will do the main data processing job.
@@ -233,19 +234,18 @@ namespace automotive {
                     captureCounter++;
                 }
 
-                //read the vehicle container
-                Container car = getKeyValueDataStore().get(automotive::VehicleControl::ID());
-                readContainer(car);
+                if(serialBool){
+                    readSerial();
+                }
 
+                // Get sensor data from IR/US.
             }
-
-
 
             cout << "Proxy: Captured " << captureCounter << " frames." << endl;
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
 
-    } //miniature
+    }
 } // automotive::miniature
 

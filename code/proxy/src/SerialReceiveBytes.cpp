@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <iostream>
-
+#include <string>
 #include <memory>
 #include <opendavinci/odcore/base/Thread.h>
 #include <opendavinci/odcore/wrapper/SerialPort.h>
@@ -31,142 +31,77 @@
 #include <stdio.h>      /* printf, NULL */
 #include <stdlib.h> /* strtod */
 
-//For Mapping the sensors
-#include <map>
+using namespace std;
 
-#include <string>
-#include <cstring>
-#include "SerialReceiveBytes.hpp"
+void SerialReceiveBytes::nextString(const string &s) {
+	//cout << "original" << s << endl;
 
-#include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include "opendavinci/odcore/data/Container.h"
+    int serialStart = s.find("{");
+    int serialEnd = s.find("}");
 
-#include <Proxy.h>
+    if(s.length() > 10 && !s.empty() && serialStart != -1 && serialEnd != -1){
 
-namespace odcore { namespace io { namespace conference { class ContainerConference; }}}
-
-namespace automotive {
-    namespace miniature {
-
-        using namespace std;
-
-        using namespace odcore;
-        using namespace odcore::wrapper;
-        using namespace odcore::base;
-        using namespace odcore::data;
-        using namespace odcore::io::conference;
-
-        using namespace automotive;
-        using namespace automotive::miniature;
+ 	serialStart = s.find("{");
 
 
-        SerialReceiveBytes::SerialReceiveBytes(odcore::io::conference::ContainerConference &conference) :
-                m_conference(conference) {}
+	string tmp;
+	serialEnd = 0;
 
-        void SerialReceiveBytes::nextString(const string &s) {
+	if((int) s.length() > (int) serialStart && (int) s.length() > 10){
 
-            int serialStart = s.find("{");
-            int serialEnd = s.find("}");
+            tmp = s.substr(serialStart, s.length());
+            serialEnd = tmp.find("}");
 
-            if (s.length() > 10 && !s.empty() && serialStart != -1 && serialEnd != -1) {
+	}
 
-                serialStart = s.find("{");
+	if((int) serialEnd > (int) serialStart && (int) tmp.length() > 10){
+	string serialValues = tmp.substr (1, serialEnd -1);
+	cerr << "Received new" << serialValues.length() << " bytes containing '" << serialValues << "'" << endl;
 
+		//we create this object in order to send the sensor data to the conference "handles the containers"
+		//SensorBoardData sendData;
 
-                string tmp;
-                serialEnd = 0;
+		//we create a temporal string
+		string sendSensortmp = serialValues;
+		
+		//
+		string sensor0 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorZERO = atof(sensor0);
+		cerr << "this is sensorZero" << sensorZero << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor1 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorONE = atof(sensor1);
+		cerr << "this is sensorONE" << sensorONE << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor2 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorTWO = atof(sensorTWO);
+		cerr << "this is sensorTWO" << sensorTWO << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor3 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorTHREE = atof(sensor3);
+		cerr << "this is sensorTHREE" << sensorTHREE << endl;
+		//cut the string
+		sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" "), sendSensortmp.length());
+		//
+		string sensor4 = sendSensortmp.substr(0, sendSensortmp.find(" "));
+		double sensorFOUR = atof(sensor4);
+		cerr << "this is sensorFOUR" << sensorFOUR << endl;
 
-                if ((int) s.length() > (int) serialStart && (int) s.length() > 10) {
-
-                    tmp = s.substr(serialStart, s.length());
-                    serialEnd = tmp.find("}");
-
-                }
-
-                if ((int) serialEnd > (int) serialStart && (int) tmp.length() > 10) {
-                    string serialValues = tmp.substr(1, serialEnd - 1);
-                    cerr << "Received new" << serialValues.length() << " bytes containing '" << serialValues << "'"
-                         << endl;
-
-                    //we create a temporal string
-                    string sendSensortmp = serialValues;
-
-                    //
-                    string sensor0 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-
-                    double sensorZERO = atof(sensor0.c_str());
-                    cerr << "this is sensorZERO " << sensorZERO << endl;
-
-                    //cut the string
-                    sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    cerr << "THIS IS sendSensortmp " << sendSensortmp << endl;
-                    //
-                    string sensor1 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-                    double sensorONE = atof(sensor1.c_str());
-                    cerr << "this is sensorONE " << sensorONE << endl;
-
-                    //cut the string
-                    sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
-                    //
-                    string sensor2 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-                    double sensorTWO = atof(sensor2.c_str());
-                    cerr << "this is sensorTWO " << sensorTWO << endl;
-
-                    //cut the string
-                    sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
-                    //
-                    string sensor3 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-                    double sensorTHREE = atof(sensor3.c_str());
-                    cerr << "this is sensorTHREE " << sensorTHREE << endl;
-
-                    //cut the string
-                    sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
-                    //
-                    string sensor4 = sendSensortmp.substr(0, sendSensortmp.find(" "));
-                    double sensorFOUR = atof(sensor4.c_str());
-                    cerr << "this is sensorFOUR " << sensorFOUR << endl;
-
-                    //USED FOR DEBUGGING
-                    //Map the values for sending the sensors values.
-//		map<int,double> sensorsMap;
-//        sensorsMap.insert (pair<int,double>(0,sensorZERO) );
-//        sensorsMap.insert (pair<int,double>(1,sensorONE) );
-//        sensorsMap.insert (pair<int,double>(2,sensorTWO) );
-//        sensorsMap.insert (pair<int,double>(3,sensorTHREE) );
-//        sensorsMap.insert (pair<int,double>(4,sensorFOUR) );
-
-                    // showing contents:
-//        cerr << "sensorsMap contains:\n";
-//        map<int,double>::iterator it;
-//        for (it=sensorsMap.begin(); it!=sensorsMap.end(); ++it)
-//            cerr << it->first << " => " << it->second << endl;
+		//Map dataMap;
 
 
+	}
 
-                    automotive::miniature::SensorBoardData sensorsData;
+	}
 
-
-                    sensorsData.setNumberOfSensors(5);
-
-                    sensorsData.putTo_MapOfDistances(0, sensorZERO);
-                    sensorsData.putTo_MapOfDistances(1, sensorONE);
-                    sensorsData.putTo_MapOfDistances(2, sensorTWO);
-                    sensorsData.putTo_MapOfDistances(3, sensorTHREE);
-                    sensorsData.putTo_MapOfDistances(4, sensorFOUR);
-
-                    Container sensors(sensorsData);
-                    m_conference.send(sensors);
-
-                }
-
-            }
-
-        }
-
-
-    }
+    //cerr << "REAL ONE" << s.length() << " bytes containing '" << s << "'" << endl;
+	
 }
+
 

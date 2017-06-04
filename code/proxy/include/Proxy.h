@@ -46,7 +46,6 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 
 #include "Camera.h"
-#include <SerialReceiveBytes.hpp>
 
 namespace automotive {
     namespace miniature {
@@ -90,8 +89,6 @@ namespace automotive {
 
                 virtual ~Proxy();
 
-                virtual void readContainer(odcore::data::Container &c);
-
                 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
             private:
@@ -100,6 +97,8 @@ namespace automotive {
 
                 virtual void tearDown();
 
+                void readSerial();
+
                 void distribute(odcore::data::Container c);
 
 
@@ -107,7 +106,7 @@ namespace automotive {
             private:
                 unique_ptr<odtools::recorder::Recorder> m_recorder;
                 unique_ptr<Camera> m_camera;
-                SerialReceiveBytes serialReceiveBytes;
+                //shared_ptr<SerialPort> serial;
         };
 
     }
