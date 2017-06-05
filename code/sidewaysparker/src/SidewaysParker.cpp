@@ -67,11 +67,11 @@ namespace scaledcars {
             //cerr << sdata.toString() << endl;
 
             if (foundSpot) {
-                cerr << "Found spot" << endl;
+                //cerr << "Found spot" << endl;
 
                 parallelPark(vcontrol, sdata, vdata);
             } else {
-                cerr << "Finding spot" << endl;
+                //cerr << "Finding spot" << endl;
                 findSpot(vcontrol, sdata, vdata);
             }
         }
@@ -106,59 +106,59 @@ namespace scaledcars {
         rtmp.setControl(vc);
         Container send(rtmp);
         getConference().send(send);
-        cerr << "sent vc from sidewaysparker " << endl;
+        //cerr << "sent vc from sidewaysparker " << endl;
 
         }
 
 
         void SidewaysParker::slowReverse(){
-            vc.setSpeed(-0.5);
+            vc.setSpeed(3);
             vc.setSteeringWheelAngle(0);
             ReturnVehicleControl rtmp;
             rtmp.setControl(vc);
             Container send(rtmp);
             getConference().send(send);
-            cerr << "sent vc from sidewaysparker " << endl;
+            //cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::forward(){
-            vc.setSpeed(2);
+            vc.setSpeed(1);
             vc.setSteeringWheelAngle(0);
             ReturnVehicleControl rtmp;
             rtmp.setControl(vc);
             Container send(rtmp);
             getConference().send(send);
-            cerr << "sent vc from sidewaysparker " << endl;
+            //cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::slowForward(){
-            vc.setSpeed(.4);
+            vc.setSpeed(1);
             vc.setSteeringWheelAngle(0);
             ReturnVehicleControl rtmp;
             rtmp.setControl(vc);
             Container send(rtmp);
             getConference().send(send);
-            cerr << "sent vc from sidewaysparker " << endl;
+            //cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::reverseTurnRight(){
-            vc.setSpeed(-2);
+            vc.setSpeed(3);
             vc.setSteeringWheelAngle(25);
             ReturnVehicleControl rtmp;
             rtmp.setControl(vc);
             Container send(rtmp);
             getConference().send(send);
-            cerr << "sent vc from sidewaysparker " << endl;
+            //cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::reverseTurnLeftSlow(){
-            vc.setSpeed(-.5);
+            vc.setSpeed(3);
             vc.setSteeringWheelAngle(-25);
             ReturnVehicleControl rtmp;
             rtmp.setControl(vc);
             Container send(rtmp);
             getConference().send(send);
-            cerr << "sent vc from sidewaysparker " << endl;
+            //cerr << "sent vc from sidewaysparker " << endl;
         }
 
         void SidewaysParker::forwardWithLaneFollower(){
@@ -186,10 +186,11 @@ namespace scaledcars {
             vd = vdata;
             double traveledPath = sdata.getValueForKey_MapOfDistances(5);
 
-            forwardWithLaneFollower();
-
+            //forwardWithLaneFollower();
+            forward();
+            stopWithLaneFollower();
             double frontRightInfrared = data.getValueForKey_MapOfDistances(0);
-
+            cerr << "traveled path: " << traveledPath << endl;
 
                 // Measuring state machine.
                 switch (stageMeasuring) {
@@ -207,7 +208,7 @@ namespace scaledcars {
                         absPathParkStart = traveledPath;
                         //cerr << "case1"<<endl;
 
-                        if(absPathParkStart - absPathParkEnd > 6){
+                        if(absPathParkStart - absPathParkEnd > 20){
 
                                     stageMoving = 1;
                                     foundSpot = true;
@@ -243,7 +244,7 @@ namespace scaledcars {
                         {
                             //if(vd.getAbsTraveledPath() - absPathStart > 6){
 
-                            if(traveledPath - absPathStart > 6){
+                            if(traveledPath - absPathStart > 20){
 
                                 stageMoving = 1;
                                 foundSpot = true;
@@ -267,7 +268,7 @@ namespace scaledcars {
 
                             cerr << "Size = " << GAP_SIZE << endl;
 
-                            if ((stageMoving < 1) && (GAP_SIZE > 5)) {
+                            if ((stageMoving < 1) && (GAP_SIZE > 20)) {
                                     stageMoving = 1;
                                 foundSpot = true;
                                     parkAfterCar = 2;
@@ -309,39 +310,47 @@ namespace scaledcars {
             if (stageMoving == 0) {
                 // Go forward.
 
+
             }
 
             if (parkAfterCar == 1) {
                 stopWithLaneFollower();
+                cerr << "Parking with 1, stagemoving: " << stageMoving <<  endl;
 
-                if ((stageMoving > 0) && (stageMoving < 15)) {
-                    // forward
-                    forward();
-                    stageMoving++;
-                }
-                if ((stageMoving >= 15) && (stageMoving < 30)) {
+
+                if ((stageMoving >= 0) && (stageMoving < 15)) {
                     // slowforward
                     slowForward();
                     stageMoving++;
                 }
-                if ((stageMoving >= 30) && (stageMoving < 35)) {
+                if ((stageMoving >= 15) && (stageMoving <19)) {
+                    // slowforward
+                    slowReverse();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 19) && (stageMoving < 25)) {
                     // Stop.
                     stop();
                     stageMoving++;
                 }
-                if ((stageMoving >= 35) && (stageMoving < 71)) {
+                if ((stageMoving >= 25) && (stageMoving < 35)) {
                     // Backwards, steering wheel to the right.
                     reverseTurnRight();
                     stageMoving++;
                 }
-                if ((stageMoving >= 71) && (stageMoving < 108)) {
+                if ((stageMoving >= 35) && (stageMoving < 40)) {
                     // Backwards, steering wheel to the left.
                     reverseTurnLeftSlow();
                     stageMoving++;
                 }
-                if (stageMoving >= 108) {
-                    if (rearInfrared > 2.5) {
-                        slowReverse();
+                if ((stageMoving >= 40) && (stageMoving < 42)) {
+                    // Backwards, steering wheel to the left.
+                    slowForward();
+                    stageMoving++;
+                }
+                if (stageMoving >= 42) {
+                    if (rearInfrared > 10 && rearInfrared > 0) {
+                        //slowReverse();
                     } else {
                         // Stop.
                         stop();
@@ -355,28 +364,34 @@ namespace scaledcars {
 
             if (parkAfterCar == 2) {
                 stopWithLaneFollower();
-                if ((stageMoving > 0) && (stageMoving < 25)) {
-                    // Move slightly forward.
+                cerr << "Parking with 2, stagemoving: " << stageMoving <<  endl;
+                if ((stageMoving > 0) && (stageMoving < 10)) {
+                    // forward
+                    forward();
+                    stageMoving++;
+                }
+                if ((stageMoving >= 10) && (stageMoving < 15)) {
+                    // slowforward
                     slowForward();
                     stageMoving++;
                 }
-                if ((stageMoving >= 25) && (stageMoving < 30)) {
+                if ((stageMoving >= 15) && (stageMoving < 20)) {
                     // Stop.
                     stop();
                     stageMoving++;
                 }
-                if ((stageMoving >= 30) && (stageMoving < 66)) {
+                if ((stageMoving >= 20) && (stageMoving < 40)) {
                     // Backwards, steering wheel to the right.
                     reverseTurnRight();
                     stageMoving++;
                 }
-                if ((stageMoving >= 66) && (stageMoving < 107)) {
+                if ((stageMoving >= 40) && (stageMoving < 60)) {
                     // Backwards, steering wheel to the left.
                     reverseTurnLeftSlow();
                     stageMoving++;
                 }
-                if (stageMoving >= 107) {
-                    if (frontUltrasonic > 3) {
+                if (stageMoving >= 60) {
+                    if (frontUltrasonic > 15) {
                         slowForward();
                     } else {
                         stop();
@@ -393,32 +408,28 @@ namespace scaledcars {
             }
             if (parkAfterCar == 3) {
                 stopWithLaneFollower();
+                cerr << "Parking with 3, stagemoving: " << stageMoving <<  endl;
 
-                if ((stageMoving > 0) && (stageMoving < 20)) {
-                    // Move forward.
-                    forward();
-                    stageMoving++;
-                }
-                if ((stageMoving >= 20) && (stageMoving < 50)) {
+                if ((stageMoving >= 0) && (stageMoving < 5)) {
                     // Move slightly forward.
                     slowForward();
                     stageMoving++;
                 }
-                if ((stageMoving >= 50) && (stageMoving < 55)) {
+                if ((stageMoving >= 5) && (stageMoving < 10)) {
                     // Stop.
                     stop();
                     stageMoving++;
                 }
-                if ((stageMoving >= 55) && (stageMoving < 84)) {
+                if ((stageMoving >= 10) && (stageMoving < 15)) {
                     // Backwards, steering wheel to the right.
                     reverseTurnRight();
-                    cerr << "turning right" << endl;
+                    //cerr << "turning right" << endl;
                     stageMoving++;
                 }
-                if ((stageMoving >= 84) && (stageMoving < 115)) {
+                if ((stageMoving >= 15) && (stageMoving < 20)) {
                     // Backwards, steering wheel to the left.
 
-                    if (rearInfrared < 2 && rearInfrared > 0) {
+                    if (rearInfrared < 10 && rearInfrared > 0) {
                         stop();
                         stageMoving++;
                     } else {
@@ -428,7 +439,7 @@ namespace scaledcars {
                     }
 
                 }
-                if (stageMoving >= 115) {
+                if (stageMoving >= 20) {
 
                         stop();
                         StateMSG stop;

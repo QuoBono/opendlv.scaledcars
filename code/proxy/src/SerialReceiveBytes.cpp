@@ -65,6 +65,13 @@ namespace automotive {
 
         void SerialReceiveBytes::nextString(const string &s) {
 
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+            cerr << "this is the string " << s << endl;
+
             int serialStart = s.find("{");
             int serialEnd = s.find("}");
 
@@ -95,47 +102,46 @@ namespace automotive {
                     string sensor0 = sendSensortmp.substr(0, sendSensortmp.find(" "));
 
                     double sensorZERO = atof(sensor0.c_str());
-                    //cerr << "this is sensorZERO " << sensorZERO << endl;
+                    cerr << "this is sensorZERO " << sensorZERO << endl;
 
                     //cut the string
                     sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    //cerr << "THIS IS sendSensortmp " << sendSensortmp << endl;
+                    cerr << "THIS IS sendSensortmp " << sendSensortmp << endl;
                     //
                     string sensor1 = sendSensortmp.substr(0, sendSensortmp.find(" "));
                     double sensorONE = atof(sensor1.c_str());
-                    //cerr << "this is sensorONE " << sensorONE << endl;
+                    cerr << "this is sensorONE " << sensorONE << endl;
 
                     //cut the string
                     sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    //cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
+                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
                     //
                     string sensor2 = sendSensortmp.substr(0, sendSensortmp.find(" "));
                     double sensorTWO = atof(sensor2.c_str());
-                    //cerr << "this is sensorTWO " << sensorTWO << endl;
+                    cerr << "this is sensorTWO " << sensorTWO << endl;
 
                     //cut the string
                     sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    //cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
+                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
                     //
                     string sensor3 = sendSensortmp.substr(0, sendSensortmp.find(" "));
                     double sensorTHREE = atof(sensor3.c_str());
-                    //cerr << "this is sensorTHREE " << sensorTHREE << endl;
+                    cerr << "this is sensorTHREE " << sensorTHREE << endl;
 
                     //cut the string
                     sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    //cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
+                    cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
                     //
                     string sensor4 = sendSensortmp.substr(0, sendSensortmp.find(" "));
                     double sensorFOUR = atof(sensor4.c_str());
-                    //cerr << "this is sensorFOUR " << sensorFOUR << endl;
+                    cerr << "this is sensorFOUR " << sensorFOUR << endl;
 
                     //cut the string
                     sendSensortmp = sendSensortmp.substr(sendSensortmp.find(" ") + 1, sendSensortmp.length());
-                    //cerr << "TMP2 IS sendSensortmp " << sendSensortmp << endl;
                     //
                     string sensor5 = sendSensortmp.substr(0, sendSensortmp.find(" "));
                     double sensorFIVE = atof(sensor5.c_str());
-                    //cerr << "this is sensorFIVE " << sensorFIVE << endl;
+                    cerr << "this is sensorFIVE " << sensorFIVE << endl;
 
                     //USED FOR DEBUGGING
                     //Map the values for sending the sensors values.
@@ -174,4 +180,3 @@ namespace automotive {
 
     }
 }
-

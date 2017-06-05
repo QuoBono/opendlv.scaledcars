@@ -59,55 +59,55 @@ namespace automotive {
          * This class wraps the software/hardware interface board.
          */
         class Proxy : public odcore::base::module::TimeTriggeredConferenceClientModule {
-            private:
-                /**
-                 * "Forbidden" copy constructor. Goal: The compiler should warn
-                 * already at compile time for unwanted bugs caused by any misuse
-                 * of the copy constructor.
-                 *
-                 * @param obj Reference to an object of this class.
-                 */
-                Proxy(const Proxy &/*obj*/);
+        private:
+            /**
+             * "Forbidden" copy constructor. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the copy constructor.
+             *
+             * @param obj Reference to an object of this class.
+             */
+            Proxy(const Proxy &/*obj*/);
 
-                /**
-                 * "Forbidden" assignment operator. Goal: The compiler should warn
-                 * already at compile time for unwanted bugs caused by any misuse
-                 * of the assignment operator.
-                 *
-                 * @param obj Reference to an object of this class.
-                 * @return Reference to this instance.
-                 */
-                Proxy& operator=(const Proxy &/*obj*/);
+            /**
+             * "Forbidden" assignment operator. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the assignment operator.
+             *
+             * @param obj Reference to an object of this class.
+             * @return Reference to this instance.
+             */
+            Proxy& operator=(const Proxy &/*obj*/);
 
-            public:
-                /**
-                 * Constructor.
-                 *
-                 * @param argc Number of command line arguments.
-                 * @param argv Command line arguments.
-                 */
-                Proxy(const int32_t &argc, char **argv);
+        public:
+            /**
+             * Constructor.
+             *
+             * @param argc Number of command line arguments.
+             * @param argv Command line arguments.
+             */
+            Proxy(const int32_t &argc, char **argv);
 
-                virtual ~Proxy();
+            virtual ~Proxy();
 
-                virtual void readContainer(odcore::data::Container &c);
+            virtual void readContainer(odcore::data::Container &c);
 
-                odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+            odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
-            private:
+        private:
 
-                virtual void setUp();
+            virtual void setUp();
 
-                virtual void tearDown();
+            virtual void tearDown();
 
-                void distribute(odcore::data::Container c);
+            void distribute(odcore::data::Container c);
 
 
 
-            private:
-                unique_ptr<odtools::recorder::Recorder> m_recorder;
-                unique_ptr<Camera> m_camera;
-                SerialReceiveBytes serialReceiveBytes;
+        private:
+            unique_ptr<odtools::recorder::Recorder> m_recorder;
+            unique_ptr<Camera> m_camera;
+            SerialReceiveBytes serialReceiveBytes;
         };
 
     }

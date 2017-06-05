@@ -45,7 +45,7 @@
 #include "OpenCVCamera.h"
 
 #ifdef HAVE_UEYE
-    #include "uEyeCamera.h"
+#include "uEyeCamera.h"
 #endif
 
 #include "Proxy.h"
@@ -76,10 +76,10 @@ namespace automotive {
 
 
         Proxy::Proxy(const int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
-            m_recorder(),
-            m_camera(),
-            serialReceiveBytes(getConference())
+                TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
+                m_recorder(),
+                m_camera(),
+                serialReceiveBytes(getConference())
         {}
 
         Proxy::~Proxy() {
@@ -174,9 +174,9 @@ namespace automotive {
             // This method will be call automatically _after_ return from body().
             //stop the serial connection
             if (serialBool){
-                    serial -> stop();
-                    serial->setStringListener(NULL);
-                    cerr << "Proxy stopped - Serial Closed" << endl;
+                serial -> stop();
+                serial->setStringListener(NULL);
+                cerr << "Proxy stopped - Serial Closed" << endl;
 
             }
 
@@ -258,11 +258,12 @@ namespace automotive {
             //printf("Speed in hexadecimal is %x\n", bytes[1]);
 
             //Here we read the values for the steering. NOTE   : structs help read and help organize the bits
-            arduinoCar.steeringOfCar =  (bytes[3]>>2);
-            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
-            //Here we read the values for the speed.
-            arduinoCar.speedOfCar =  bytes[3];
-            //printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+//            arduinoCar.steeringOfCar =  (bytes[3]>>2);
+//            printf("Steering in another way with struct is %d\n", arduinoCar.steeringOfCar);
+//            //Here we read the values for the speed.
+//            arduinoCar.speedOfCar =  bytes[3];
+//            printf("Speed in another way is %d\n", arduinoCar.speedOfCar);
+//            printf("THis is bytes[3] %x\n", bytes[3]);
 
 
 
@@ -278,9 +279,8 @@ namespace automotive {
                     //serial->send(string(1, bytes[0]) + string(1, bytes[1]) + "\r\n");
 
                     //Version for sending in one byte the speed and steering. (use structs to read from the arduino)
-                    serial->send(string(1, bytes[3]) + "\n");
-                    string tmfs = string(1, bytes[3]) + "\n";
-                    cerr << tmfs << endl;
+                    serial->send(string(1, bytes[3]));
+
 
                 } catch (string &exception) {
                     cerr << "Serial port could not be created: " << exception << endl;
@@ -322,4 +322,3 @@ namespace automotive {
 
     } //miniature
 } // automotive::miniature
-
