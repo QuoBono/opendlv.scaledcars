@@ -471,13 +471,8 @@ namespace automotive {
 //            }
 
             // Get the  Vehicle control container. We use it to communicate with Overtaker.
-            VehicleControl vd = containerVehicleControl.getData<VehicleControl>();
+            VehicleControl vc1 = containerVehicleControl.getData<VehicleControl>();
 
-            bool lane = vd.getBrakeLights(); //this variable is a boolean for lanefollowing or not.
-
-            if(lane){
-                cerr << "THis is lane following" << endl;
-            }
 
             //Here we detect the stopline and tell he car to stop.
 
@@ -527,14 +522,19 @@ namespace automotive {
 
 
             // Overall state machine handler.
+            //while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+            Container containerVehicleControl = getKeyValueDataStore().get(automotive::VehicleControl::ID());
+
+
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+
                 bool has_next_frame = false;
 
                 // Get the most recent available container for a SharedImage.
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
                 // Get most recent data from Vehicle-Control (for communication with overtake)
-                Container containerVehicleControl = getKeyValueDataStore().get(automotive::VehicleControl::ID());
+                containerVehicleControl = getKeyValueDataStore().get(automotive::VehicleControl::ID());
 
 
                 //PLAYING WITH SENSORS
@@ -555,6 +555,11 @@ namespace automotive {
                 cerr << "THIS IS FROM LANEFOLLOWER THE SENSOR IS " << sensor5 << endl;
                 //END OF PLAYING WITH SENSORS
 
+                Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+                VehicleData vd = containerVehicleData.getData<VehicleData>();
+                double isLaneFollower = vd.getHeading();
+                cerr << "THE HEADING IS " << isLaneFollower << endl;
+
 
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
@@ -569,7 +574,12 @@ namespace automotive {
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);
                 // Send container.
-                getConference().send(c2);
+                //if(vd.getHeading()>0){
+                    cerr << "Lanefollower is ON" << endl;
+                    getConference().send(c2);
+                //} else {
+                //    cerr << "Lanefollower is OFF" << endl;
+                //}
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
