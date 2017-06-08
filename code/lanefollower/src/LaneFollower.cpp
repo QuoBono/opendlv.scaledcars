@@ -1,4 +1,4 @@
-﻿ /**
+ /**
  * lanefollower - Sample application for following lane markings.
  * Copyright (C) 2012 - 2015 Christian Berger
  *
@@ -574,7 +574,7 @@ namespace automotive {
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);
                 // Send container.
-                //if(vd.getHeading()>0){
+                //if(isLaneFollower > 0){
                     cerr << "Lanefollower is ON" << endl;
                     getConference().send(c2);
                 //} else {

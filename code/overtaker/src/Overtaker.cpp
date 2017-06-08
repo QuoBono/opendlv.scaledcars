@@ -62,7 +62,7 @@ namespace automotive {
             const int32_t INFRARED_FRONT_RIGHT = 0;
             const int32_t INFRARED_REAR_RIGHT = 2;
             const int32_t ODOMETER = 5;
-            const double OVERTAKING_DISTANCE = 60;
+            const double OVERTAKING_DISTANCE = 50;
             const double HEADING_PARALLEL = 5;
 
             // Vars for storing the IR values
@@ -186,7 +186,7 @@ namespace automotive {
                     vc.setSteeringWheelAngle(25); //15
 
                     relative_odometer_distance = sbd.getValueForKey_MapOfDistances(ODOMETER)-total_odometer_distance;
-                    if (relative_odometer_distance >= mid_of_overtaking - beginning_of_overtaking + 15) {
+                    if (relative_odometer_distance >= mid_of_overtaking - beginning_of_overtaking + 90) {
                         stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                         total_odometer_distance = sbd.getValueForKey_MapOfDistances(ODOMETER);
                     }
@@ -195,9 +195,9 @@ namespace automotive {
                 else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                     cerr << "stage: TO_RIGHT_LANE_LEFT_TURN" << endl;
                     //vc.setSpeed(1);
-                    //vc.setSteeringWheelAngle(-1);
+                    vc.setSteeringWheelAngle(-1);
 
-                    vd.setHeading(1);
+                    //vd.setHeading(1);
 
                     /* End of turning left on the right lane */
 
